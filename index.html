@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DASHBOARD DE RENTABILIDAD - REYMUNDO FRIAS</title>
+  <title>DASHBOARD DE RENTABILIDAD - GRUPO FRIAS</title>
 
   <!-- Fuente Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -41,7 +41,6 @@
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
-    .month-chip input:checked + span { background: #0f172a; color: white; border-color: #0f172a; }
     .input-roa::-webkit-outer-spin-button, .input-roa::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     #cloud-status { transition: all 0.3s ease; }
   </style>
@@ -52,26 +51,26 @@
   <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
       <div class="flex items-center gap-4 min-w-0">
-        <div class="h-14 w-14 sm:h-16 sm:w-16 shrink-0 rounded-2xl bg-white border border-slate-100 flex items-center justify-center overflow-hidden p-0.5 shadow-sm">
-          <img src="https://files.oaiusercontent.com/file-7ee80c75-348d-4555-a343-00da74a8f176?se=2024-12-16T19%3A58%3A19Z&sp=r&sv=2024-08-04&sr=b&rscc=max-age%3D604800%2C%20private%2C%20immutable%2C%20proxy-revalidate&rscd=attachment%3B%20filename%3D7ee80c75-348d-4555-a343-00da74a8f176.webp&sig=G06lWj7P70S6vXoN0G36NfP8/Bv/p5z/Gk7q8Z4Lp38%3D" alt="Reymundo Frías Logo" class="w-full h-full object-contain">
+        <!-- Logo Grupo Frías -->
+        <div class="h-14 w-14 sm:h-16 sm:w-16 shrink-0 rounded-2xl bg-white border border-slate-100 flex items-center justify-center overflow-hidden p-1 shadow-sm">
+          <img src="Gemini_Generated_Image_p3b65fp3b65fp3b6.jpg" alt="Grupo Frías Logo" class="w-full h-full object-contain">
         </div>
         <div class="min-w-0">
           <div class="flex items-center gap-2">
             <h1 class="text-xl sm:text-2xl font-[900] text-slate-900 truncate tracking-tighter uppercase leading-tight">DASHBOARD DE RENTABILIDAD</h1>
-            <span id="cloud-status" class="hidden sm:flex items-center gap-1 text-[10px] font-bold bg-sky-50 text-sky-600 px-2 py-0.5 rounded-full border border-sky-100"><i data-lucide="cloud-check" class="w-3 h-3"></i> Guardado en la nube</span>
+            <span id="cloud-status" class="hidden sm:flex items-center gap-1 text-[10px] font-bold bg-sky-50 text-sky-600 px-2 py-0.5 rounded-full border border-sky-100"><i data-lucide="cloud-check" class="w-3 h-3"></i> Nube Activa</span>
           </div>
-          <p class="text-[11px] sm:text-xs text-brand-600 font-[800] uppercase tracking-[0.2em] mt-0.5">Reymundo Frías S.R.L.</p>
+          <p class="text-[11px] sm:text-xs text-brand-600 font-[800] uppercase tracking-[0.2em] mt-0.5">Grupo Frías S.R.L.</p>
         </div>
       </div>
       <div class="flex flex-wrap items-center gap-2">
-        <button onclick="window.loadDemo()" class="px-3 py-2 rounded-xl bg-slate-50 text-slate-700 font-bold hover:bg-slate-100 transition border border-slate-200 text-xs hidden sm:block">Demo</button>
         <button onclick="window.clearData()" class="px-3 py-2 rounded-xl bg-rose-50 text-rose-600 font-bold hover:bg-rose-100 transition border border-rose-200 text-xs flex items-center gap-1 shadow-sm" title="Borrar base de datos de la nube">
-          <i data-lucide="trash-2" class="w-4 h-4"></i> <span class="hidden sm:inline">Limpiar Base</span>
+          <i data-lucide="trash-2" class="w-4 h-4"></i> <span class="hidden sm:inline">Limpiar Todo</span>
         </button>
         <label for="file-upload" class="cursor-pointer px-4 py-2 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800 transition flex items-center gap-2 text-sm shadow-lg shadow-slate-900/20">
           <i data-lucide="upload-cloud" class="w-4 h-4"></i>
-          <span id="upload-btn-text">Anexar Excel</span>
-          <input type="file" id="file-upload" accept=".xlsx,.xls,.csv" class="hidden" />
+          <span id="upload-btn-text">Subir/Reemplazar Excel</span>
+          <input type="file" id="file-upload" accept=".xlsx,.xls,.csv" class="hidden" onchange="window.handleFile(event)" />
         </label>
       </div>
     </div>
@@ -79,140 +78,169 @@
 
   <main class="flex-1 max-w-7xl mx-auto w-full px-4 py-6 md:py-8">
     
-    <!-- Navegación & Filtros -->
-    <div class="flex flex-col xl:flex-row gap-4 mb-8">
-      <div class="w-full xl:w-auto overflow-x-auto pb-2 xl:pb-0 shrink-0">
-        <div class="tab-container whitespace-nowrap">
-          <button data-tab="periodo" class="tab-btn active inline-flex items-center gap-2"><i data-lucide="calendar" class="w-4 h-4"></i> Vista Período</button>
-          <button data-tab="acumulado" class="tab-btn inline-flex items-center gap-2"><i data-lucide="bar-chart-big" class="w-4 h-4"></i> Acumulado Anual</button>
-          <button data-tab="simulador" class="tab-btn inline-flex items-center gap-2"><i data-lucide="target" class="w-4 h-4"></i> Simulador</button>
-          <button data-tab="glosario" class="tab-btn inline-flex items-center gap-2"><i data-lucide="book-open" class="w-4 h-4"></i> Glosario</button>
+    <!-- ESTADO VACÍO (Muestra cuando no hay datos) -->
+    <div id="empty-state" class="flex flex-col items-center justify-center py-20 text-center hidden">
+        <div class="w-24 h-24 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mb-6 shadow-inner">
+            <i data-lucide="bar-chart-2" class="w-12 h-12"></i>
         </div>
-      </div>
-      
-      <div id="month-filter-wrapper" class="modern-card p-3 px-4 flex items-center gap-3 bg-white flex-1 min-w-0 transition-all">
-        <div class="flex items-center gap-2 border-r border-slate-200 pr-3 shrink-0">
-          <i data-lucide="calendar-days" class="w-4 h-4 text-brand-500"></i>
-          <select id="year-select" class="text-xs font-black text-slate-800 bg-transparent outline-none cursor-pointer" onchange="window.changeYear(this.value)"></select>
-        </div>
-        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest shrink-0 hidden sm:block">Meses:</span>
-        <div id="months-container" class="flex gap-1.5 overflow-x-auto no-scrollbar flex-1 pb-1"></div>
-        <button onclick="window.selectLastMonth()" class="shrink-0 ml-auto text-xs font-bold text-brand-600 bg-brand-50 px-3 py-1.5 rounded-lg transition hover:bg-brand-100">Último</button>
-      </div>
+        <h2 class="text-2xl font-black text-slate-800 mb-2">Aún no hay datos cargados</h2>
+        <p class="text-slate-500 max-w-md mx-auto mb-8 leading-relaxed">Para comenzar a visualizar tu tablero, por favor sube tu archivo Excel. Cada nueva subida reemplazará los meses cargados anteriormente.</p>
+        <label for="file-upload-empty" class="cursor-pointer px-6 py-3 rounded-xl bg-brand-600 text-white font-bold hover:bg-brand-500 transition shadow-lg shadow-brand-500/30 flex items-center gap-2">
+            <i data-lucide="upload-cloud" class="w-5 h-5"></i>
+            Subir mi Excel ahora
+            <input type="file" id="file-upload-empty" accept=".xlsx,.xls,.csv" class="hidden" onchange="window.handleFile(event)" />
+        </label>
     </div>
 
-    <!-- VISTA PERIODO -->
-    <section id="content-periodo" class="tab-content active space-y-6">
-      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
-        <div class="modern-card p-6 border-b-4 border-b-brand-400"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Facturación Bruta</p><h3 id="kpi-fb" class="text-3xl font-[900] tracking-tighter text-slate-900">$0</h3></div>
-        <div class="modern-card p-6 border-b-4 border-b-emerald-400"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Margen Bruto</p><h3 id="kpi-mb" class="text-3xl font-[900] tracking-tighter text-slate-900">$0</h3></div>
-        <div class="modern-card p-6 border-b-4 border-b-rose-400"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Costos Op.</p><h3 id="kpi-cop" class="text-3xl font-[900] tracking-tighter text-slate-900">$0</h3></div>
-        <div class="modern-card p-6 bg-slate-900 text-white">
-          <div class="flex items-center justify-between mb-1"><p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Utilidad Global</p><span id="kpi-margen-pct" class="text-xs font-black px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400">0%</span></div>
-          <h3 id="kpi-ug" class="text-3xl font-[900] tracking-tighter text-white">$0</h3>
+    <!-- CONTENIDO DEL DASHBOARD -->
+    <div id="dashboard-content" class="hidden">
+      <!-- Navegación & Filtros -->
+      <div class="flex flex-col xl:flex-row gap-4 mb-8">
+        <div class="w-full xl:w-auto overflow-x-auto pb-2 xl:pb-0 shrink-0">
+          <div class="tab-container whitespace-nowrap">
+            <button data-tab="periodo" class="tab-btn active inline-flex items-center gap-2"><i data-lucide="calendar" class="w-4 h-4"></i> Vista Período</button>
+            <button data-tab="acumulado" class="tab-btn inline-flex items-center gap-2"><i data-lucide="bar-chart-big" class="w-4 h-4"></i> Acumulado Anual</button>
+            <button data-tab="simulador" class="tab-btn inline-flex items-center gap-2"><i data-lucide="target" class="w-4 h-4"></i> Simulador</button>
+            <button data-tab="glosario" class="tab-btn inline-flex items-center gap-2"><i data-lucide="book-open" class="w-4 h-4"></i> Glosario</button>
+          </div>
+        </div>
+        
+        <!-- Contenedor de Filtros de Año y Mes (Desplegable) -->
+        <div id="month-filter-wrapper" class="modern-card p-3 px-4 flex items-center gap-3 bg-white flex-1 min-w-0 transition-all">
+          <div class="flex items-center gap-2 border-r border-slate-200 pr-3 shrink-0">
+            <i data-lucide="calendar-days" class="w-4 h-4 text-brand-500"></i>
+            <select id="year-select" class="text-xs font-black text-slate-800 bg-transparent outline-none cursor-pointer" onchange="window.changeYear(this.value)"></select>
+          </div>
+          
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-widest shrink-0 hidden sm:block">Filtro de Meses:</span>
+          
+          <div class="relative inline-block text-left flex-1 sm:w-64">
+            <button id="btn-month-dropdown" class="flex items-center justify-between w-full px-4 py-2 text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl shadow-sm hover:bg-slate-100 transition">
+               <span id="month-dropdown-text" class="truncate">Seleccionando...</span> <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
+            </button>
+            <!-- Dropdown Menú de Meses -->
+            <div id="month-dropdown-menu" class="hidden absolute left-0 z-50 w-full mt-2 origin-top-left bg-white border border-slate-200 rounded-xl shadow-xl max-h-[300px] overflow-y-auto custom-scrollbar">
+               <div class="p-2 flex flex-col gap-0.5" id="month-options"></div>
+            </div>
+          </div>
+
+          <button onclick="window.selectLastMonth()" class="shrink-0 ml-auto text-xs font-bold text-brand-600 bg-brand-50 px-3 py-1.5 rounded-lg transition hover:bg-brand-100 hidden sm:block">Solo Último</button>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 xl:grid-cols-5 gap-6">
-        <div class="modern-card p-6 xl:col-span-3">
-          <h3 class="text-xs font-bold text-slate-900 uppercase tracking-widest mb-8">Cascada de Rentabilidad</h3>
-          <div class="h-[400px] w-full"><canvas id="chart-waterfall"></canvas></div>
+      <!-- VISTA PERIODO -->
+      <section id="content-periodo" class="tab-content active space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+          <div class="modern-card p-6 border-b-4 border-b-brand-400"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Facturación Bruta</p><h3 id="kpi-fb" class="text-3xl font-[900] tracking-tighter text-slate-900">$0</h3></div>
+          <div class="modern-card p-6 border-b-4 border-b-emerald-400"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Margen Bruto</p><h3 id="kpi-mb" class="text-3xl font-[900] tracking-tighter text-slate-900">$0</h3></div>
+          <div class="modern-card p-6 border-b-4 border-b-rose-400"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Costos Op.</p><h3 id="kpi-cop" class="text-3xl font-[900] tracking-tighter text-slate-900">$0</h3></div>
+          <div class="modern-card p-6 bg-slate-900 text-white">
+            <div class="flex items-center justify-between mb-1"><p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Utilidad Global</p><span id="kpi-margen-pct" class="text-xs font-black px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400">0%</span></div>
+            <h3 id="kpi-ug" class="text-3xl font-[900] tracking-tighter text-white">$0</h3>
+          </div>
         </div>
-        <div class="modern-card p-6 xl:col-span-2 flex flex-col">
-          <h3 class="text-xs font-bold text-slate-900 uppercase tracking-widest mb-6">Composición de Egresos</h3>
-          <div id="egresos-legend" class="grid grid-cols-1 sm:grid-cols-2 gap-4 overflow-y-auto max-h-[400px] pr-2 custom-scrollbar content-start"></div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-5 gap-6">
+          <div class="modern-card p-6 xl:col-span-3">
+            <h3 class="text-xs font-bold text-slate-900 uppercase tracking-widest mb-8">Cascada de Rentabilidad</h3>
+            <div class="h-[400px] w-full"><canvas id="chart-waterfall"></canvas></div>
+          </div>
+          <div class="modern-card p-6 xl:col-span-2 flex flex-col">
+            <h3 class="text-xs font-bold text-slate-900 uppercase tracking-widest mb-6">Composición de Egresos</h3>
+            <div id="egresos-legend" class="grid grid-cols-1 sm:grid-cols-2 gap-4 overflow-y-auto max-h-[400px] pr-2 custom-scrollbar content-start"></div>
+          </div>
         </div>
-      </div>
 
-      <div id="micro-kpis" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-    </section>
+        <div id="micro-kpis" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      </section>
 
-    <!-- ACUMULADO -->
-    <section id="content-acumulado" class="tab-content space-y-6">
-      <div class="modern-card p-6">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 relative z-20">
-            <h3 class="text-xs font-bold text-slate-900 uppercase tracking-widest">Tendencia Histórica <span id="trend-year-label" class="text-brand-600"></span></h3>
-            <div class="relative inline-block text-left w-full sm:w-72">
-              <button id="btn-metric-dropdown" class="flex items-center justify-between w-full px-4 py-2.5 text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded-xl shadow-sm hover:bg-slate-50 hover:border-slate-300 transition">
-                 <span>Métricas a comparar</span> <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
-              </button>
-              <div id="metric-dropdown-menu" class="hidden absolute right-0 z-50 w-full mt-2 origin-top-right bg-white border border-slate-200 rounded-xl shadow-xl max-h-[300px] overflow-y-auto custom-scrollbar">
-                 <div class="p-2 flex flex-col gap-0.5" id="metric-options"></div>
+      <!-- ACUMULADO -->
+      <section id="content-acumulado" class="tab-content space-y-6">
+        <div class="modern-card p-6">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 relative z-20">
+              <h3 class="text-xs font-bold text-slate-900 uppercase tracking-widest">Tendencia Histórica <span id="trend-year-label" class="text-brand-600"></span></h3>
+              <div class="relative inline-block text-left w-full sm:w-72">
+                <button id="btn-metric-dropdown" class="flex items-center justify-between w-full px-4 py-2.5 text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded-xl shadow-sm hover:bg-slate-50 hover:border-slate-300 transition">
+                   <span>Métricas a comparar</span> <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
+                </button>
+                <div id="metric-dropdown-menu" class="hidden absolute right-0 z-50 w-full mt-2 origin-top-right bg-white border border-slate-200 rounded-xl shadow-xl max-h-[300px] overflow-y-auto custom-scrollbar">
+                   <div class="p-2 flex flex-col gap-0.5" id="metric-options"></div>
+                </div>
+              </div>
+          </div>
+          <div class="h-[350px] relative z-10"><canvas id="chart-anual"></canvas></div>
+        </div>
+        <div class="modern-card p-6">
+          <h3 class="text-xs font-bold text-slate-900 uppercase tracking-widest mb-6">Composición Anual de Costos</h3>
+          <div id="anual-comp-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 content-start"></div>
+        </div>
+      </section>
+
+      <!-- SIMULADOR -->
+      <section id="content-simulador" class="tab-content space-y-6">
+        <div class="modern-card p-8 bg-slate-900 text-white flex flex-col md:flex-row justify-between items-center gap-6">
+          <div class="relative z-10">
+            <h2 class="text-2xl font-black uppercase tracking-tight mb-2 leading-relaxed pt-1">Simulador de Objetivos</h2>
+            <p class="text-slate-400 text-sm leading-relaxed pt-1">Proyecta tu facturación necesaria. Los datos manuales se guardan automáticamente.</p>
+          </div>
+          <button id="btn-pdf" onclick="window.exportSimuladorPDF()" class="relative z-10 px-6 py-3 bg-brand-600 hover:bg-brand-500 text-white font-bold transition inline-flex items-center gap-2 shadow-xl shadow-brand-900/40">
+            <i data-lucide="file-down"></i> DESCARGAR PDF
+          </button>
+        </div>
+        <div id="sim-area" class="grid grid-cols-1 lg:grid-cols-3 gap-6 p-1">
+          <div class="lg:col-span-2 space-y-6">
+            <div class="modern-card p-6 border-t-4 border-t-emerald-400">
+              <h3 class="text-xs font-bold uppercase mb-6 tracking-widest leading-relaxed pt-1">1. Variables de Meta</h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 pt-1">Meta Utilidad Global ($)</label><div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span><input type="number" id="sim-meta" class="w-full border rounded-xl h-11 pl-7 pr-3 font-black bg-slate-50 outline-none" oninput="window.calcSim()"></div></div>
+                <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 pt-1">Margen Bruto Proyectado (%)</label><div class="relative"><span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">%</span><input type="number" id="sim-mb-pct" class="w-full border rounded-xl h-11 pl-3 pr-12 font-black bg-slate-50 outline-none" oninput="window.calcSim()"><button type="button" onclick="window.restoreSimVal('sim-mb-pct')" class="absolute right-1 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-brand-600" title="Restaurar a original"><i data-lucide="history" class="w-4 h-4"></i></button></div></div>
+                <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 pt-1">Comisión Financiera Est. ($)</label><div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span><input type="number" id="sim-com" class="w-full border rounded-xl h-11 pl-7 pr-12 font-black bg-slate-50 outline-none" oninput="window.calcSim()"><button type="button" onclick="window.restoreSimVal('sim-com')" class="absolute right-1 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-brand-600" title="Restaurar a original"><i data-lucide="history" class="w-4 h-4"></i></button></div></div>
+                <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 pt-1">Fact. Acumulada Hoy ($)</label><div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span><input type="number" id="sim-fact-ac" placeholder="0" class="w-full border rounded-xl h-11 pl-7 pr-3 font-black bg-slate-50 outline-none" oninput="window.calcSim()"></div></div>
               </div>
             </div>
-        </div>
-        <div class="h-[350px] relative z-10"><canvas id="chart-anual"></canvas></div>
-      </div>
-      <div class="modern-card p-6">
-        <h3 class="text-xs font-bold text-slate-900 uppercase tracking-widest mb-6">Composición Anual de Costos</h3>
-        <div id="anual-comp-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 content-start"></div>
-      </div>
-    </section>
-
-    <!-- SIMULADOR -->
-    <section id="content-simulador" class="tab-content space-y-6">
-      <div class="modern-card p-8 bg-slate-900 text-white flex flex-col md:flex-row justify-between items-center gap-6">
-        <div class="relative z-10">
-          <h2 class="text-2xl font-black uppercase tracking-tight mb-2 leading-relaxed pt-1">Simulador de Objetivos</h2>
-          <p class="text-slate-400 text-sm leading-relaxed pt-1">Proyecta tu facturación necesaria según tu meta de utilidad y ajustes de estructura.</p>
-        </div>
-        <button id="btn-pdf" onclick="window.exportSimuladorPDF()" class="relative z-10 px-6 py-3 bg-brand-600 hover:bg-brand-500 text-white font-bold transition inline-flex items-center gap-2 shadow-xl shadow-brand-900/40">
-          <i data-lucide="file-down"></i> DESCARGAR PDF
-        </button>
-      </div>
-      <div id="sim-area" class="grid grid-cols-1 lg:grid-cols-3 gap-6 p-1">
-        <div class="lg:col-span-2 space-y-6">
-          <div class="modern-card p-6 border-t-4 border-t-emerald-400">
-            <h3 class="text-xs font-bold uppercase mb-6 tracking-widest leading-relaxed pt-1">1. Variables de Meta</h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 pt-1">Meta Utilidad Global ($)</label><div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span><input type="number" id="sim-meta" class="w-full border rounded-xl h-11 pl-7 pr-3 font-black bg-slate-50 outline-none" oninput="window.calcSim()"></div></div>
-              <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 pt-1">Margen Bruto Proyectado (%)</label><div class="relative"><span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">%</span><input type="number" id="sim-mb-pct" class="w-full border rounded-xl h-11 pl-3 pr-12 font-black bg-slate-50 outline-none" oninput="window.calcSim()"><button type="button" onclick="window.restoreSimVal('sim-mb-pct')" class="absolute right-1 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-brand-600"><i data-lucide="history" class="w-4 h-4"></i></button></div></div>
-              <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 pt-1">Comisión Financiera Est. ($)</label><div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span><input type="number" id="sim-com" class="w-full border rounded-xl h-11 pl-7 pr-12 font-black bg-slate-50 outline-none" oninput="window.calcSim()"><button type="button" onclick="window.restoreSimVal('sim-com')" class="absolute right-1 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-brand-600"><i data-lucide="history" class="w-4 h-4"></i></button></div></div>
-              <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 pt-1">Fact. Acumulada Hoy ($)</label><div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span><input type="number" id="sim-fact-ac" placeholder="0" class="w-full border rounded-xl h-11 pl-7 pr-3 font-black bg-slate-50 outline-none" oninput="window.calcSim()"></div></div>
+            <div class="modern-card p-6 border-t-4 border-t-rose-400">
+              <h3 class="text-xs font-bold uppercase mb-6 tracking-widest leading-relaxed pt-1 flex justify-between items-center">2. Ajuste de Gastos <button onclick="window.resetSim()" class="text-[9px] bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg hover:bg-slate-200 transition font-bold uppercase border border-slate-200 shadow-sm"><i data-lucide="rotate-ccw" class="w-3 h-3 inline mr-1"></i>Resetear Datos Manuales</button></h3>
+              <div id="sim-costs-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
             </div>
           </div>
-          <div class="modern-card p-6 border-t-4 border-t-rose-400">
-            <h3 class="text-xs font-bold uppercase mb-6 tracking-widest leading-relaxed pt-1 flex justify-between items-center">2. Ajuste de Gastos <button onclick="window.resetSim()" class="text-[9px] bg-slate-100 px-2 py-1 rounded hover:bg-slate-200 transition font-bold uppercase">Resetear</button></h3>
-            <div id="sim-costs-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
-          </div>
-        </div>
-        <div class="lg:col-span-1">
-          <div class="modern-card p-6 bg-brand-50 border-brand-200 sticky top-24 shadow-xl shadow-brand-500/10">
-            <h4 class="text-[10px] font-black uppercase text-brand-800 tracking-[0.2em] mb-6 pt-1">Facturación Objetivo</h4>
-            <p class="text-xs font-bold text-slate-500 mb-1">Total Requerido Mensual:</p>
-            <h2 id="res-fb" class="text-3xl font-[900] text-brand-600 mb-6">$0</h2>
-            <div class="bg-white p-5 rounded-2xl border border-brand-100 shadow-sm mb-6">
-              <p class="text-[10px] font-black text-sky-700 uppercase mb-1">Falta Vender (Restante)</p>
-              <h3 id="res-faltante" class="text-3xl font-[900] text-sky-600">$0</h3>
-            </div>
-            <div class="space-y-3 pt-4 border-t border-brand-100 text-xs font-bold">
-              <div class="flex justify-between"><span class="text-slate-400">Margen Bruto Req.</span><span id="res-mb" class="text-slate-800">$0</span></div>
-              <div class="flex justify-between"><span class="text-slate-400">Gastos Proyectados</span><span id="res-cop" class="text-rose-600">$0</span></div>
-              <div class="flex justify-between pt-2 border-t"><span class="text-slate-600">Utilidad Meta</span><span id="res-ug" class="text-emerald-600">$0</span></div>
+          <div class="lg:col-span-1">
+            <div class="modern-card p-6 bg-brand-50 border-brand-200 sticky top-24 shadow-xl shadow-brand-500/10">
+              <h4 class="text-[10px] font-black uppercase text-brand-800 tracking-[0.2em] mb-6 pt-1">Facturación Objetivo</h4>
+              <p class="text-xs font-bold text-slate-500 mb-1">Total Requerido Mensual:</p>
+              <h2 id="res-fb" class="text-3xl font-[900] text-brand-600 mb-6">$0</h2>
+              <div class="bg-white p-5 rounded-2xl border border-brand-100 shadow-sm mb-6">
+                <p class="text-[10px] font-black text-sky-700 uppercase mb-1">Falta Vender (Restante)</p>
+                <h3 id="res-faltante" class="text-3xl font-[900] text-sky-600">$0</h3>
+              </div>
+              <div class="space-y-3 pt-4 border-t border-brand-100 text-xs font-bold">
+                <div class="flex justify-between"><span class="text-slate-400">Margen Bruto Req.</span><span id="res-mb" class="text-slate-800">$0</span></div>
+                <div class="flex justify-between"><span class="text-slate-400">Gastos Proyectados</span><span id="res-cop" class="text-rose-600">$0</span></div>
+                <div class="flex justify-between pt-2 border-t"><span class="text-slate-600">Utilidad Meta</span><span id="res-ug" class="text-emerald-600">$0</span></div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- GLOSARIO -->
-    <section id="content-glosario" class="tab-content py-8">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="glosario-grid"></div>
-    </section>
+      <!-- GLOSARIO -->
+      <section id="content-glosario" class="tab-content py-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="glosario-grid"></div>
+      </section>
 
-    <!-- TABLA UNIVERSAL -->
-    <section id="table-container" class="modern-card overflow-hidden mt-8">
-      <div class="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
-        <h3 id="table-title" class="text-xs font-black uppercase tracking-widest">Estado de Resultados Detallado</h3>
-        <button onclick="window.exportCSV()" class="text-xs font-bold text-slate-500 bg-white border px-4 py-2 rounded-xl hover:bg-slate-50 transition">EXPORTAR CSV</button>
-      </div>
-      <div class="overflow-x-auto custom-scrollbar">
-        <table class="w-full text-left text-sm whitespace-nowrap min-w-[800px]">
-          <thead><tr id="table-head" class="bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-widest"></tr></thead>
-          <tbody id="table-body" class="divide-y divide-slate-100 font-medium text-slate-600"></tbody>
-        </table>
-      </div>
-    </section>
+      <!-- TABLA UNIVERSAL -->
+      <section id="table-container" class="modern-card overflow-hidden mt-8">
+        <div class="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+          <h3 id="table-title" class="text-xs font-black uppercase tracking-widest">Estado de Resultados Detallado</h3>
+          <button onclick="window.exportCSV()" class="text-xs font-bold text-slate-500 bg-white border px-4 py-2 rounded-xl hover:bg-slate-50 transition">EXPORTAR CSV</button>
+        </div>
+        <div class="overflow-x-auto custom-scrollbar">
+          <table class="w-full text-left text-sm whitespace-nowrap min-w-[800px]">
+            <thead><tr id="table-head" class="bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-widest"></tr></thead>
+            <tbody id="table-body" class="divide-y divide-slate-100 font-medium text-slate-600"></tbody>
+          </table>
+        </div>
+      </section>
+    </div> <!-- Cierre del dashboard-content -->
 
   </main>
 
@@ -220,7 +248,7 @@
     // --- IMPORTACIÓN DIRECTA DE SUPABASE ---
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-    // TUS CREDENCIALES REALES DE SUPABASE (Ya conectadas)
+    // TUS CREDENCIALES REALES DE SUPABASE
     const supabaseUrl = 'https://qefhvntgskqzrmayovaa.supabase.co';
     const supabaseKey = 'sb_publishable_XcfkFhLnMQqelqCGlkvVag_q-BL8cKD';
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -231,10 +259,64 @@
     const palette = { indigo: '#6366f1', emerald: '#10b981', rose: '#f43f5e', amber: '#f59e0b', sky: '#0ea5e9', slate: '#0f172a' };
     const dotColors = ['#6366f1', '#10b981', '#f43f5e', '#f59e0b', '#0ea5e9', '#8b5cf6', '#d946ef', '#14b8a6', '#f97316', '#06b6d4'];
     
-    let state = { loaded: false, dataMode: 'demo', months: [], accounts: [], selected: [], tab: 'periodo', annualMetrics: ['Facturación Bruta', 'Utilidad Global'], selectedYear: null };
+    // Estado General con PERSISTENCIA MANUAL
+    let state = { 
+        loaded: false, 
+        months: [], 
+        accounts: [], 
+        selected: [], 
+        tab: 'periodo', 
+        annualMetrics: ['Facturación Bruta', 'Utilidad Global'], 
+        selectedYear: null,
+        manualInputs: { simCosts: {} } 
+    };
     let charts = {};
 
-    // --- FUNCIONES COMUNES EXPUESTAS A WINDOW (Para Vercel) ---
+    // --- COMUNICACIÓN CON BASE DE DATOS (NUBE + LOCAL) ---
+    function saveDataLocallyAndCloud() {
+        const dataToSave = { months: state.months, accounts: state.accounts, manualInputs: state.manualInputs };
+        localStorage.setItem('rf_dashboard_data', JSON.stringify(dataToSave));
+        saveDataToCloud(dataToSave);
+    }
+
+    async function saveDataToCloud(dataToSave) {
+       if(!supabase) return;
+       try {
+           const { error } = await supabase.from('dashboard').upsert({ id: 'main', content: dataToSave });
+           if (!error) document.getElementById('cloud-status').classList.remove('hidden');
+       } catch(e) { console.error("Error guardando", e); }
+    }
+    
+    async function loadFromCloud() {
+       if(!supabase) return false;
+       try {
+           const { data, error } = await supabase.from('dashboard').select('content').eq('id', 'main').single();
+           if (data && data.content && data.content.months && data.content.months.length) {
+               state.months = data.content.months;
+               state.accounts = data.content.accounts;
+               state.manualInputs = data.content.manualInputs || { simCosts: {} };
+               state.loaded = true;
+               
+               renderMetricDropdown(); 
+               window.render(); 
+               document.getElementById('cloud-status').classList.remove('hidden');
+               return true;
+           }
+       } catch(e) { console.error("Error cargando", e); }
+       return false;
+    }
+    
+    window.clearData = async function() {
+        if(confirm("¿Estás seguro de que deseas borrar absolutamente todos los datos del tablero (incluyendo Excel y ajustes manuales)?")) {
+            if(supabase) try { await supabase.from('dashboard').delete().eq('id', 'main'); } catch(e) {}
+            localStorage.removeItem('rf_dashboard_data');
+            state = { loaded: false, months: [], accounts: [], selected: [], tab: 'periodo', annualMetrics: ['Facturación Bruta', 'Utilidad Global'], selectedYear: null, manualInputs: { simCosts: {} } };
+            document.getElementById('cloud-status').classList.add('hidden');
+            window.render();
+        }
+    }
+
+    // --- FUNCIONES COMUNES Y DE INTERACCIÓN ---
     window.changeYear = function(y) { state.selectedYear = y; window.render(); }
     
     window.toggleAnnualMetric = function(m) {
@@ -251,33 +333,54 @@
       state.selected = state.selected.includes(m) ? state.selected.filter(x => x!==m) : [...state.selected, m].sort((a,b)=>state.months.indexOf(a)-state.months.indexOf(b));
       if(!state.selected.length) {
           const mInY = state.months.filter(mo => extractYear(mo) === state.selectedYear);
-          state.selected = [mInY[mInY.length-1]];
+          if (mInY.length > 0) state.selected = [mInY[mInY.length-1]];
       }
       window.render();
     }
     
     window.selectLastMonth = function() {
-        if(state.months.length) { 
+        if(state.months && state.months.length) { 
             const mInY = state.months.filter(m => extractYear(m) === state.selectedYear);
             if(mInY.length) { state.selected = [mInY[mInY.length-1]]; window.render(); }
         }
     }
+
+    window.updateROA = function(val) {
+        if (!state.manualInputs) state.manualInputs = { simCosts: {} };
+        state.manualInputs.roaActivos = parseFloat(val) || 0;
+        saveDataLocallyAndCloud();
+        window.render(); 
+    }
     
-    window.calcSim = function() {
+    window.calcSim = function(skipSave = false) {
       const meta = parseFloat(document.getElementById('sim-meta').value) || 0;
-      const mbP = (parseFloat(document.getElementById('sim-mb-pct').value) || 0) / 100;
+      const rawMbP = parseFloat(document.getElementById('sim-mb-pct').value) || 0;
+      const mbP = rawMbP / 100;
       const com = parseFloat(document.getElementById('sim-com').value) || 0;
       const ac = parseFloat(document.getElementById('sim-fact-ac').value) || 0;
       let cSum = 0;
       
+      if (!state.manualInputs.simCosts) state.manualInputs.simCosts = {};
+
       document.querySelectorAll('input[data-sim]').forEach(i => {
         const v = parseFloat(i.value) || 0; const o = parseFloat(i.dataset.original) || 0;
         cSum += v; 
+        
         i.classList.remove('bg-rose-50', 'bg-emerald-50', 'border-rose-300', 'border-emerald-300');
         if(v > o+1) i.classList.add('bg-rose-50', 'border-rose-300'); 
         else if(v < o-1) i.classList.add('bg-emerald-50', 'border-emerald-300');
+
+        if(!skipSave) state.manualInputs.simCosts[i.dataset.simName] = v;
       });
       
+      if(!skipSave) {
+          state.manualInputs.simMeta = meta;
+          state.manualInputs.simMbPct = rawMbP;
+          state.manualInputs.simCom = com;
+          state.manualInputs.simFactAc = ac;
+          saveDataLocallyAndCloud();
+      }
+
       const mbReq = meta + cSum - com; 
       const fbReq = mbP ? mbReq / mbP : 0;
       window.simData = { fbReq, mbReq, meta, com, cSum };
@@ -288,13 +391,20 @@
       document.getElementById('res-cop').innerText = currF.format(cSum);
       document.getElementById('res-ug').innerText = currF.format(meta);
       
-      if(state.tab === 'simulador') { 
+      if(state.tab === 'simulador' && !skipSave) { 
           const mInY = state.months.filter(mo => extractYear(mo) === state.selectedYear); 
           renderTable(mInY); 
       }
     }
     
     window.resetSim = function() { 
+        state.manualInputs.simMeta = '';
+        state.manualInputs.simMbPct = '';
+        state.manualInputs.simCom = '';
+        state.manualInputs.simFactAc = '';
+        state.manualInputs.simCosts = {};
+        saveDataLocallyAndCloud();
+
         const mInY = state.months.filter(mo => extractYear(mo) === state.selectedYear); 
         initSim(mInY); 
     }
@@ -344,39 +454,62 @@
       b.disabled = false; b.innerHTML = `<i data-lucide="file-down"></i> DESCARGAR PDF`; lucide.createIcons();
     }
 
-    // --- COMUNICACIÓN CON SUPABASE ---
-    async function saveDataToCloud() {
-       if(!supabase) return;
-       try {
-           const dataToSave = JSON.parse(JSON.stringify({ months: state.months, accounts: state.accounts }));
-           const { error } = await supabase.from('dashboard').upsert({ id: 'main', content: dataToSave });
-           if (!error) document.getElementById('cloud-status').classList.remove('hidden');
-       } catch(e) { console.error("Error guardando", e); }
+    // --- MANEJO DE ARCHIVOS (REEMPLAZO DE INFO VIEJA) ---
+    window.handleFile = function(e) {
+      const f = e.target.files[0] || (e.dataTransfer && e.dataTransfer.files[0]);
+      if(!f) return;
+      
+      const btnText = document.getElementById('upload-btn-text');
+      if(btnText) btnText.innerText = 'PROCESANDO...';
+      
+      const r = new FileReader();
+      r.onload = ev => {
+        try { 
+            const wb = XLSX.read(new Uint8Array(ev.target.result), { type: 'array' }); 
+            parseExcel(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: true })); 
+        } catch(err) { alert("Error al leer el Excel."); }
+        if(btnText) btnText.innerText = 'Subir/Reemplazar Excel'; 
+        e.target.value = ''; 
+      }; 
+      r.readAsArrayBuffer(f);
     }
-    
-    async function loadFromCloud() {
-       if(!supabase) return false;
-       try {
-           const { data, error } = await supabase.from('dashboard').select('content').eq('id', 'main').single();
-           if (data && data.content && data.content.months && data.content.months.length) {
-               state = { ...state, loaded: true, dataMode: 'archivo', months: data.content.months, accounts: data.content.accounts };
-               renderMetricDropdown(); 
-               window.render(); 
-               document.getElementById('cloud-status').classList.remove('hidden');
-               return true;
-           }
-       } catch(e) { console.error("Error cargando", e); }
-       return false;
-    }
-    
-    window.clearData = async function() {
-        if(confirm("¿Estás seguro de que deseas borrar la base de datos y volver a la Demo para todos?")) {
-            if(supabase) try { await supabase.from('dashboard').delete().eq('id', 'main'); } catch(e) {}
-            localStorage.removeItem('rf_dashboard_data');
-            state.months = []; state.accounts = []; state.selectedYear = null;
-            document.getElementById('cloud-status').classList.add('hidden');
-            window.loadDemo();
-        }
+
+    function parseExcel(data) {
+      let hr = -1; let ms = [];
+      for(let i=0; i<Math.min(data.length, 60); i++) {
+        const det = (data[i]||[]).map(c => detectM(c)).filter(Boolean);
+        if(det.length >= 2) { hr = i; ms = (data[i]||[]).map(c => detectM(c)); break; }
+      }
+      if(hr === -1) return alert("No se detectó la cabecera de meses en el Excel.");
+      
+      const newAccs = [];
+      for(let i = hr+1; i < data.length; i++) {
+        const n = String(data[i][0] || '').trim(); if(!n) continue;
+        const vs = {}; 
+        ms.forEach((m, idx) => { 
+            if(!m) return; 
+            let v = data[i][idx]; 
+            vs[m] = (typeof v === 'number') ? v : parseFloat(String(v || '0').replace(/[^0-9.-]/g,'')) || 0; 
+        });
+        newAccs.push({ name: n, values: vs });
+      }
+      
+      const vMs = ms.filter(Boolean);
+      
+      // REEMPLAZO TOTAL DE LA BASE DE DATOS VIEJA (Mantiene los manualInputs intactos)
+      state.months = vMs;
+      state.accounts = newAccs;
+      state.loaded = true;
+
+      const availableY = [...new Set(state.months.map(extractYear))].sort(); 
+      state.selectedYear = availableY[availableY.length - 1];
+      
+      // Seleccionamos por defecto el ultimo mes de la nueva carga
+      state.selected = [state.months[state.months.length-1]];
+      
+      saveDataLocallyAndCloud();
+      renderMetricDropdown(); 
+      window.render();
     }
 
     // --- INICIALIZACIÓN ---
@@ -387,22 +520,33 @@
           const l = localStorage.getItem('rf_dashboard_data');
           if(l) { 
               const d = JSON.parse(l); 
-              state = { ...state, loaded: true, months: d.months, accounts: d.accounts }; 
+              state.months = d.months || [];
+              state.accounts = d.accounts || [];
+              state.manualInputs = d.manualInputs || { simCosts: {} };
+              state.loaded = true;
               renderMetricDropdown(); 
               window.render(); 
           } else { 
-              window.loadDemo(); 
+              window.render(); 
           }
       }
       
       document.querySelectorAll('.tab-btn').forEach(b => b.onclick = () => switchT(b.dataset.tab));
-      document.getElementById('file-upload').onchange = (e) => handleFile(e);
+      
+      // Lógica de menús desplegables
       document.addEventListener('click', (e) => {
-        const btn = document.getElementById('btn-metric-dropdown'); 
-        const menu = document.getElementById('metric-dropdown-menu');
-        if(btn && menu) { 
-            if(btn.contains(e.target)) menu.classList.toggle('hidden'); 
-            else if(!menu.contains(e.target)) menu.classList.add('hidden'); 
+        const btnMet = document.getElementById('btn-metric-dropdown'); 
+        const menuMet = document.getElementById('metric-dropdown-menu');
+        if(btnMet && menuMet) { 
+            if(btnMet.contains(e.target)) menuMet.classList.toggle('hidden'); 
+            else if(!menuMet.contains(e.target)) menuMet.classList.add('hidden'); 
+        }
+
+        const btnMon = document.getElementById('btn-month-dropdown');
+        const menuMon = document.getElementById('month-dropdown-menu');
+        if(btnMon && menuMon) {
+            if(btnMon.contains(e.target)) menuMon.classList.toggle('hidden');
+            else if(!menuMon.contains(e.target)) menuMon.classList.add('hidden');
         }
       });
     });
@@ -453,63 +597,6 @@
       return null;
     }
 
-    function handleFile(e) {
-      const f = e.target.files[0]; if(!f) return;
-      document.getElementById('upload-btn-text').innerText = 'PROCESANDO...';
-      const r = new FileReader();
-      r.onload = ev => {
-        try { 
-            const wb = XLSX.read(new Uint8Array(ev.target.result), { type: 'array' }); 
-            parseExcel(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: true })); 
-        } catch(err) { alert("Error al leer el Excel."); }
-        document.getElementById('upload-btn-text').innerText = 'Anexar Excel'; 
-        e.target.value = ''; 
-      }; 
-      r.readAsArrayBuffer(f);
-    }
-
-    function parseExcel(data) {
-      let hr = -1; let ms = [];
-      for(let i=0; i<Math.min(data.length, 60); i++) {
-        const det = (data[i]||[]).map(c => detectM(c)).filter(Boolean);
-        if(det.length >= 2) { hr = i; ms = (data[i]||[]).map(c => detectM(c)); break; }
-      }
-      if(hr === -1) return alert("No se detectó la cabecera de meses.");
-      
-      const newAccs = [];
-      for(let i = hr+1; i < data.length; i++) {
-        const n = String(data[i][0] || '').trim(); if(!n) continue;
-        const vs = {}; 
-        ms.forEach((m, idx) => { 
-            if(!m) return; 
-            let v = data[i][idx]; 
-            vs[m] = (typeof v === 'number') ? v : parseFloat(String(v || '0').replace(/[^0-9.-]/g,'')) || 0; 
-        });
-        newAccs.push({ name: n, values: vs });
-      }
-      
-      const vMs = ms.filter(Boolean);
-      let mergedMonths = state.dataMode === 'demo' ? [] : [...state.months]; 
-      vMs.forEach(m => { if(!mergedMonths.includes(m)) mergedMonths.push(m); });
-      
-      let mergedAccounts = state.dataMode === 'demo' ? [] : [...state.accounts];
-      newAccs.forEach(na => { 
-          let existing = mergedAccounts.find(ea => norm(ea.name) === norm(na.name)); 
-          if (existing) existing.values = { ...existing.values, ...na.values }; 
-          else mergedAccounts.push(na); 
-      });
-      
-      state = { ...state, loaded: true, dataMode: 'archivo', months: mergedMonths, accounts: mergedAccounts };
-      const availableY = [...new Set(mergedMonths.map(extractYear))].sort(); 
-      state.selectedYear = availableY[availableY.length - 1];
-      
-      localStorage.setItem('rf_dashboard_data', JSON.stringify({ months: state.months, accounts: state.accounts })); 
-      saveDataToCloud();
-      
-      renderMetricDropdown(); 
-      window.render();
-    }
-
     function renderMetricDropdown() {
       const bOpts = ['Facturación Bruta', 'Margen Bruto', 'Costos Operativos', 'Utilidad Global'];
       const aOpts = state.accounts.map(a => a.name).filter(n => !bOpts.some(b => norm(b) === norm(n)));
@@ -526,6 +613,7 @@
     }
     
     function getMetrics(ms) {
+      if(!ms || ms.length === 0) return { fb: 0, mb: 0, ug: 0, cop: 0, lab: 0, tsd: 0 };
       const fb = getV('Facturacion Bruta', ms); 
       const mb = getV('Margen Bruto', ms); 
       const ug = getV('Utilidad Global', ms); 
@@ -536,8 +624,16 @@
     }
 
     window.render = function() {
-      if(!state.loaded) return;
+      // Si no hay datos cargados muestra el estado vacío y oculta lo demás
+      if (!state.months || state.months.length === 0) {
+          document.getElementById('dashboard-content').classList.add('hidden');
+          document.getElementById('empty-state').classList.remove('hidden');
+          return;
+      }
       
+      document.getElementById('dashboard-content').classList.remove('hidden');
+      document.getElementById('empty-state').classList.add('hidden');
+
       const availableYears = [...new Set(state.months.map(extractYear))].sort();
       if(!state.selectedYear || !availableYears.includes(state.selectedYear)) state.selectedYear = availableYears[availableYears.length - 1] || new Date().getFullYear().toString();
       
@@ -550,11 +646,30 @@
       if(validS.length === 0 && mInY.length > 0) state.selected = [mInY[mInY.length - 1]]; 
       else if(validS.length > 0) state.selected = validS;
 
-      document.getElementById('months-container').innerHTML = mInY.map(m => `
-        <label class="month-chip cursor-pointer">
-            <input type="checkbox" class="hidden" ${state.selected.includes(m)?'checked':''} onchange="window.toggleM('${m}')">
-            <span class="px-4 py-2 rounded-xl border border-slate-200 text-[10px] font-black uppercase bg-white transition-all whitespace-nowrap">${m.replace(/\s?\d{4}/, '').trim()}</span>
-        </label>`).join('');
+      // ACTUALIZAR DROPDOWN DE MESES
+      const btnText = document.getElementById('month-dropdown-text');
+      document.getElementById('month-options').innerHTML = mInY.map(m => {
+          const displayM = m.replace(/\s?\d{4}/, '').trim();
+          const isChecked = state.selected.includes(m);
+          return `
+            <label class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-lg cursor-pointer transition">
+               <input type="checkbox" value="${m}" class="w-4 h-4 text-brand-600 rounded border-slate-300 focus:ring-brand-500" ${isChecked ? 'checked' : ''} onchange="window.toggleM('${m}')">
+               <span class="text-xs font-bold text-slate-700 truncate capitalize">${displayM.toLowerCase()}</span>
+            </label>`;
+      }).join('');
+
+      if (state.selected.length === 0) {
+          btnText.innerText = "Ningún mes seleccionado";
+      } else if (state.selected.length === mInY.length) {
+          btnText.innerText = "Todos los meses del año";
+      } else if (state.selected.length > 2) {
+          btnText.innerText = `${state.selected.length} meses seleccionados`;
+      } else {
+          btnText.innerText = state.selected.map(m => {
+              let name = m.replace(/\s?\d{4}/, '').trim().toLowerCase();
+              return name.charAt(0).toUpperCase() + name.slice(1);
+          }).join(', ');
+      }
         
       const m = getMetrics(state.selected);
       document.getElementById('kpi-fb').innerText = currF.format(m.fb); 
@@ -645,7 +760,9 @@
     function renderMicro(m, mInY) {
       const pvM = state.months.indexOf(state.selected[0]) > 0 ? state.months[state.months.indexOf(state.selected[0])-1] : null;
       const p = pvM ? getMetrics([pvM]) : null; 
-      const rAct = document.getElementById('input-roa-activos')?.value || 0;
+      
+      // RESTAURA VALOR MANUAL PARA ROA
+      const rAct = (state.manualInputs && state.manualInputs.roaActivos !== undefined) ? state.manualInputs.roaActivos : '';
       
       const inds = [
         { l: 'Margen Bruto', v: m.fb?m.mb/m.fb:0, pv: p?p.mb/p.fb:0, f: 'Margen Bruto / Facturación Bruta', i: 'pie-chart', c: 'emerald' },
@@ -673,7 +790,7 @@
                 <div class="relative z-10 flex justify-between gap-2">
                     <div class="min-w-0"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">ROA Operativo</p><p class="text-2xl font-[900] text-sky-700">${percF.format(rAct>0?m.ug/rAct:0)}</p></div>
                     <div class="flex flex-col text-right"><span class="text-[9px] text-slate-500 font-bold uppercase mb-1">Activos Op. ($)</span>
-                    <input type="number" id="input-roa-activos" value="${rAct||''}" class="w-20 px-2 py-1.5 text-xs font-bold text-slate-700 border rounded-lg text-right" onchange="window.render()"></div>
+                    <input type="number" id="input-roa-activos" value="${rAct}" class="w-20 px-2 py-1.5 text-xs font-bold text-slate-700 border rounded-lg text-right" oninput="window.updateROA(this.value)"></div>
                 </div>
             </div>`;
       lucide.createIcons();
@@ -725,15 +842,23 @@
     function initSim(mInY) {
       if(!mInY || !mInY.length) return;
       const l = mInY[mInY.length-1]; const m = getMetrics([l]);
-      document.getElementById('sim-meta').value = Math.round(m.ug * 1.15);
       
-      const mbP = (m.fb ? m.mb/m.fb*100 : 0).toFixed(2); 
-      document.getElementById('sim-mb-pct').value = mbP; 
-      document.getElementById('sim-mb-pct').setAttribute('data-original', mbP);
+      // RESTAURA O CALCULA VALORES POR DEFECTO DEL SIMULADOR
+      const metaVal = state.manualInputs.simMeta !== undefined && state.manualInputs.simMeta !== '' ? state.manualInputs.simMeta : Math.round(m.ug * 1.15);
+      document.getElementById('sim-meta').value = metaVal;
       
-      const com = getV('Comision Financiera', [l]) || 0; 
-      document.getElementById('sim-com').value = com; 
-      document.getElementById('sim-com').setAttribute('data-original', com);
+      const mbPDef = (m.fb ? m.mb/m.fb*100 : 0).toFixed(2); 
+      const mbPVal = state.manualInputs.simMbPct !== undefined && state.manualInputs.simMbPct !== '' ? state.manualInputs.simMbPct : mbPDef;
+      document.getElementById('sim-mb-pct').value = mbPVal; 
+      document.getElementById('sim-mb-pct').setAttribute('data-original', mbPDef);
+      
+      const comDef = getV('Comision Financiera', [l]) || 0; 
+      const comVal = state.manualInputs.simCom !== undefined && state.manualInputs.simCom !== '' ? state.manualInputs.simCom : comDef;
+      document.getElementById('sim-com').value = comVal; 
+      document.getElementById('sim-com').setAttribute('data-original', comDef);
+
+      const acVal = state.manualInputs.simFactAc !== undefined ? state.manualInputs.simFactAc : '';
+      document.getElementById('sim-fact-ac').value = acVal;
       
       const cs = state.accounts.filter(a => { 
           const i = state.accounts.findIndex(x => norm(x.name) === 'margen bruto'); 
@@ -742,13 +867,19 @@
           return idx > i && idx < e && !norm(a.name).includes('costos'); 
       }).map(a => ({ l: a.name, v: a.values[l] }));
       
-      document.getElementById('sim-costs-grid').innerHTML = cs.map((c, i) => `
+      document.getElementById('sim-costs-grid').innerHTML = cs.map((c, i) => {
+        const nKey = norm(c.l);
+        const sVal = state.manualInputs.simCosts && state.manualInputs.simCosts[nKey] !== undefined ? state.manualInputs.simCosts[nKey] : c.v;
+        
+        return `
         <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1 truncate">${c.l}</label>
         <div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
-        <input type="number" id="sim-i-${i}" data-sim data-sim-name="${norm(c.l)}" value="${c.v}" data-original="${c.v}" class="w-full border rounded-xl pl-7 pr-12 h-10 text-xs font-black outline-none" oninput="window.calcSim()">
-        <button type="button" onclick="window.restoreSimVal('sim-i-${i}')" class="absolute right-1 top-1/2 -translate-y-1/2 p-2 text-slate-400"><i data-lucide="history" class="w-4 h-4"></i></button></div></div>`).join('');
+        <input type="number" id="sim-i-${i}" data-sim data-sim-name="${nKey}" value="${sVal}" data-original="${c.v}" class="w-full border rounded-xl pl-7 pr-12 h-10 text-xs font-black outline-none" oninput="window.calcSim()">
+        <button type="button" onclick="window.restoreSimVal('sim-i-${i}')" class="absolute right-1 top-1/2 -translate-y-1/2 p-2 text-slate-400" title="Restaurar a original"><i data-lucide="history" class="w-4 h-4"></i></button></div></div>`;
+      }).join('');
       
-      window.calcSim(); lucide.createIcons();
+      window.calcSim(true); // Calcula los totales con los valores cargados sin sobrescribir en bucle
+      lucide.createIcons();
     }
 
     function renderGlosario() {
@@ -759,24 +890,6 @@
         { t: 'Rentabilidad Op.', d: 'Porcentaje de Utilidad Global sobre la Facturación Bruta.' }, 
         { t: 'TS Distri', d: 'Inversión en Trade Spend específica para la Distribución / Facturación Bruta.' }
       ].map(i => `<div class="modern-card p-6 border-t-4 border-t-slate-800"><h4 class="font-black text-slate-900 text-sm uppercase mb-2 tracking-widest pt-1 leading-relaxed">${i.t}</h4><p class="text-xs text-slate-500 font-medium pt-1 leading-relaxed">${i.d}</p></div>`).join('');
-    }
-
-    window.loadDemo = function() {
-      const ms = ['ENERO 2025', 'FEBRERO 2025', 'MARZO 2025', 'ABRIL 2025', 'MAYO 2025', 'JUNIO 2025', 'JULIO 2025', 'AGOSTO 2025', 'SEPTIEMBRE 2025', 'OCTUBRE 2025', 'NOVIEMBRE 2025', 'DICIEMBRE 2025'];
-      const accMap = { 'Facturación Neta': {}, 'TS CMQ': {}, 'TS Dis Comercial': {}, 'TS WSC': {}, 'CMV': {}, 'Facturación Bruta': {}, 'Margen Bruto': {}, 'Sueldos y Jornales': {}, 'Cargas Sociales': {}, 'Fletes y Acarreos': {}, 'Utilidad Bruta': {}, 'Comision Financiera': {}, 'Utilidad Global': {} };
-      
-      ms.forEach((m, i) => {
-          const f = 1 + (i * 0.03); 
-          const fn = Math.round(170000000 * f); const tscmq = Math.round(4000000 * f); const tsdis = Math.round(6000000 * f); const tswsc = Math.round(2000000 * f); const cmv = Math.round(110000000 * f);
-          const fb = fn + tscmq + tsdis; const mb = fn + tswsc + tscmq - cmv;
-          const sueldos = Math.round(12000000 * f); const cargas = Math.round(3000000 * f); const fletes = Math.round(5000000 * f);
-          const cop = sueldos + cargas + fletes; const ub = mb - cop; const com = Math.round(-4000000 * f); const ug = ub + com;
-          
-          accMap['Facturación Neta'][m] = fn; accMap['TS CMQ'][m] = tscmq; accMap['TS Dis Comercial'][m] = tsdis; accMap['TS WSC'][m] = tswsc; accMap['CMV'][m] = cmv; accMap['Facturación Bruta'][m] = fb; accMap['Margen Bruto'][m] = mb; accMap['Sueldos y Jornales'][m] = sueldos; accMap['Cargas Sociales'][m] = cargas; accMap['Fletes y Acarreos'][m] = fletes; accMap['Utilidad Bruta'][m] = ub; accMap['Comision Financiera'][m] = com; accMap['Utilidad Global'][m] = ug;
-      });
-      
-      state = { ...state, loaded: true, dataMode: 'demo', months: ms, accounts: Object.keys(accMap).map(k => ({ name: k, values: accMap[k] })) };
-      renderMetricDropdown(); window.render();
     }
   </script>
 </body>
