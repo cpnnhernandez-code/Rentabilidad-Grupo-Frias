@@ -14,23 +14,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://unpkg.com/lucide@latest…
-[8:55 p. m., 12/4/2026] Guadita: <!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DASHBOARD DE RENTABILIDAD - GRUPO FRIAS</title>
-
-  <!-- Fuente Inter -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-
-  <!-- Librerías Externas -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -62,7 +45,7 @@
     .modern-card:hover { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2); }
     
     /* Tabs adaptados al fondo oscuro */
-    .tab-container { background: rgba(0, 40, 85, 0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 999px; padding: 0.375rem; display: inline-flex; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); max-width: 100%; }
+    .tab-container { background: rgba(0, 40, 85, 0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 999px; padding: 0.375rem; display: inline-flex; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
     .tab-btn { padding: 0.5rem 1.25rem; border-radius: 999px; font-weight: 700; font-size: 0.875rem; color: #94a3b8; transition: all 0.2s; white-space: nowrap; }
     .tab-btn:hover { color: #ffffff; }
     .tab-btn.active { background: #ffffff; color: #003A70; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
@@ -85,10 +68,11 @@
   <header class="sticky top-0 z-50 bg-[#002855]/95 backdrop-blur-md border-b border-white/10 shadow-lg">
     <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
       <div class="flex items-center gap-4 min-w-0">
+        <!-- Logo Eliminado a pedido -->
         <div class="min-w-0 py-1">
           <div class="flex items-center gap-3">
             <h1 class="text-xl sm:text-2xl font-[900] text-white truncate tracking-tighter uppercase leading-tight">DASHBOARD DE RENTABILIDAD</h1>
-            <span id="cloud-status" class="hidden sm:flex items-center gap-1 text-[10px] font-bold bg-white/10 text-blue-100 px-2 py-0.5 rounded-full border border-white/20"><i data-lucide="cloud-check" class="w-3 h-3"></i> Nube</span>
+            <span id="cloud-status" class="hidden sm:flex items-center gap-1 text-[10px] font-bold bg-white/10 text-blue-100 px-2 py-0.5 rounded-full border border-white/20"><i data-lucide="cloud-check" class="w-3 h-3"></i> Nube Activa</span>
           </div>
           <p class="text-[11px] sm:text-xs text-blue-300 font-[800] uppercase tracking-[0.2em] mt-0.5">Grupo Frías S.R.L.</p>
         </div>
@@ -99,8 +83,7 @@
         </button>
         <label for="file-upload" class="cursor-pointer px-4 py-2 rounded-xl bg-white text-[#003A70] font-black hover:bg-blue-50 transition flex items-center gap-2 text-sm shadow-lg shadow-black/20">
           <i data-lucide="upload-cloud" class="w-4 h-4"></i>
-          <span id="upload-btn-text" class="hidden sm:inline">Subir/Reemplazar Excel</span>
-          <span class="sm:hidden">Subir Excel</span>
+          <span id="upload-btn-text">Subir/Reemplazar Excel</span>
           <input type="file" id="file-upload" accept=".xlsx,.xls,.csv" class="hidden" onchange="window.handleFile(event)" />
         </label>
       </div>
@@ -110,13 +93,13 @@
   <main class="flex-1 max-w-7xl mx-auto w-full px-4 py-6 md:py-8">
     
     <!-- ESTADO VACÍO (Muestra cuando no hay datos) -->
-    <div id="empty-state" class="flex flex-col items-center justify-center py-12 md:py-24 text-center hidden px-4">
-        <div class="w-20 h-20 md:w-24 md:h-24 bg-white/10 text-white rounded-full flex items-center justify-center mb-6 shadow-inner backdrop-blur-sm border border-white/20">
-            <i data-lucide="bar-chart-2" class="w-10 h-10 md:w-12 md:h-12"></i>
+    <div id="empty-state" class="flex flex-col items-center justify-center py-24 text-center hidden">
+        <div class="w-24 h-24 bg-white/10 text-white rounded-full flex items-center justify-center mb-6 shadow-inner backdrop-blur-sm border border-white/20">
+            <i data-lucide="bar-chart-2" class="w-12 h-12"></i>
         </div>
-        <h2 class="text-2xl md:text-3xl font-black text-white mb-3">Aún no hay datos cargados</h2>
+        <h2 class="text-3xl font-black text-white mb-3">Aún no hay datos cargados</h2>
         <p class="text-blue-100 max-w-md mx-auto mb-8 leading-relaxed text-sm font-medium">Para comenzar a visualizar tu tablero, por favor sube tu archivo Excel. Cada nueva subida reemplazará los meses cargados anteriormente.</p>
-        <label for="file-upload-empty" class="cursor-pointer px-6 py-3 md:px-8 md:py-4 rounded-xl bg-white text-[#003A70] font-black hover:bg-blue-50 transition shadow-xl shadow-black/20 flex items-center gap-3 text-base md:text-lg">
+        <label for="file-upload-empty" class="cursor-pointer px-8 py-4 rounded-xl bg-white text-[#003A70] font-black hover:bg-blue-50 transition shadow-xl shadow-black/20 flex items-center gap-3 text-lg">
             <i data-lucide="upload-cloud" class="w-6 h-6"></i>
             Subir mi Excel ahora
             <input type="file" id="file-upload-empty" accept=".xlsx,.xls,.csv" class="hidden" onchange="window.handleFile(event)" />
@@ -143,11 +126,11 @@
             <select id="year-select" class="text-xs font-black text-slate-800 bg-transparent outline-none cursor-pointer" onchange="window.changeYear(this.value)"></select>
           </div>
           
-          <span class="text-xs font-bold text-slate-400 uppercase tracking-widest shrink-0 hidden sm:block">Filtros:</span>
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-widest shrink-0 hidden sm:block">Filtro de Meses:</span>
           
-          <div class="relative inline-block text-left flex-1 min-w-[200px]">
+          <div class="relative inline-block text-left flex-1 min-w-[200px] sm:w-64">
             <button id="btn-month-dropdown" class="flex items-center justify-between w-full px-4 py-2 text-xs font-bold text-[#003A70] bg-blue-50 border border-blue-100 rounded-xl shadow-sm hover:bg-blue-100 transition">
-               <span id="month-dropdown-text" class="truncate">Seleccionando...</span> <i data-lucide="chevron-down" class="w-4 h-4 text-brand-500 shrink-0"></i>
+               <span id="month-dropdown-text" class="truncate">Seleccionando...</span> <i data-lucide="chevron-down" class="w-4 h-4 text-brand-500"></i>
             </button>
             <!-- Dropdown Menú de Meses -->
             <div id="month-dropdown-menu" class="hidden absolute left-0 z-50 w-full mt-2 origin-top-left bg-white border border-slate-200 rounded-xl shadow-xl max-h-[350px] overflow-y-auto custom-scrollbar">
@@ -163,54 +146,53 @@
             </div>
           </div>
 
-          <button onclick="window.selectLastMonth()" class="shrink-0 text-xs font-bold text-brand-700 bg-brand-100 px-3 py-2 sm:py-1.5 rounded-lg transition hover:bg-brand-200 w-full sm:w-auto text-center mt-2 sm:mt-0 sm:ml-auto">Solo Último Mes</button>
+          <button onclick="window.selectLastMonth()" class="shrink-0 w-full sm:w-auto mt-2 sm:mt-0 sm:ml-auto text-center text-xs font-bold text-brand-700 bg-brand-100 px-3 py-1.5 rounded-lg transition hover:bg-brand-200">Solo Último</button>
         </div>
       </div>
 
       <!-- VISTA PERIODO -->
       <section id="content-periodo" class="tab-content active space-y-6">
-        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
-          <div class="modern-card p-6 border-b-4 border-b-brand-400"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Facturación Bruta</p><h3 id="kpi-fb" class="text-2xl md:text-3xl font-[900] tracking-tighter text-slate-900">$0</h3></div>
-          <div class="modern-card p-6 border-b-4 border-b-emerald-400"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Margen Bruto</p><h3 id="kpi-mb" class="text-2xl md:text-3xl font-[900] tracking-tighter text-slate-900">$0</h3></div>
-          <div class="modern-card p-6 border-b-4 border-b-rose-400"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Costos Op.</p><h3 id="kpi-cop" class="text-2xl md:text-3xl font-[900] tracking-tighter text-slate-900">$0</h3></div>
-          <div class="modern-card p-6 bg-[#002855] text-white border-none shadow-lg">
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+          <div class="modern-card p-6 border-b-4 border-b-brand-400"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Facturación Bruta</p><h3 id="kpi-fb" class="text-3xl font-[900] tracking-tighter text-slate-900">$0</h3></div>
+          <div class="modern-card p-6 border-b-4 border-b-emerald-400"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Margen Bruto</p><h3 id="kpi-mb" class="text-3xl font-[900] tracking-tighter text-slate-900">$0</h3></div>
+          <div class="modern-card p-6 border-b-4 border-b-rose-400"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Costos Op.</p><h3 id="kpi-cop" class="text-3xl font-[900] tracking-tighter text-slate-900">$0</h3></div>
+          <div class="modern-card p-6 bg-[#002855] text-white">
             <div class="flex items-center justify-between mb-1"><p class="text-[10px] font-bold text-blue-300 uppercase tracking-widest">Utilidad Global</p><span id="kpi-margen-pct" class="text-xs font-black px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">0%</span></div>
-            <h3 id="kpi-ug" class="text-2xl md:text-3xl font-[900] tracking-tighter text-white">$0</h3>
+            <h3 id="kpi-ug" class="text-3xl font-[900] tracking-tighter text-white">$0</h3>
           </div>
         </div>
 
-        <!-- Gráficos Cascada y Egresos Independientes -->
-        <div class="space-y-6">
-          <div class="modern-card p-6">
-            <h3 class="text-xs font-bold text-slate-900 uppercase tracking-widest mb-6">Cascada de Rentabilidad</h3>
-            <div class="h-[300px] md:h-[400px] w-full"><canvas id="chart-waterfall"></canvas></div>
+        <div class="flex flex-col gap-6">
+          <div class="modern-card p-6 w-full">
+            <h3 class="text-xs font-bold text-slate-900 uppercase tracking-widest mb-8">Cascada de Rentabilidad</h3>
+            <div class="h-[400px] w-full"><canvas id="chart-waterfall"></canvas></div>
           </div>
-          <div class="modern-card p-6 flex flex-col">
+          <div class="modern-card p-6 w-full flex flex-col">
             <h3 class="text-xs font-bold text-slate-900 uppercase tracking-widest mb-6">Composición de Egresos</h3>
-            <div id="egresos-legend" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 overflow-y-auto max-h-[400px] pr-2 custom-scrollbar content-start"></div>
+            <div id="egresos-legend" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 overflow-y-auto max-h-[400px] pr-2 custom-scrollbar content-start"></div>
           </div>
         </div>
 
-        <div id="micro-kpis" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        <div id="micro-kpis" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
       </section>
 
       <!-- ACUMULADO -->
       <section id="content-acumulado" class="tab-content space-y-6">
-        <div class="modern-card p-4 md:p-6">
+        <div class="modern-card p-6">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 relative z-20">
               <h3 class="text-xs font-bold text-slate-900 uppercase tracking-widest">Tendencia Histórica <span id="trend-year-label" class="text-brand-600"></span></h3>
               <div class="relative inline-block text-left w-full sm:w-72">
                 <button id="btn-metric-dropdown" class="flex items-center justify-between w-full px-4 py-2.5 text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded-xl shadow-sm hover:bg-slate-50 hover:border-slate-300 transition">
-                   <span>Métricas a comparar</span> <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 shrink-0"></i>
+                   <span>Métricas a comparar</span> <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
                 </button>
                 <div id="metric-dropdown-menu" class="hidden absolute right-0 z-50 w-full mt-2 origin-top-right bg-white border border-slate-200 rounded-xl shadow-xl max-h-[300px] overflow-y-auto custom-scrollbar">
                    <div class="p-2 flex flex-col gap-0.5" id="metric-options"></div>
                 </div>
               </div>
           </div>
-          <div class="h-[300px] md:h-[350px] relative z-10 w-full"><canvas id="chart-anual"></canvas></div>
+          <div class="h-[350px] relative z-10"><canvas id="chart-anual"></canvas></div>
         </div>
-        <div class="modern-card p-4 md:p-6">
+        <div class="modern-card p-6">
           <h3 class="text-xs font-bold text-slate-900 uppercase tracking-widest mb-6">Composición Anual de Costos</h3>
           <div id="anual-comp-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 content-start"></div>
         </div>
@@ -218,18 +200,18 @@
 
       <!-- SIMULADOR -->
       <section id="content-simulador" class="tab-content space-y-6">
-        <div class="modern-card p-6 md:p-8 bg-[#002855] text-white flex flex-col md:flex-row justify-between items-center text-center md:text-left gap-6 shadow-xl shadow-black/20 border-none">
+        <div class="modern-card p-8 bg-[#002855] text-white flex flex-col md:flex-row justify-between items-center gap-6 shadow-xl shadow-black/20 border-white/10">
           <div class="relative z-10">
             <h2 class="text-2xl font-black uppercase tracking-tight mb-2 leading-relaxed pt-1">Simulador de Objetivos</h2>
             <p class="text-blue-200 text-sm leading-relaxed pt-1 font-medium">Proyecta tu facturación necesaria. Los datos manuales se guardan automáticamente.</p>
           </div>
-          <button id="btn-pdf" onclick="window.exportSimuladorPDF()" class="relative z-10 px-6 py-3 w-full md:w-auto justify-center bg-white text-[#003A70] hover:bg-blue-50 font-black transition inline-flex items-center gap-2 shadow-lg rounded-xl">
+          <button id="btn-pdf" onclick="window.exportSimuladorPDF()" class="relative z-10 px-6 py-3 bg-white text-[#003A70] hover:bg-blue-50 font-black transition inline-flex items-center gap-2 shadow-lg rounded-xl">
             <i data-lucide="file-down"></i> DESCARGAR PDF
           </button>
         </div>
         <div id="sim-area" class="grid grid-cols-1 lg:grid-cols-3 gap-6 p-1">
           <div class="lg:col-span-2 space-y-6">
-            <div class="modern-card p-4 md:p-6 border-t-4 border-t-emerald-400">
+            <div class="modern-card p-6 border-t-4 border-t-emerald-400">
               <h3 class="text-xs font-bold uppercase mb-6 tracking-widest leading-relaxed pt-1">1. Variables de Meta</h3>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 pt-1">Meta Utilidad Global ($)</label><div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span><input type="number" id="sim-meta" class="w-full border rounded-xl h-11 pl-7 pr-3 font-black bg-slate-50 outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition" oninput="window.calcSim()"></div></div>
@@ -238,11 +220,8 @@
                 <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 pt-1">Fact. Acumulada Hoy ($)</label><div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span><input type="number" id="sim-fact-ac" placeholder="0" class="w-full border rounded-xl h-11 pl-7 pr-3 font-black bg-slate-50 outline-none focus:ring-2 focus:ring-brand-500 transition" oninput="window.calcSim()"></div></div>
               </div>
             </div>
-            <div class="modern-card p-4 md:p-6 border-t-4 border-t-rose-400">
-              <h3 class="text-xs font-bold uppercase mb-6 tracking-widest leading-relaxed pt-1 flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center">
-                  2. Ajuste de Gastos 
-                  <button onclick="window.resetSim()" class="text-[9px] bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg hover:bg-slate-200 transition font-bold uppercase border border-slate-200 shadow-sm"><i data-lucide="rotate-ccw" class="w-3 h-3 inline mr-1"></i>Resetear Datos</button>
-              </h3>
+            <div class="modern-card p-6 border-t-4 border-t-rose-400">
+              <h3 class="text-xs font-bold uppercase mb-6 tracking-widest leading-relaxed pt-1 flex justify-between items-center">2. Ajuste de Gastos <button onclick="window.resetSim()" class="text-[9px] bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg hover:bg-slate-200 transition font-bold uppercase border border-slate-200 shadow-sm"><i data-lucide="rotate-ccw" class="w-3 h-3 inline mr-1"></i>Resetear Datos</button></h3>
               <div id="sim-costs-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
             </div>
           </div>
@@ -250,10 +229,10 @@
             <div class="modern-card p-6 bg-brand-50 border-brand-200 sticky top-24 shadow-xl shadow-brand-900/10">
               <h4 class="text-[10px] font-black uppercase text-brand-800 tracking-[0.2em] mb-6 pt-1">Facturación Objetivo</h4>
               <p class="text-xs font-bold text-slate-500 mb-1">Total Requerido Mensual:</p>
-              <h2 id="res-fb" class="text-3xl font-[900] text-brand-700 mb-6 break-all">$0</h2>
-              <div class="bg-white p-4 md:p-5 rounded-2xl border border-brand-100 shadow-sm mb-6">
+              <h2 id="res-fb" class="text-3xl font-[900] text-brand-700 mb-6">$0</h2>
+              <div class="bg-white p-5 rounded-2xl border border-brand-100 shadow-sm mb-6">
                 <p class="text-[10px] font-black text-sky-700 uppercase mb-1">Falta Vender (Restante)</p>
-                <h3 id="res-faltante" class="text-2xl md:text-3xl font-[900] text-sky-600 break-all">$0</h3>
+                <h3 id="res-faltante" class="text-3xl font-[900] text-sky-600">$0</h3>
               </div>
               <div class="space-y-3 pt-4 border-t border-brand-100 text-xs font-bold">
                 <div class="flex justify-between"><span class="text-slate-400">Margen Bruto Req.</span><span id="res-mb" class="text-slate-800">$0</span></div>
@@ -267,16 +246,16 @@
 
       <!-- GLOSARIO -->
       <section id="content-glosario" class="tab-content py-8">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="glosario-grid"></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="glosario-grid"></div>
       </section>
 
       <!-- TABLA UNIVERSAL -->
       <section id="table-container" class="modern-card overflow-hidden mt-8">
-        <div class="p-4 md:p-6 border-b border-slate-100 bg-slate-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div class="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
           <h3 id="table-title" class="text-xs font-black uppercase tracking-widest text-slate-800">Estado de Resultados Detallado</h3>
-          <button onclick="window.exportCSV()" class="w-full sm:w-auto text-xs font-bold text-slate-600 bg-white border border-slate-200 px-4 py-2 rounded-xl hover:bg-slate-50 hover:text-slate-900 transition shadow-sm text-center">EXPORTAR CSV</button>
+          <button onclick="window.exportCSV()" class="text-xs font-bold text-slate-600 bg-white border border-slate-200 px-4 py-2 rounded-xl hover:bg-slate-50 hover:text-slate-900 transition shadow-sm">EXPORTAR CSV</button>
         </div>
-        <div class="overflow-x-auto custom-scrollbar w-full">
+        <div class="overflow-x-auto custom-scrollbar">
           <table class="w-full text-left text-sm whitespace-nowrap min-w-[800px]">
             <thead><tr id="table-head" class="bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-widest"></tr></thead>
             <tbody id="table-body" class="divide-y divide-slate-100 font-medium text-slate-600"></tbody>
@@ -780,10 +759,10 @@
         }
         return `
             <div class="flex justify-between p-3 border border-slate-100 bg-white rounded-xl shadow-sm">
-                <div class="flex gap-3"><span class="w-3.5 h-3.5 rounded-full shrink-0 mt-0.5" style="background-color: ${dotColors[i%10]}"></span>
+                <div class="flex gap-3"><span class="w-3.5 h-3.5 rounded-full" style="background-color: ${dotColors[i%10]}"></span>
                 <div class="flex flex-col"><span class="text-xs font-bold truncate text-slate-800">${c.l}</span>
                 <span class="text-[10px] text-slate-500">${totC?(c.v/totC*100).toFixed(1):0}% del op.</span></div></div>
-                <div class="flex flex-col items-end pl-2"><span class="text-sm font-black text-[#003A70]">${currF.format(c.v)}</span>${diff}</div>
+                <div class="flex flex-col items-end"><span class="text-sm font-black text-[#003A70]">${currF.format(c.v)}</span>${diff}</div>
             </div>`;
       }).join('');
 
@@ -792,10 +771,10 @@
       
       document.getElementById('anual-comp-grid').innerHTML = aC.map((c, i) => `
           <div class="flex justify-between p-3 border border-slate-100 bg-white rounded-xl shadow-sm">
-              <div class="flex gap-3"><span class="w-3.5 h-3.5 rounded-full shrink-0 mt-0.5" style="background-color: ${dotColors[i%10]}"></span>
+              <div class="flex gap-3"><span class="w-3.5 h-3.5 rounded-full" style="background-color: ${dotColors[i%10]}"></span>
               <div class="flex flex-col"><span class="text-xs font-bold truncate text-slate-800">${c.l}</span>
               <span class="text-[10px] text-slate-500">${totA?(c.v/totA*100).toFixed(1):0}% del op.</span></div></div>
-              <div class="flex flex-col items-end pl-2"><span class="text-sm font-black text-[#003A70]">${currF.format(c.v)}</span></div>
+              <div class="flex flex-col items-end"><span class="text-sm font-black text-[#003A70]">${currF.format(c.v)}</span></div>
           </div>`).join('');
 
       if(charts.a) charts.a.destroy();
@@ -813,7 +792,7 @@
                  return { label: mName, data: d, borderColor: dotColors[i % 10], borderWidth: 3, pointRadius: 4, tension: 0.4 };
               })
           }, 
-          options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { position: 'top', labels: { font: { family: 'Inter', size: 10, weight: 'bold' }, boxWidth: 10, padding: 15 } } }, scales: { y: { border: { display: false } }, x: { grid: { display: false } } } } 
+          options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { position: 'top', labels: { font: { family: 'Inter', size: 10, weight: 'bold' } } } }, scales: { y: { border: { display: false } }, x: { grid: { display: false } } } } 
       });
     }
 
@@ -850,7 +829,7 @@
                 <div class="relative z-10 flex justify-between gap-2">
                     <div class="min-w-0"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">ROA Operativo</p><p class="text-2xl font-[900] text-slate-900 tracking-tighter">${percF.format(rAct>0?m.ug/rAct:0)}</p></div>
                     <div class="flex flex-col text-right"><span class="text-[9px] text-slate-500 font-bold uppercase mb-1">Activos Op. ($)</span>
-                    <input type="number" id="input-roa-activos" value="${rAct}" class="w-20 px-2 py-1.5 text-xs font-bold text-slate-900 bg-slate-50 border border-slate-200 rounded-lg text-right focus:ring-2 focus:ring-brand-500 outline-none transition" oninput="window.updateROA(this.value)"></div>
+                    <input type="number" id="input-roa-activos" value="${rAct}" class="w-20 px-2 py-1.5 text-xs font-bold text-slate-900 border border-slate-200 rounded-lg text-right outline-none focus:ring-2 focus:ring-brand-500 transition" oninput="window.updateROA(this.value)"></div>
                 </div>
             </div>`;
     }
@@ -942,9 +921,9 @@
         const sVal = state.manualInputs.simCosts && state.manualInputs.simCosts[nKey] !== undefined ? state.manualInputs.simCosts[nKey] : c.v;
         
         return `
-        <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1 truncate" title="${c.l}">${c.l}</label>
+        <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1 truncate">${c.l}</label>
         <div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
-        <input type="number" id="sim-i-${i}" data-sim data-sim-name="${nKey}" value="${sVal}" data-original="${c.v}" class="w-full border rounded-xl pl-7 pr-12 h-10 text-xs font-black outline-none focus:ring-2 focus:ring-brand-500 transition" oninput="window.calcSim()">
+        <input type="number" id="sim-i-${i}" data-sim data-sim-name="${nKey}" value="${sVal}" data-original="${c.v}" class="w-full border rounded-xl h-11 pl-7 pr-12 font-black bg-slate-50 outline-none focus:ring-2 focus:ring-brand-500 transition" oninput="window.calcSim()">
         <button type="button" onclick="window.restoreSimVal('sim-i-${i}')" class="absolute right-1 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-brand-600" title="Restaurar a original"><i data-lucide="history" class="w-4 h-4"></i></button></div></div>`;
       }).join('');
       
