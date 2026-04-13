@@ -46,7 +46,8 @@
     
     /* Tabs adaptados al fondo oscuro */
     .tab-container { background: rgba(0, 40, 85, 0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 999px; padding: 0.375rem; display: inline-flex; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
-    .tab-btn { padding: 0.5rem 1.25rem; border-radius: 999px; font-weight: 700; font-size: 0.875rem; color: #94a3b8; transition: all 0.2s; white-space: nowrap; }
+    .tab-btn { padding: 0.5rem 1rem; border-radius: 999px; font-weight: 700; font-size: 0.75rem; color: #94a3b8; transition: all 0.2s; white-space: nowrap; }
+    @media (min-width: 640px) { .tab-btn { padding: 0.5rem 1.25rem; font-size: 0.875rem; } }
     .tab-btn:hover { color: #ffffff; }
     .tab-btn.active { background: #ffffff; color: #003A70; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
     
@@ -58,7 +59,6 @@
     .input-roa::-webkit-outer-spin-button, .input-roa::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     #cloud-status { transition: all 0.3s ease; }
     
-    /* Animación suave */
     @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
@@ -66,9 +66,8 @@
 
   <!-- Header Azul Oscuro -->
   <header class="sticky top-0 z-50 bg-[#002855]/95 backdrop-blur-md border-b border-white/10 shadow-lg">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div class="flex items-center gap-4 min-w-0">
-        <!-- Logo Eliminado a pedido -->
         <div class="min-w-0 py-1">
           <div class="flex items-center gap-3">
             <h1 class="text-xl sm:text-2xl font-[900] text-white truncate tracking-tighter uppercase leading-tight">DASHBOARD DE RENTABILIDAD</h1>
@@ -78,12 +77,13 @@
         </div>
       </div>
       <div class="flex flex-wrap items-center gap-2">
-        <button onclick="window.clearData()" class="px-3 py-2 rounded-xl bg-white/10 text-rose-300 font-bold hover:bg-rose-500 hover:text-white transition border border-rose-500/30 text-xs flex items-center gap-1 shadow-sm" title="Borrar base de datos de la nube">
+        <button onclick="window.clearData()" class="px-3 py-2 rounded-xl bg-white/10 text-rose-300 font-bold hover:bg-rose-500 hover:text-white transition border border-rose-500/30 text-xs flex items-center gap-1" title="Borrar base de datos de la nube">
           <i data-lucide="trash-2" class="w-4 h-4"></i> <span class="hidden sm:inline">Limpiar Todo</span>
         </button>
-        <label for="file-upload" class="cursor-pointer px-4 py-2 rounded-xl bg-white text-[#003A70] font-black hover:bg-blue-50 transition flex items-center gap-2 text-sm shadow-lg shadow-black/20">
+        <label for="file-upload" class="cursor-pointer px-4 py-2 rounded-xl bg-white text-[#003A70] font-black hover:bg-blue-50 transition flex items-center gap-2 text-sm shadow-lg">
           <i data-lucide="upload-cloud" class="w-4 h-4"></i>
-          <span id="upload-btn-text">Subir/Reemplazar Excel</span>
+          <span id="upload-btn-text" class="hidden sm:inline">Subir/Reemplazar Excel</span>
+          <span class="sm:hidden">Excel</span>
           <input type="file" id="file-upload" accept=".xlsx,.xls,.csv" class="hidden" onchange="window.handleFile(event)" />
         </label>
       </div>
@@ -92,149 +92,141 @@
 
   <main class="flex-1 max-w-7xl mx-auto w-full px-4 py-6 md:py-8">
     
-    <!-- ESTADO VACÍO (Muestra cuando no hay datos) -->
+    <!-- ESTADO VACÍO -->
     <div id="empty-state" class="flex flex-col items-center justify-center py-24 text-center hidden">
         <div class="w-24 h-24 bg-white/10 text-white rounded-full flex items-center justify-center mb-6 shadow-inner backdrop-blur-sm border border-white/20">
             <i data-lucide="bar-chart-2" class="w-12 h-12"></i>
         </div>
         <h2 class="text-3xl font-black text-white mb-3">Aún no hay datos cargados</h2>
-        <p class="text-blue-100 max-w-md mx-auto mb-8 leading-relaxed text-sm font-medium">Para comenzar a visualizar tu tablero, por favor sube tu archivo Excel. Cada nueva subida reemplazará los meses cargados anteriormente.</p>
-        <label for="file-upload-empty" class="cursor-pointer px-8 py-4 rounded-xl bg-white text-[#003A70] font-black hover:bg-blue-50 transition shadow-xl shadow-black/20 flex items-center gap-3 text-lg">
+        <p class="text-blue-100 max-w-md mx-auto mb-8 leading-relaxed text-sm font-medium">Sube tu archivo Excel para comenzar. Los datos se guardarán automáticamente en la nube.</p>
+        <label for="file-upload-empty" class="cursor-pointer px-8 py-4 rounded-xl bg-white text-[#003A70] font-black hover:bg-blue-50 transition shadow-xl flex items-center gap-3 text-lg">
             <i data-lucide="upload-cloud" class="w-6 h-6"></i>
-            Subir mi Excel ahora
+            Subir Excel
             <input type="file" id="file-upload-empty" accept=".xlsx,.xls,.csv" class="hidden" onchange="window.handleFile(event)" />
         </label>
     </div>
 
     <!-- CONTENIDO DEL DASHBOARD -->
     <div id="dashboard-content" class="hidden">
-      <!-- Navegación & Filtros -->
+      <!-- Filtros -->
       <div class="flex flex-col xl:flex-row gap-4 mb-8">
         <div class="w-full xl:w-auto overflow-x-auto pb-2 xl:pb-0 shrink-0">
           <div class="tab-container whitespace-nowrap">
-            <button data-tab="periodo" class="tab-btn active inline-flex items-center gap-2"><i data-lucide="calendar" class="w-4 h-4"></i> Vista Período</button>
-            <button data-tab="acumulado" class="tab-btn inline-flex items-center gap-2"><i data-lucide="bar-chart-big" class="w-4 h-4"></i> Acumulado Anual</button>
+            <button data-tab="periodo" class="tab-btn active inline-flex items-center gap-2"><i data-lucide="calendar" class="w-4 h-4"></i> Período</button>
+            <button data-tab="acumulado" class="tab-btn inline-flex items-center gap-2"><i data-lucide="bar-chart-big" class="w-4 h-4"></i> Anual</button>
             <button data-tab="simulador" class="tab-btn inline-flex items-center gap-2"><i data-lucide="target" class="w-4 h-4"></i> Simulador</button>
             <button data-tab="glosario" class="tab-btn inline-flex items-center gap-2"><i data-lucide="book-open" class="w-4 h-4"></i> Glosario</button>
           </div>
         </div>
         
-        <!-- Contenedor de Filtros de Año y Mes (Desplegable) -->
-        <div id="month-filter-wrapper" class="modern-card p-3 px-4 flex items-center gap-3 bg-white text-slate-800 flex-1 min-w-0 transition-all shadow-lg shadow-black/10">
+        <div id="month-filter-wrapper" class="modern-card p-3 px-4 flex items-center gap-3 bg-white text-slate-800 flex-1 min-w-0 shadow-lg">
           <div class="flex items-center gap-2 border-r border-slate-200 pr-3 shrink-0">
-            <i data-lucide="calendar-days" class="w-4 h-4 text-brand-600"></i>
             <select id="year-select" class="text-xs font-black text-slate-800 bg-transparent outline-none cursor-pointer" onchange="window.changeYear(this.value)"></select>
           </div>
           
-          <span class="text-xs font-bold text-slate-400 uppercase tracking-widest shrink-0 hidden sm:block">Filtro de Meses:</span>
-          
           <div class="relative inline-block text-left flex-1 sm:w-64">
-            <button id="btn-month-dropdown" class="flex items-center justify-between w-full px-4 py-2 text-xs font-bold text-[#003A70] bg-blue-50 border border-blue-100 rounded-xl shadow-sm hover:bg-blue-100 transition">
-               <span id="month-dropdown-text" class="truncate">Seleccionando...</span> <i data-lucide="chevron-down" class="w-4 h-4 text-brand-500"></i>
+            <button id="btn-month-dropdown" class="flex items-center justify-between w-full px-4 py-2 text-xs font-bold text-[#003A70] bg-blue-50 border border-blue-100 rounded-xl hover:bg-blue-100 transition">
+               <span id="month-dropdown-text" class="truncate uppercase">Seleccionando Meses...</span> <i data-lucide="chevron-down" class="w-4 h-4 text-brand-500"></i>
             </button>
-            <!-- Dropdown Menú de Meses -->
-            <div id="month-dropdown-menu" class="hidden absolute left-0 z-50 w-full mt-2 origin-top-left bg-white border border-slate-200 rounded-xl shadow-xl max-h-[350px] overflow-y-auto custom-scrollbar">
-               
-               <!-- Botones de Acción Global -->
+            <div id="month-dropdown-menu" class="hidden absolute left-0 z-50 w-full mt-2 origin-top-left bg-white border border-slate-200 rounded-xl shadow-2xl max-h-[350px] overflow-y-auto custom-scrollbar">
                <div class="p-2 border-b border-slate-100 flex flex-col gap-1 bg-slate-50 rounded-t-xl">
-                   <button onclick="window.selectAllMonths()" class="text-left px-3 py-2 text-xs font-black text-brand-700 hover:bg-brand-100 rounded-lg transition flex items-center gap-2">✓ Seleccionar Todos</button>
-                   <button onclick="window.deselectAllMonths()" class="text-left px-3 py-2 text-xs font-black text-slate-500 hover:bg-slate-200 rounded-lg transition flex items-center gap-2">✗ Deseleccionar Todos</button>
+                   <button onclick="window.selectAllMonths()" class="text-left px-3 py-2 text-[10px] font-black text-brand-700 hover:bg-brand-100 rounded-lg transition uppercase">✓ Seleccionar Todos</button>
+                   <button onclick="window.deselectAllMonths()" class="text-left px-3 py-2 text-[10px] font-black text-slate-500 hover:bg-slate-200 rounded-lg transition uppercase">✗ Deseleccionar Todos</button>
                </div>
-
-               <!-- Lista de Meses -->
                <div class="p-2 flex flex-col gap-0.5" id="month-options"></div>
             </div>
           </div>
 
-          <button onclick="window.selectLastMonth()" class="shrink-0 ml-auto text-xs font-bold text-brand-700 bg-brand-100 px-3 py-1.5 rounded-lg transition hover:bg-brand-200 hidden sm:block">Solo Último</button>
+          <button onclick="window.selectLastMonth()" class="shrink-0 ml-auto text-[10px] font-black text-brand-700 bg-brand-100 px-3 py-2 rounded-lg transition hover:bg-brand-200 hidden sm:block uppercase">Último Mes</button>
         </div>
       </div>
 
       <!-- VISTA PERIODO -->
       <section id="content-periodo" class="tab-content active space-y-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
-          <div class="modern-card p-6 border-b-4 border-b-brand-400"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Facturación Bruta</p><h3 id="kpi-fb" class="text-3xl font-[900] tracking-tighter text-slate-900">$0</h3></div>
-          <div class="modern-card p-6 border-b-4 border-b-emerald-400"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Margen Bruto</p><h3 id="kpi-mb" class="text-3xl font-[900] tracking-tighter text-slate-900">$0</h3></div>
-          <div class="modern-card p-6 border-b-4 border-b-rose-400"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Costos Op.</p><h3 id="kpi-cop" class="text-3xl font-[900] tracking-tighter text-slate-900">$0</h3></div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+          <div class="modern-card p-6 border-b-4 border-b-brand-400"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Facturación Bruta</p><h3 id="kpi-fb" class="text-2xl sm:text-3xl font-[900] tracking-tighter text-slate-900">$0</h3></div>
+          <div class="modern-card p-6 border-b-4 border-b-emerald-400"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Margen Bruto</p><h3 id="kpi-mb" class="text-2xl sm:text-3xl font-[900] tracking-tighter text-slate-900">$0</h3></div>
+          <div class="modern-card p-6 border-b-4 border-b-rose-400"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Costos Op.</p><h3 id="kpi-cop" class="text-2xl sm:text-3xl font-[900] tracking-tighter text-slate-900">$0</h3></div>
           <div class="modern-card p-6 bg-[#002855] text-white">
-            <div class="flex items-center justify-between mb-1"><p class="text-[10px] font-bold text-blue-300 uppercase tracking-widest">Utilidad Global</p><span id="kpi-margen-pct" class="text-xs font-black px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">0%</span></div>
-            <h3 id="kpi-ug" class="text-3xl font-[900] tracking-tighter text-white">$0</h3>
+            <div class="flex items-center justify-between mb-1"><p class="text-[10px] font-bold text-blue-300 uppercase tracking-widest">Utilidad Global</p><span id="kpi-margen-pct" class="text-[10px] font-black px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">0%</span></div>
+            <h3 id="kpi-ug" class="text-2xl sm:text-3xl font-[900] tracking-tighter text-white">$0</h3>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 xl:grid-cols-5 gap-6">
-          <div class="modern-card p-6 xl:col-span-3">
-            <h3 class="text-xs font-bold text-slate-900 uppercase tracking-widest mb-8">Cascada de Rentabilidad</h3>
-            <div class="h-[400px] w-full"><canvas id="chart-waterfall"></canvas></div>
+        <!-- Cascada y Egresos (Ahora apilados verticalmente para mejor legibilidad) -->
+        <div class="flex flex-col gap-6">
+          <div class="modern-card p-6 w-full">
+            <h3 class="text-[10px] font-bold text-slate-900 uppercase tracking-widest mb-6">Cascada de Rentabilidad</h3>
+            <div class="h-[300px] sm:h-[400px] w-full"><canvas id="chart-waterfall"></canvas></div>
           </div>
-          <div class="modern-card p-6 xl:col-span-2 flex flex-col">
-            <h3 class="text-xs font-bold text-slate-900 uppercase tracking-widest mb-6">Composición de Egresos</h3>
-            <div id="egresos-legend" class="grid grid-cols-1 sm:grid-cols-2 gap-4 overflow-y-auto max-h-[400px] pr-2 custom-scrollbar content-start"></div>
+          <div class="modern-card p-6 w-full">
+            <h3 class="text-[10px] font-bold text-slate-900 uppercase tracking-widest mb-6">Composición de Egresos</h3>
+            <div id="egresos-legend" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 content-start"></div>
           </div>
         </div>
 
-        <div id="micro-kpis" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        <div id="micro-kpis" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
       </section>
 
       <!-- ACUMULADO -->
       <section id="content-acumulado" class="tab-content space-y-6">
         <div class="modern-card p-6">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 relative z-20">
-              <h3 class="text-xs font-bold text-slate-900 uppercase tracking-widest">Tendencia Histórica <span id="trend-year-label" class="text-brand-600"></span></h3>
+              <h3 class="text-[10px] font-bold text-slate-900 uppercase tracking-widest">Tendencia Histórica <span id="trend-year-label" class="text-brand-600"></span></h3>
               <div class="relative inline-block text-left w-full sm:w-72">
-                <button id="btn-metric-dropdown" class="flex items-center justify-between w-full px-4 py-2.5 text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded-xl shadow-sm hover:bg-slate-50 hover:border-slate-300 transition">
+                <button id="btn-metric-dropdown" class="flex items-center justify-between w-full px-4 py-2.5 text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded-xl shadow-sm hover:bg-slate-50 transition">
                    <span>Métricas a comparar</span> <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
                 </button>
-                <div id="metric-dropdown-menu" class="hidden absolute right-0 z-50 w-full mt-2 origin-top-right bg-white border border-slate-200 rounded-xl shadow-xl max-h-[300px] overflow-y-auto custom-scrollbar">
+                <div id="metric-dropdown-menu" class="hidden absolute right-0 z-50 w-full mt-2 bg-white border border-slate-200 rounded-xl shadow-xl max-h-[300px] overflow-y-auto custom-scrollbar">
                    <div class="p-2 flex flex-col gap-0.5" id="metric-options"></div>
                 </div>
               </div>
           </div>
-          <div class="h-[350px] relative z-10"><canvas id="chart-anual"></canvas></div>
+          <div class="h-[300px] sm:h-[400px] relative z-10"><canvas id="chart-anual"></canvas></div>
         </div>
         <div class="modern-card p-6">
-          <h3 class="text-xs font-bold text-slate-900 uppercase tracking-widest mb-6">Composición Anual de Costos</h3>
-          <div id="anual-comp-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 content-start"></div>
+          <h3 class="text-[10px] font-bold text-slate-900 uppercase tracking-widest mb-6">Composición Anual de Costos</h3>
+          <div id="anual-comp-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 content-start"></div>
         </div>
       </section>
 
       <!-- SIMULADOR -->
       <section id="content-simulador" class="tab-content space-y-6">
-        <div class="modern-card p-8 bg-[#002855] text-white flex flex-col md:flex-row justify-between items-center gap-6 shadow-xl shadow-black/20 border-white/10">
-          <div class="relative z-10">
-            <h2 class="text-2xl font-black uppercase tracking-tight mb-2 leading-relaxed pt-1">Simulador de Objetivos</h2>
-            <p class="text-blue-200 text-sm leading-relaxed pt-1 font-medium">Proyecta tu facturación necesaria. Los datos manuales se guardan automáticamente.</p>
+        <div class="modern-card p-8 bg-[#002855] text-white flex flex-col md:flex-row justify-between items-center gap-6 shadow-xl border-white/10">
+          <div class="relative z-10 text-center md:text-left">
+            <h2 class="text-2xl font-black uppercase tracking-tight mb-2">Simulador de Objetivos</h2>
+            <p class="text-blue-200 text-sm font-medium">Proyecta tu facturación necesaria. Los datos manuales se guardan en la nube.</p>
           </div>
-          <button id="btn-pdf" onclick="window.exportSimuladorPDF()" class="relative z-10 px-6 py-3 bg-white text-[#003A70] hover:bg-blue-50 font-black transition inline-flex items-center gap-2 shadow-lg rounded-xl">
-            <i data-lucide="file-down"></i> DESCARGAR PDF
+          <button id="btn-pdf" onclick="window.exportSimuladorPDF()" class="relative z-10 px-6 py-3 bg-white text-[#003A70] hover:bg-blue-50 font-black transition inline-flex items-center gap-2 shadow-lg rounded-xl uppercase text-xs">
+            <i data-lucide="file-down" class="w-4 h-4"></i> Descargar PDF
           </button>
         </div>
-        <div id="sim-area" class="grid grid-cols-1 lg:grid-cols-3 gap-6 p-1">
+        <div id="sim-area" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div class="lg:col-span-2 space-y-6">
             <div class="modern-card p-6 border-t-4 border-t-emerald-400">
-              <h3 class="text-xs font-bold uppercase mb-6 tracking-widest leading-relaxed pt-1">1. Variables de Meta</h3>
+              <h3 class="text-[10px] font-bold uppercase mb-6 tracking-widest">1. Variables de Meta</h3>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 pt-1">Meta Utilidad Global ($)</label><div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span><input type="number" id="sim-meta" class="w-full border rounded-xl h-11 pl-7 pr-3 font-black bg-slate-50 outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition" oninput="window.calcSim()"></div></div>
-                <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 pt-1">Margen Bruto Proyectado (%)</label><div class="relative"><span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">%</span><input type="number" id="sim-mb-pct" class="w-full border rounded-xl h-11 pl-3 pr-12 font-black bg-slate-50 outline-none focus:ring-2 focus:ring-brand-500 transition" oninput="window.calcSim()"><button type="button" onclick="window.restoreSimVal('sim-mb-pct')" class="absolute right-1 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-brand-600" title="Restaurar a original"><i data-lucide="history" class="w-4 h-4"></i></button></div></div>
-                <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 pt-1">Comisión Financiera Est. ($)</label><div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span><input type="number" id="sim-com" class="w-full border rounded-xl h-11 pl-7 pr-12 font-black bg-slate-50 outline-none focus:ring-2 focus:ring-brand-500 transition" oninput="window.calcSim()"><button type="button" onclick="window.restoreSimVal('sim-com')" class="absolute right-1 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-brand-600" title="Restaurar a original"><i data-lucide="history" class="w-4 h-4"></i></button></div></div>
-                <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 pt-1">Fact. Acumulada Hoy ($)</label><div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span><input type="number" id="sim-fact-ac" placeholder="0" class="w-full border rounded-xl h-11 pl-7 pr-3 font-black bg-slate-50 outline-none focus:ring-2 focus:ring-brand-500 transition" oninput="window.calcSim()"></div></div>
+                <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5">Meta Utilidad Global ($)</label><div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span><input type="number" id="sim-meta" class="w-full border rounded-xl h-11 pl-7 pr-3 font-black bg-slate-50 outline-none focus:ring-2 focus:ring-brand-500 transition" oninput="window.calcSim()"></div></div>
+                <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5">Margen Bruto Proyectado (%)</label><div class="relative"><span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">%</span><input type="number" id="sim-mb-pct" class="w-full border rounded-xl h-11 pl-3 pr-12 font-black bg-slate-50 outline-none focus:ring-2 focus:ring-brand-500 transition" oninput="window.calcSim()"><button type="button" onclick="window.restoreSimVal('sim-mb-pct')" class="absolute right-1 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-brand-600"><i data-lucide="history" class="w-4 h-4"></i></button></div></div>
+                <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5">Comisión Est. ($)</label><div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span><input type="number" id="sim-com" class="w-full border rounded-xl h-11 pl-7 pr-12 font-black bg-slate-50 outline-none focus:ring-2 focus:ring-brand-500 transition" oninput="window.calcSim()"><button type="button" onclick="window.restoreSimVal('sim-com')" class="absolute right-1 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-brand-600"><i data-lucide="history" class="w-4 h-4"></i></button></div></div>
+                <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5">Fact. Acumulada Hoy ($)</label><div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span><input type="number" id="sim-fact-ac" placeholder="0" class="w-full border rounded-xl h-11 pl-7 pr-3 font-black bg-slate-50 outline-none focus:ring-2 focus:ring-brand-500 transition" oninput="window.calcSim()"></div></div>
               </div>
             </div>
             <div class="modern-card p-6 border-t-4 border-t-rose-400">
-              <h3 class="text-xs font-bold uppercase mb-6 tracking-widest leading-relaxed pt-1 flex justify-between items-center">2. Ajuste de Gastos <button onclick="window.resetSim()" class="text-[9px] bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg hover:bg-slate-200 transition font-bold uppercase border border-slate-200 shadow-sm"><i data-lucide="rotate-ccw" class="w-3 h-3 inline mr-1"></i>Resetear Datos</button></h3>
+              <h3 class="text-[10px] font-bold uppercase mb-6 tracking-widest flex justify-between items-center">2. Ajuste de Gastos <button onclick="window.resetSim()" class="text-[9px] bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg hover:bg-slate-200 transition font-bold uppercase border border-slate-200"><i data-lucide="rotate-ccw" class="w-3 h-3 inline mr-1"></i>Resetear</button></h3>
               <div id="sim-costs-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
             </div>
           </div>
           <div class="lg:col-span-1">
-            <div class="modern-card p-6 bg-brand-50 border-brand-200 sticky top-24 shadow-xl shadow-brand-900/10">
-              <h4 class="text-[10px] font-black uppercase text-brand-800 tracking-[0.2em] mb-6 pt-1">Facturación Objetivo</h4>
-              <p class="text-xs font-bold text-slate-500 mb-1">Total Requerido Mensual:</p>
+            <div class="modern-card p-6 bg-brand-50 border-brand-200 sticky top-24 shadow-xl">
+              <h4 class="text-[10px] font-black uppercase text-brand-800 tracking-[0.2em] mb-6">Facturación Objetivo</h4>
+              <p class="text-[10px] font-bold text-slate-500 mb-1 uppercase">Total Requerido Mensual:</p>
               <h2 id="res-fb" class="text-3xl font-[900] text-brand-700 mb-6">$0</h2>
               <div class="bg-white p-5 rounded-2xl border border-brand-100 shadow-sm mb-6">
                 <p class="text-[10px] font-black text-sky-700 uppercase mb-1">Falta Vender (Restante)</p>
-                <h3 id="res-faltante" class="text-3xl font-[900] text-sky-600">$0</h3>
+                <h3 id="res-faltante" class="text-2xl font-[900] text-sky-600">$0</h3>
               </div>
-              <div class="space-y-3 pt-4 border-t border-brand-100 text-xs font-bold">
+              <div class="space-y-3 pt-4 border-t border-brand-100 text-[10px] font-black uppercase">
                 <div class="flex justify-between"><span class="text-slate-400">Margen Bruto Req.</span><span id="res-mb" class="text-slate-800">$0</span></div>
                 <div class="flex justify-between"><span class="text-slate-400">Gastos Proyectados</span><span id="res-cop" class="text-rose-600">$0</span></div>
                 <div class="flex justify-between pt-2 border-t border-brand-100"><span class="text-brand-800">Utilidad Meta</span><span id="res-ug" class="text-emerald-600">$0</span></div>
@@ -249,52 +241,38 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="glosario-grid"></div>
       </section>
 
-      <!-- TABLA UNIVERSAL -->
+      <!-- TABLA -->
       <section id="table-container" class="modern-card overflow-hidden mt-8">
         <div class="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
-          <h3 id="table-title" class="text-xs font-black uppercase tracking-widest text-slate-800">Estado de Resultados Detallado</h3>
-          <button onclick="window.exportCSV()" class="text-xs font-bold text-slate-600 bg-white border border-slate-200 px-4 py-2 rounded-xl hover:bg-slate-50 hover:text-slate-900 transition shadow-sm">EXPORTAR CSV</button>
+          <h3 id="table-title" class="text-[10px] font-black uppercase tracking-widest text-slate-800">Estado de Resultados Detallado</h3>
+          <button onclick="window.exportCSV()" class="text-[10px] font-black text-slate-600 bg-white border border-slate-200 px-4 py-2 rounded-xl hover:bg-slate-50 transition uppercase">Exportar CSV</button>
         </div>
         <div class="overflow-x-auto custom-scrollbar">
-          <table class="w-full text-left text-sm whitespace-nowrap min-w-[800px]">
-            <thead><tr id="table-head" class="bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-widest"></tr></thead>
+          <table class="w-full text-left text-xs whitespace-nowrap min-w-[800px]">
+            <thead><tr id="table-head" class="bg-slate-100 text-slate-500 font-black uppercase tracking-widest"></tr></thead>
             <tbody id="table-body" class="divide-y divide-slate-100 font-medium text-slate-600"></tbody>
           </table>
         </div>
       </section>
-    </div> <!-- Cierre del dashboard-content -->
+    </div>
 
   </main>
 
   <script type="module">
-    // --- IMPORTACIÓN DIRECTA DE SUPABASE ---
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-    // TUS CREDENCIALES REALES DE SUPABASE
     const supabaseUrl = 'https://qefhvntgskqzrmayovaa.supabase.co';
     const supabaseKey = 'sb_publishable_XcfkFhLnMQqelqCGlkvVag_q-BL8cKD';
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Formateadores y variables base
     const currF = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0, maximumFractionDigits: 0 });
     const percF = new Intl.NumberFormat('es-AR', { style: 'percent', minimumFractionDigits: 1 });
-    const palette = { indigo: '#6366f1', emerald: '#10b981', rose: '#f43f5e', amber: '#f59e0b', sky: '#0ea5e9', slate: '#0f172a' };
+    const palette = { indigo: '#0055a5', emerald: '#10b981', rose: '#f43f5e', amber: '#f59e0b', sky: '#0ea5e9', slate: '#0f172a' };
     const dotColors = ['#0055a5', '#10b981', '#f43f5e', '#f59e0b', '#0ea5e9', '#8b5cf6', '#d946ef', '#14b8a6', '#f97316', '#06b6d4'];
     
-    // Estado General con PERSISTENCIA MANUAL
-    let state = { 
-        loaded: false, 
-        months: [], 
-        accounts: [], 
-        selected: [], 
-        tab: 'periodo', 
-        annualMetrics: ['Facturación Bruta', 'Utilidad Global'], 
-        selectedYear: null,
-        manualInputs: { simCosts: {} } 
-    };
+    let state = { loaded: false, months: [], accounts: [], selected: [], tab: 'periodo', annualMetrics: ['Facturación Bruta', 'Utilidad Global'], selectedYear: null, manualInputs: { simCosts: {} } };
     let charts = {};
 
-    // --- COMUNICACIÓN CON BASE DE DATOS (NUBE + LOCAL) ---
     function saveDataLocallyAndCloud() {
         const dataToSave = { months: state.months, accounts: state.accounts, manualInputs: state.manualInputs };
         localStorage.setItem('rf_dashboard_data', JSON.stringify(dataToSave));
@@ -303,34 +281,25 @@
 
     async function saveDataToCloud(dataToSave) {
        if(!supabase) return;
-       try {
-           const { error } = await supabase.from('dashboard').upsert({ id: 'main', content: dataToSave });
-           if (!error) document.getElementById('cloud-status').classList.remove('hidden');
-       } catch(e) { console.error("Error guardando", e); }
+       try { await supabase.from('dashboard').upsert({ id: 'main', content: dataToSave }); document.getElementById('cloud-status').classList.remove('hidden'); } catch(e) {}
     }
     
     async function loadFromCloud() {
        if(!supabase) return false;
        try {
-           const { data, error } = await supabase.from('dashboard').select('content').eq('id', 'main').single();
+           const { data } = await supabase.from('dashboard').select('content').eq('id', 'main').single();
            if (data && data.content && data.content.months && data.content.months.length) {
-               state.months = data.content.months;
-               state.accounts = data.content.accounts;
-               state.manualInputs = data.content.manualInputs || { simCosts: {} };
-               state.loaded = true;
-               
-               renderMetricDropdown(); 
-               window.render(); 
-               document.getElementById('cloud-status').classList.remove('hidden');
+               state.months = data.content.months; state.accounts = data.content.accounts; state.manualInputs = data.content.manualInputs || { simCosts: {} }; state.loaded = true;
+               renderMetricDropdown(); window.render(); document.getElementById('cloud-status').classList.remove('hidden');
                return true;
            }
-       } catch(e) { console.error("Error cargando", e); }
+       } catch(e) {}
        return false;
     }
     
     window.clearData = async function() {
-        if(confirm("¿Estás seguro de que deseas borrar absolutamente todos los datos del tablero (incluyendo Excel y ajustes manuales)?")) {
-            if(supabase) try { await supabase.from('dashboard').delete().eq('id', 'main'); } catch(e) {}
+        if(confirm("¿Borrar todos los datos del tablero?")) {
+            if(supabase) await supabase.from('dashboard').delete().eq('id', 'main');
             localStorage.removeItem('rf_dashboard_data');
             state = { loaded: false, months: [], accounts: [], selected: [], tab: 'periodo', annualMetrics: ['Facturación Bruta', 'Utilidad Global'], selectedYear: null, manualInputs: { simCosts: {} } };
             document.getElementById('cloud-status').classList.add('hidden');
@@ -338,171 +307,66 @@
         }
     }
 
-    // --- FUNCIONES DE FILTRO MAESTRO DE MESES ---
     window.selectAllMonths = function() {
-        if (!state.months || state.months.length === 0) return;
-        const mInY = state.months.filter(mo => extractYear(mo) === state.selectedYear);
-        state.selected = [...mInY];
+        if (!state.months.length) return;
+        state.selected = state.months.filter(mo => extractYear(mo) === state.selectedYear);
         window.render();
     }
 
-    window.deselectAllMonths = function() {
-        state.selected = [];
-        window.render();
-    }
-
-    // --- FUNCIONES COMUNES Y DE INTERACCIÓN ---
+    window.deselectAllMonths = function() { state.selected = []; window.render(); }
     window.changeYear = function(y) { state.selectedYear = y; window.render(); }
-    
     window.toggleAnnualMetric = function(m) {
-      if (state.annualMetrics.includes(m)) { 
-          if(state.annualMetrics.length > 1) state.annualMetrics = state.annualMetrics.filter(x => x !== m); 
-      } else { 
-          state.annualMetrics.push(m); 
-      }
-      renderMetricDropdown(); 
-      window.render(); 
+      state.annualMetrics = state.annualMetrics.includes(m) ? (state.annualMetrics.length > 1 ? state.annualMetrics.filter(x => x !== m) : state.annualMetrics) : [...state.annualMetrics, m];
+      renderMetricDropdown(); window.render(); 
     }
-    
-    window.toggleM = function(m) {
-      // Togglea el mes seleccionado. No fuerza selección si queda en 0.
-      state.selected = state.selected.includes(m) ? state.selected.filter(x => x!==m) : [...state.selected, m].sort((a,b)=>state.months.indexOf(a)-state.months.indexOf(b));
-      window.render();
-    }
-    
+    window.toggleM = function(m) { state.selected = state.selected.includes(m) ? state.selected.filter(x => x!==m) : [...state.selected, m].sort((a,b)=>state.months.indexOf(a)-state.months.indexOf(b)); window.render(); }
     window.selectLastMonth = function() {
-        if(state.months && state.months.length) { 
-            const mInY = state.months.filter(m => extractYear(m) === state.selectedYear);
-            if(mInY.length) { state.selected = [mInY[mInY.length-1]]; window.render(); }
-        }
+        const mInY = state.months.filter(m => extractYear(m) === state.selectedYear);
+        if(mInY.length) { state.selected = [mInY[mInY.length-1]]; window.render(); }
     }
-
-    window.updateROA = function(val) {
-        if (!state.manualInputs) state.manualInputs = { simCosts: {} };
-        state.manualInputs.roaActivos = parseFloat(val) || 0;
-        saveDataLocallyAndCloud();
-        window.render(); 
-    }
+    window.updateROA = function(val) { state.manualInputs.roaActivos = parseFloat(val) || 0; saveDataLocallyAndCloud(); window.render(); }
     
     window.calcSim = function(skipSave = false) {
       const meta = parseFloat(document.getElementById('sim-meta').value) || 0;
-      const rawMbP = parseFloat(document.getElementById('sim-mb-pct').value) || 0;
-      const mbP = rawMbP / 100;
+      const mbP = (parseFloat(document.getElementById('sim-mb-pct').value) || 0) / 100;
       const com = parseFloat(document.getElementById('sim-com').value) || 0;
       const ac = parseFloat(document.getElementById('sim-fact-ac').value) || 0;
       let cSum = 0;
       
-      if (!state.manualInputs.simCosts) state.manualInputs.simCosts = {};
-
       document.querySelectorAll('input[data-sim]').forEach(i => {
         const v = parseFloat(i.value) || 0; const o = parseFloat(i.dataset.original) || 0;
-        cSum += v; 
-        
-        i.classList.remove('bg-rose-50', 'bg-emerald-50', 'border-rose-300', 'border-emerald-300');
-        if(v > o+1) i.classList.add('bg-rose-50', 'border-rose-300'); 
-        else if(v < o-1) i.classList.add('bg-emerald-50', 'border-emerald-300');
-
+        cSum += v; i.classList.remove('bg-rose-50', 'bg-emerald-50', 'border-rose-300', 'border-emerald-300');
+        if(v > o+1) i.classList.add('bg-rose-50', 'border-rose-300'); else if(v < o-1) i.classList.add('bg-emerald-50', 'border-emerald-300');
         if(!skipSave) state.manualInputs.simCosts[i.dataset.simName] = v;
       });
       
-      if(!skipSave) {
-          state.manualInputs.simMeta = meta;
-          state.manualInputs.simMbPct = rawMbP;
-          state.manualInputs.simCom = com;
-          state.manualInputs.simFactAc = ac;
-          saveDataLocallyAndCloud();
-      }
-
-      const mbReq = meta + cSum - com; 
-      const fbReq = mbP ? mbReq / mbP : 0;
+      if(!skipSave) { state.manualInputs.simMeta = meta; state.manualInputs.simMbPct = (mbP*100); state.manualInputs.simCom = com; state.manualInputs.simFactAc = ac; saveDataLocallyAndCloud(); }
+      const mbReq = meta + cSum - com; const fbReq = mbP ? mbReq / mbP : 0;
       window.simData = { fbReq, mbReq, meta, com, cSum };
-      
-      document.getElementById('res-fb').innerText = currF.format(fbReq);
-      document.getElementById('res-faltante').innerText = currF.format(Math.max(0, fbReq-ac));
-      document.getElementById('res-mb').innerText = currF.format(mbReq);
-      document.getElementById('res-cop').innerText = currF.format(cSum);
-      document.getElementById('res-ug').innerText = currF.format(meta);
-      
-      if(state.tab === 'simulador' && !skipSave) { 
-          const mInY = state.months.filter(mo => extractYear(mo) === state.selectedYear); 
-          renderTable(mInY); 
-      }
+      document.getElementById('res-fb').innerText = currF.format(fbReq); document.getElementById('res-faltante').innerText = currF.format(Math.max(0, fbReq-ac)); document.getElementById('res-mb').innerText = currF.format(mbReq); document.getElementById('res-cop').innerText = currF.format(cSum); document.getElementById('res-ug').innerText = currF.format(meta);
+      if(state.tab === 'simulador' && !skipSave) renderTable(state.months.filter(mo => extractYear(mo) === state.selectedYear));
     }
     
-    window.resetSim = function() { 
-        state.manualInputs.simMeta = '';
-        state.manualInputs.simMbPct = '';
-        state.manualInputs.simCom = '';
-        state.manualInputs.simFactAc = '';
-        state.manualInputs.simCosts = {};
-        saveDataLocallyAndCloud();
-
-        const mInY = state.months.filter(mo => extractYear(mo) === state.selectedYear); 
-        initSim(mInY); 
-    }
-    
-    window.restoreSimVal = function(id) { 
-        const el = document.getElementById(id); 
-        if(el) { el.value = el.dataset.original; window.calcSim(); }
-    };
-    
+    window.resetSim = function() { state.manualInputs.simCosts = {}; state.manualInputs.simMeta = ''; state.manualInputs.simMbPct = ''; state.manualInputs.simCom = ''; state.manualInputs.simFactAc = ''; saveDataLocallyAndCloud(); initSim(state.months.filter(mo => extractYear(mo) === state.selectedYear)); }
+    window.restoreSimVal = function(id) { const el = document.getElementById(id); if(el) { el.value = el.dataset.original; window.calcSim(); } };
     window.exportCSV = function() {
       const rows = Array.from(document.querySelectorAll('table tr')).map(tr => Array.from(tr.querySelectorAll('th, td')).map(td => `"${td.innerText}"`).join(',')).join('\n');
-      const blob = new Blob([rows], { type: 'text/csv' }); 
-      const a = document.createElement('a'); 
-      a.href = URL.createObjectURL(blob); 
-      a.download = `PNL_GRUPO_FRIAS_${state.selectedYear}.csv`; 
-      a.click();
+      const blob = new Blob([rows], { type: 'text/csv' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `PNL_FRIAS_${state.selectedYear}.csv`; a.click();
     }
     
     window.exportSimuladorPDF = async function() {
       const b = document.getElementById('btn-pdf'); b.disabled = true; b.innerText = "PROCESANDO...";
-      await document.fonts.ready; await new Promise(r => setTimeout(r, 200)); 
-      
-      const canvas = await html2canvas(document.getElementById('sim-area'), { 
-          scale: 2, useCORS: true, backgroundColor: '#003A70', scrollY: -window.scrollY,
-          onclone: (clonedDoc) => {
-              clonedDoc.querySelectorAll('input[type="number"]').forEach(inp => {
-                  const div = clonedDoc.createElement('div');
-                  div.className = inp.className + ' flex items-center overflow-hidden'; 
-                  div.innerText = inp.value;
-                  if(inp.classList.contains('bg-rose-50')) div.classList.add('bg-rose-50'); 
-                  else if(inp.classList.contains('bg-emerald-50')) div.classList.add('bg-emerald-50');
-                  inp.parentNode.replaceChild(div, inp);
-              });
-              const tC = ['.tracking-tighter', '.tracking-tight', '.tracking-widest', '.tracking-\\[0\\.2em\\]'];
-              clonedDoc.querySelectorAll(tC.join(', ')).forEach(el => { el.style.letterSpacing = 'normal'; el.style.paddingBottom = '3px'; });
-          }
-      });
-      
-      const img = canvas.toDataURL('image/jpeg', 0.95);
-      const { jsPDF } = window.jspdf; const pdf = new jsPDF('l', 'mm', 'a4'); const pW = pdf.internal.pageSize.getWidth();
-      
-      pdf.setFontSize(16); pdf.setFont("helvetica", "bold");
-      pdf.text(`GRUPO FRIAS - PLANIFICACION METAS (${state.selectedYear})`, pW/2, 15, { align: 'center' });
-      pdf.addImage(img, 'JPEG', 10, 20, pW - 20, (pW - 20) * (canvas.height/canvas.width));
-      pdf.save(`Plan_Rentabilidad_GrupoFrias_${state.selectedYear}.pdf`);
-      
-      b.disabled = false; b.innerHTML = `<i data-lucide="file-down"></i> DESCARGAR PDF`; lucide.createIcons();
+      const canvas = await html2canvas(document.getElementById('sim-area'), { scale: 2, useCORS: true, backgroundColor: '#003A70' });
+      const img = canvas.toDataURL('image/jpeg', 0.95); const { jsPDF } = window.jspdf; const pdf = new jsPDF('l', 'mm', 'a4'); const pW = pdf.internal.pageSize.getWidth();
+      pdf.setFontSize(16); pdf.setFont("helvetica", "bold"); pdf.text(`GRUPO FRIAS - PLANIFICACION (${state.selectedYear})`, pW/2, 15, { align: 'center' });
+      pdf.addImage(img, 'JPEG', 10, 20, pW - 20, (pW - 20) * (canvas.height/canvas.width)); pdf.save(`Plan_Rentabilidad_GrupoFrias.pdf`);
+      b.disabled = false; b.innerHTML = `<i data-lucide="file-down" class="w-4 h-4"></i> Descargar PDF`; lucide.createIcons();
     }
 
-    // --- MANEJO DE ARCHIVOS (REEMPLAZO DE INFO VIEJA) ---
     window.handleFile = function(e) {
-      const f = e.target.files[0] || (e.dataTransfer && e.dataTransfer.files[0]);
-      if(!f) return;
-      
-      const btnText = document.getElementById('upload-btn-text');
-      if(btnText) btnText.innerText = 'PROCESANDO...';
-      
+      const f = e.target.files[0]; if(!f) return;
       const r = new FileReader();
-      r.onload = ev => {
-        try { 
-            const wb = XLSX.read(new Uint8Array(ev.target.result), { type: 'array' }); 
-            parseExcel(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: true })); 
-        } catch(err) { alert("Error al leer el Excel."); }
-        if(btnText) btnText.innerText = 'Subir/Reemplazar Excel'; 
-        e.target.value = ''; 
-      }; 
+      r.onload = ev => { try { const wb = XLSX.read(new Uint8Array(ev.target.result), { type: 'array' }); parseExcel(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: true })); } catch(err) { alert("Error Excel"); } e.target.value = ''; };
       r.readAsArrayBuffer(f);
     }
 
@@ -512,96 +376,50 @@
         const det = (data[i]||[]).map(c => detectM(c)).filter(Boolean);
         if(det.length >= 2) { hr = i; ms = (data[i]||[]).map(c => detectM(c)); break; }
       }
-      if(hr === -1) return alert("No se detectó la cabecera de meses en el Excel.");
-      
+      if(hr === -1) return alert("Meses no detectados");
       const newAccs = [];
       for(let i = hr+1; i < data.length; i++) {
         const n = String(data[i][0] || '').trim(); if(!n) continue;
-        const vs = {}; 
-        ms.forEach((m, idx) => { 
-            if(!m) return; 
-            let v = data[i][idx]; 
-            vs[m] = (typeof v === 'number') ? v : parseFloat(String(v || '0').replace(/[^0-9.-]/g,'')) || 0; 
-        });
+        const vs = {}; ms.forEach((m, idx) => { if(!m) return; let v = data[i][idx]; vs[m] = (typeof v === 'number') ? v : parseFloat(String(v || '0').replace(/[^0-9.-]/g,'')) || 0; });
         newAccs.push({ name: n, values: vs });
       }
-      
-      const vMs = ms.filter(Boolean);
-      
-      // REEMPLAZO TOTAL DE LA BASE DE DATOS VIEJA (Mantiene los manualInputs intactos)
-      state.months = vMs;
-      state.accounts = newAccs;
-      state.loaded = true;
-
-      const availableY = [...new Set(state.months.map(extractYear))].sort(); 
-      state.selectedYear = availableY[availableY.length - 1];
-      
-      // Seleccionamos por defecto el ultimo mes de la nueva carga
+      state.months = ms.filter(Boolean); state.accounts = newAccs; state.loaded = true;
+      state.selectedYear = [...new Set(state.months.map(extractYear))].sort().pop();
       state.selected = [state.months[state.months.length-1]];
-      
-      saveDataLocallyAndCloud();
-      renderMetricDropdown(); 
-      window.render();
+      saveDataLocallyAndCloud(); renderMetricDropdown(); window.render();
     }
 
-    // --- INICIALIZACIÓN ---
     document.addEventListener('DOMContentLoaded', async () => {
       lucide.createIcons();
       let loaded = await loadFromCloud();
       if(!loaded) {
           const l = localStorage.getItem('rf_dashboard_data');
-          if(l) { 
-              const d = JSON.parse(l); 
-              state.months = d.months || [];
-              state.accounts = d.accounts || [];
-              state.manualInputs = d.manualInputs || { simCosts: {} };
-              state.loaded = true;
-              renderMetricDropdown(); 
-              window.render(); 
-          } else { 
-              window.render(); 
-          }
+          if(l) { const d = JSON.parse(l); state.months = d.months || []; state.accounts = d.accounts || []; state.manualInputs = d.manualInputs || { simCosts: {} }; state.loaded = true; renderMetricDropdown(); window.render(); } else { window.render(); }
       }
-      
       document.querySelectorAll('.tab-btn').forEach(b => b.onclick = () => switchT(b.dataset.tab));
-      
-      // Lógica de menús desplegables
       document.addEventListener('click', (e) => {
-        const btnMet = document.getElementById('btn-metric-dropdown'); 
-        const menuMet = document.getElementById('metric-dropdown-menu');
-        if(btnMet && menuMet) { 
-            if(btnMet.contains(e.target)) menuMet.classList.toggle('hidden'); 
-            else if(!menuMet.contains(e.target)) menuMet.classList.add('hidden'); 
-        }
-
-        const btnMon = document.getElementById('btn-month-dropdown');
-        const menuMon = document.getElementById('month-dropdown-menu');
-        if(btnMon && menuMon) {
-            if(btnMon.contains(e.target)) menuMon.classList.toggle('hidden');
-            else if(!menuMon.contains(e.target)) menuMon.classList.add('hidden');
-        }
+        ['metric', 'month'].forEach(id => {
+            const btn = document.getElementById(`btn-${id}-dropdown`); const menu = document.getElementById(`${id}-dropdown-menu`);
+            if(btn && menu) { if(btn.contains(e.target)) menu.classList.toggle('hidden'); else if(!menu.contains(e.target)) menu.classList.add('hidden'); }
+        });
       });
     });
 
-    // --- LÓGICA Y RENDERIZADO ---
-    function extractYear(m) { const match = String(m).match(/\d{4}/); return match ? match[0] : new Date().getFullYear().toString(); }
+    function extractYear(m) { return String(m).match(/\d{4}/)?.[0] || new Date().getFullYear().toString(); }
 
     Chart.register({
       id: 'waterfallLabels',
       afterDatasetsDraw(chart) {
         if (chart.canvas.id !== 'chart-waterfall') return;
         const { ctx, data } = chart; ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
-        const fbRaw = data.datasets[0].data[0]; const fb = Array.isArray(fbRaw) ? Math.abs(fbRaw[1] - fbRaw[0]) : fbRaw;
-        
+        const fb = Array.isArray(data.datasets[0].data[0]) ? Math.abs(data.datasets[0].data[0][1]-data.datasets[0].data[0][0]) : data.datasets[0].data[0];
         chart.getDatasetMeta(0).data.forEach((bar, idx) => {
           const raw = data.datasets[0].data[idx]; let val = Array.isArray(raw) ? Math.abs(raw[1] - raw[0]) : raw;
           if (val === 0) return;
           const fmt = (v) => v >= 1000000 ? '$' + (v/1000000).toFixed(1) + 'M' : '$' + (v/1000).toFixed(0) + 'K';
-          const topY = Array.isArray(raw) ? Math.min(bar.y, bar.base) : bar.y;
-          ctx.font = 'bold 11px Inter'; ctx.fillStyle = '#0f172a'; ctx.fillText(fmt(val), bar.x, topY - 14);
-          ctx.font = '9px Inter'; ctx.fillStyle = '#64748b'; ctx.fillText(fb ? (val/fb*100).toFixed(1)+'%' : '', bar.x, topY - 2);
-        }); 
-        ctx.restore();
+          ctx.font = 'bold 11px Inter'; ctx.fillStyle = '#0f172a'; ctx.fillText(fmt(val), bar.x, (Array.isArray(raw) ? Math.min(bar.y, bar.base) : bar.y) - 14);
+          ctx.font = '9px Inter'; ctx.fillStyle = '#64748b'; ctx.fillText(fb ? (val/fb*100).toFixed(1)+'%' : '', bar.x, (Array.isArray(raw) ? Math.min(bar.y, bar.base) : bar.y) - 2);
+        }); ctx.restore();
       }
     });
 
@@ -615,18 +433,9 @@
     }
 
     function norm(t) { return String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim(); }
-    
     function detectM(c) {
-      if (!c) return null; 
-      const ms = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','setiembre','octubre','noviembre','diciembre'];
-      const s = norm(c); 
-      for(let m of ms) { 
-          if(s.includes(m)) { 
-              let r = c.toString().trim().toUpperCase().replace('SETIEMBRE','SEPTIEMBRE'); 
-              return /\d{4}/.test(r) ? r : `${r} ${new Date().getFullYear()}`; 
-          } 
-      } 
-      return null;
+      if (!c) return null; const ms = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','setiembre','octubre','noviembre','diciembre'];
+      const s = norm(c); for(let m of ms) { if(s.includes(m)) { let r = c.toString().trim().toUpperCase().replace('SETIEMBRE','SEPTIEMBRE'); return /\d{4}/.test(r) ? r : `${r} ${new Date().getFullYear()}`; } } return null;
     }
 
     function renderMetricDropdown() {
@@ -635,310 +444,119 @@
       document.getElementById('metric-options').innerHTML = [...bOpts, ...aOpts].map(o => `
         <label class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-lg cursor-pointer">
             <input type="checkbox" value="${o}" class="w-4 h-4 text-brand-600 rounded" ${state.annualMetrics.includes(o)?'checked':''} onchange="window.toggleAnnualMetric('${o}')">
-            <span class="text-xs font-bold text-slate-700 truncate">${o}</span>
+            <span class="text-xs font-bold text-slate-700 truncate uppercase">${o}</span>
         </label>`).join('');
     }
 
-    function getV(n, ms) { 
-        if(!ms || ms.length === 0) return 0;
-        const a = state.accounts.find(x => norm(x.name) === norm(n) || norm(x.name).includes(norm(n))); 
-        return a ? ms.reduce((s, m) => s + (a.values[m] || 0), 0) : 0; 
-    }
-    
+    function getV(n, ms) { const a = state.accounts.find(x => norm(x.name) === norm(n) || norm(x.name).includes(norm(n))); return a ? ms.reduce((s, m) => s + (a.values[m] || 0), 0) : 0; }
     function getMetrics(ms) {
-      if(!ms || ms.length === 0) return { fb: 0, mb: 0, ug: 0, cop: 0, lab: 0, tsd: 0 };
-      const fb = getV('Facturacion Bruta', ms); 
-      const mb = getV('Margen Bruto', ms); 
-      const ug = getV('Utilidad Global', ms); 
-      const cop = getV('Costos Operativos', ms) || (mb - getV('Utilidad Bruta', ms));
+      if(!ms.length) return { fb: 0, mb: 0, ug: 0, cop: 0, lab: 0, tsd: 0 };
+      const fb = getV('Facturacion Bruta', ms); const mb = getV('Margen Bruto', ms); const ug = getV('Utilidad Global', ms); const cop = getV('Costos Operativos', ms) || (mb - getV('Utilidad Bruta', ms));
       const lab = state.accounts.reduce((s, a) => (norm(a.name).includes('sueldo') || norm(a.name).includes('jornal') || norm(a.name).includes('salario')) ? s + ms.reduce((sum,m)=>sum+(a.values[m]||0),0) : s, 0);
       const tsd = state.accounts.reduce((s, a) => (norm(a.name).includes('ts dis') || norm(a.name).includes('ts distri')) ? s + ms.reduce((sum,m)=>sum+(a.values[m]||0),0) : s, 0);
       return { fb, mb, ug, cop, lab, tsd };
     }
 
     window.render = function() {
-      // Si no hay datos cargados muestra el estado vacío y oculta lo demás
-      if (!state.months || state.months.length === 0) {
-          document.getElementById('dashboard-content').classList.add('hidden');
-          document.getElementById('empty-state').classList.remove('hidden');
-          return;
-      }
-      
-      document.getElementById('dashboard-content').classList.remove('hidden');
-      document.getElementById('empty-state').classList.add('hidden');
-
+      if (!state.months.length) { document.getElementById('dashboard-content').classList.add('hidden'); document.getElementById('empty-state').classList.remove('hidden'); return; }
+      document.getElementById('dashboard-content').classList.remove('hidden'); document.getElementById('empty-state').classList.add('hidden');
       const availableYears = [...new Set(state.months.map(extractYear))].sort();
-      if(!state.selectedYear || !availableYears.includes(state.selectedYear)) state.selectedYear = availableYears[availableYears.length - 1] || new Date().getFullYear().toString();
-      
-      document.getElementById('year-select').innerHTML = availableYears.map(y => `<option value="${y}" ${y === state.selectedYear ? 'selected' : ''}>${y}</option>`).join('');
+      if(!state.selectedYear || !availableYears.includes(state.selectedYear)) state.selectedYear = availableYears.pop();
+      document.getElementById('year-select').innerHTML = availableYears.map(y => `<option value="${y}" ${y === state.selectedYear ? 'selected' : ''}>AÑO ${y}</option>`).join('');
       document.getElementById('trend-year-label').innerText = `(${state.selectedYear})`;
-      
       const mInY = state.months.filter(m => extractYear(m) === state.selectedYear);
-      
-      // Si por alguna razón selected tiene basura, lo limpiamos
       state.selected = state.selected.filter(m => state.months.includes(m));
-
-      // ACTUALIZAR DROPDOWN DE MESES (Renderiza la lista sin forzar autoselección)
       const btnText = document.getElementById('month-dropdown-text');
-      
-      // Renderizamos primero las opciones del select
-      document.getElementById('month-options').innerHTML = mInY.map(m => {
-          const displayM = m.replace(/\s?\d{4}/, '').trim();
-          const isChecked = state.selected.includes(m);
-          return `
-            <label class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-lg cursor-pointer transition">
-               <input type="checkbox" value="${m}" class="w-4 h-4 text-brand-600 rounded border-slate-300 focus:ring-brand-500" ${isChecked ? 'checked' : ''} onchange="window.toggleM('${m}')">
-               <span class="text-xs font-bold text-slate-700 truncate capitalize">${displayM.toLowerCase()}</span>
-            </label>`;
-      }).join('');
-
-      // Actualizamos el texto que dice cuántos seleccionaste
-      const validSelectedInYear = state.selected.filter(m => extractYear(m) === state.selectedYear);
-      if (validSelectedInYear.length === 0) {
-          btnText.innerText = "Ningún mes seleccionado";
-      } else if (validSelectedInYear.length === mInY.length) {
-          btnText.innerText = "Todos los meses del año";
-      } else if (validSelectedInYear.length > 2) {
-          btnText.innerText = `${validSelectedInYear.length} meses seleccionados`;
-      } else {
-          btnText.innerText = validSelectedInYear.map(m => {
-              let name = m.replace(/\s?\d{4}/, '').trim().toLowerCase();
-              return name.charAt(0).toUpperCase() + name.slice(1);
-          }).join(', ');
-      }
-        
-      const m = getMetrics(validSelectedInYear);
-      
-      document.getElementById('kpi-fb').innerText = currF.format(m.fb); 
-      document.getElementById('kpi-mb').innerText = currF.format(m.mb); 
-      document.getElementById('kpi-cop').innerText = currF.format(m.cop); 
-      document.getElementById('kpi-ug').innerText = currF.format(m.ug); 
-      document.getElementById('kpi-margen-pct').innerText = m.fb ? percF.format(m.ug/m.fb) : '0%';
-      
-      renderCharts(m, mInY, validSelectedInYear); 
-      renderTable(mInY, validSelectedInYear); 
-      renderMicro(m, validSelectedInYear); 
-      
-      if(state.tab === 'simulador') initSim(mInY); 
-      renderGlosario();
-      
-      lucide.createIcons();
+      document.getElementById('month-options').innerHTML = mInY.map(m => `
+        <label class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-lg cursor-pointer transition">
+            <input type="checkbox" value="${m}" class="w-4 h-4 text-brand-600 rounded border-slate-300" ${state.selected.includes(m) ? 'checked' : ''} onchange="window.toggleM('${m}')">
+            <span class="text-[10px] font-black text-slate-700 uppercase">${m.replace(/\s?\d{4}/, '').trim()}</span>
+        </label>`).join('');
+      const validS = state.selected.filter(m => extractYear(m) === state.selectedYear);
+      btnText.innerText = validS.length === 0 ? "Ningún mes" : (validS.length === mInY.length ? "Todo el año" : `${validS.length} meses`);
+      const m = getMetrics(validS);
+      document.getElementById('kpi-fb').innerText = currF.format(m.fb); document.getElementById('kpi-mb').innerText = currF.format(m.mb); document.getElementById('kpi-cop').innerText = currF.format(m.cop); document.getElementById('kpi-ug').innerText = currF.format(m.ug); document.getElementById('kpi-margen-pct').innerText = m.fb ? percF.format(m.ug/m.fb) : '0%';
+      renderCharts(m, mInY, validS); renderTable(mInY, validS); renderMicro(m, validS);
+      if(state.tab === 'simulador') initSim(mInY); renderGlosario(); lucide.createIcons();
     }
 
-    function renderCharts(m, mInY, validSelectedInYear) {
+    function renderCharts(m, mInY, validS) {
       if(charts.w) charts.w.destroy();
-      charts.w = new Chart(document.getElementById('chart-waterfall').getContext('2d'), { 
-          type: 'bar', 
-          data: { 
-              labels: ['Fact. Bruta', 'CMV y Ajustes', 'Margen Bruto', 'Gastos Op.', 'Util. Global'], 
-              datasets: [{ 
-                  data: [[0, m.fb], [m.mb, m.fb], [0, m.mb], [m.mb-m.cop, m.mb], [0, m.ug]], 
-                  backgroundColor: [palette.indigo, palette.rose, palette.indigo, palette.rose, palette.emerald], 
-                  borderRadius: 6 
-              }]
-          }, 
-          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {display:false} }, scales: { y: { grid: { color: '#f1f5f9' }, border: { display: false } }, x: { grid: { display: false } } } } 
-      });
-
-      const filterAc = a => { 
-          const i = state.accounts.findIndex(x => norm(x.name) === 'margen bruto'); 
-          const e = state.accounts.findIndex(x => norm(x.name) === 'utilidad bruta'); 
-          const idx = state.accounts.indexOf(a); 
-          return idx > i && idx < e && !norm(a.name).includes('costos'); 
-      };
-      
-      const costs = state.accounts.filter(filterAc).map(a => ({ l: a.name, v: validSelectedInYear.reduce((s,mo)=>s+(a.values[mo]||0), 0) })).sort((a,b)=>b.v-a.v);
-      const pvM = validSelectedInYear.length > 0 && state.months.indexOf(validSelectedInYear[0]) > 0 ? state.months[state.months.indexOf(validSelectedInYear[0])-1] : null;
+      charts.w = new Chart(document.getElementById('chart-waterfall').getContext('2d'), { type: 'bar', data: { labels: ['FACT. BRUTA', 'CMV', 'MARGEN BRUTO', 'GASTOS', 'UTIL. GLOBAL'], datasets: [{ data: [[0, m.fb], [m.mb, m.fb], [0, m.mb], [m.mb-m.cop, m.mb], [0, m.ug]], backgroundColor: [palette.indigo, palette.rose, palette.indigo, palette.rose, palette.emerald], borderRadius: 6 }]}, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {display:false} }, scales: { y: { grid: { color: '#f1f5f9' }, border: { display: false } }, x: { grid: { display: false } } } } });
+      const filterAc = a => { const i = state.accounts.findIndex(x => norm(x.name) === 'margen bruto'); const e = state.accounts.findIndex(x => norm(x.name) === 'utilidad bruta'); const idx = state.accounts.indexOf(a); return idx > i && idx < e && !norm(a.name).includes('costos'); };
+      const costs = state.accounts.filter(filterAc).map(a => ({ l: a.name, v: validS.reduce((s,mo)=>s+(a.values[mo]||0), 0) })).sort((a,b)=>b.v-a.v);
+      const pvM = validS.length > 0 && state.months.indexOf(validS[0]) > 0 ? state.months[state.months.indexOf(validS[0])-1] : null;
       const totC = costs.reduce((s,c) => s + c.v, 0);
-      
       document.getElementById('egresos-legend').innerHTML = costs.map((c, i) => {
-        let diff = '<span class="text-[10px] text-slate-300 font-bold">N/A</span>'; 
-        if(pvM) { 
-            const pv = getV(c.l, [pvM]); const d = c.v - pv; 
-            diff = `<span class="text-[10px] font-black px-2 py-0.5 rounded-md ${d>0?'text-rose-700 bg-rose-50':'text-emerald-700 bg-emerald-50'}">${d>0?'+':''}${pv?(d/pv*100).toFixed(1):0}%</span>`; 
-        }
-        return `
-            <div class="flex justify-between p-3 border border-slate-100 bg-white rounded-xl shadow-sm">
-                <div class="flex gap-3"><span class="w-3.5 h-3.5 rounded-full" style="background-color: ${dotColors[i%10]}"></span>
-                <div class="flex flex-col"><span class="text-xs font-bold truncate text-slate-800">${c.l}</span>
-                <span class="text-[10px] text-slate-500">${totC?(c.v/totC*100).toFixed(1):0}% del op.</span></div></div>
-                <div class="flex flex-col items-end"><span class="text-sm font-black text-[#003A70]">${currF.format(c.v)}</span>${diff}</div>
-            </div>`;
+        let diff = ''; if(pvM) { const pv = getV(c.l, [pvM]); const d = c.v - pv; diff = `<span class="text-[9px] font-black px-1.5 py-0.5 rounded ${d>0?'text-rose-700 bg-rose-50':'text-emerald-700 bg-emerald-50'}">${d>0?'+':''}${pv?(d/pv*100).toFixed(1):0}%</span>`; }
+        return `<div class="flex justify-between p-3 border border-slate-100 bg-slate-50 rounded-xl"><div class="flex gap-2 min-w-0"><span class="w-3 h-3 rounded-full shrink-0" style="background-color: ${dotColors[i%10]}"></span><div class="flex flex-col min-w-0"><span class="text-[10px] font-black truncate text-slate-800 uppercase">${c.l}</span><span class="text-[9px] text-slate-500 font-bold">${totC?(c.v/totC*100).toFixed(1):0}% TOTAL</span></div></div><div class="flex flex-col items-end shrink-0"><span class="text-[11px] font-black text-[#003A70]">${currF.format(c.v)}</span>${diff}</div></div>`;
       }).join('');
-
       const aC = state.accounts.filter(filterAc).map(a => ({ l: a.name, v: mInY.reduce((s,mo)=>s+(a.values[mo]||0), 0) })).sort((a,b)=>b.v-a.v);
       const totA = aC.reduce((s,x)=>s+x.v, 0);
-      
-      document.getElementById('anual-comp-grid').innerHTML = aC.map((c, i) => `
-          <div class="flex justify-between p-3 border border-slate-100 bg-white rounded-xl shadow-sm">
-              <div class="flex gap-3"><span class="w-3.5 h-3.5 rounded-full" style="background-color: ${dotColors[i%10]}"></span>
-              <div class="flex flex-col"><span class="text-xs font-bold truncate text-slate-800">${c.l}</span>
-              <span class="text-[10px] text-slate-500">${totA?(c.v/totA*100).toFixed(1):0}% del op.</span></div></div>
-              <div class="flex flex-col items-end"><span class="text-sm font-black text-[#003A70]">${currF.format(c.v)}</span></div>
-          </div>`).join('');
-
+      document.getElementById('anual-comp-grid').innerHTML = aC.map((c, i) => `<div class="flex justify-between p-3 border border-slate-100 bg-slate-50 rounded-xl"><div class="flex gap-2 min-w-0"><span class="w-3 h-3 rounded-full shrink-0" style="background-color: ${dotColors[i%10]}"></span><div class="flex flex-col min-w-0"><span class="text-[10px] font-black truncate text-slate-800 uppercase">${c.l}</span><span class="text-[9px] text-slate-500 font-bold">${totA?(c.v/totA*100).toFixed(1):0}% ANUAL</span></div></div><div class="flex flex-col items-end"><span class="text-[11px] font-black text-[#003A70]">${currF.format(c.v)}</span></div></div>`).join('');
       if(charts.a) charts.a.destroy();
-      charts.a = new Chart(document.getElementById('chart-anual').getContext('2d'), { 
-          type: 'line', 
-          data: { 
-              labels: mInY.map(x=>x.replace(/\s?\d{4}/, '').trim()), 
-              datasets: state.annualMetrics.map((mName, i) => {
-                 let d = []; const n = norm(mName);
-                 if (n === 'facturacion bruta') d = mInY.map(mo=>getMetrics([mo]).fb); 
-                 else if (n === 'margen bruto') d = mInY.map(mo=>getMetrics([mo]).mb); 
-                 else if (n === 'utilidad global') d = mInY.map(mo=>getMetrics([mo]).ug); 
-                 else if (n === 'costos operativos') d = mInY.map(mo=>getMetrics([mo]).cop); 
-                 else d = mInY.map(mo => getV(mName, [mo]));
-                 return { label: mName, data: d, borderColor: dotColors[i % 10], borderWidth: 3, pointRadius: 4, tension: 0.4 };
-              })
-          }, 
-          options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { position: 'top', labels: { font: { family: 'Inter', size: 10, weight: 'bold' } } } }, scales: { y: { border: { display: false } }, x: { grid: { display: false } } } } 
-      });
+      charts.a = new Chart(document.getElementById('chart-anual').getContext('2d'), { type: 'line', data: { labels: mInY.map(x=>x.replace(/\s?\d{4}/, '').trim()), datasets: state.annualMetrics.map((mName, i) => { let d = []; const n = norm(mName); if (n === 'facturacion bruta') d = mInY.map(mo=>getMetrics([mo]).fb); else if (n === 'margen bruto') d = mInY.map(mo=>getMetrics([mo]).mb); else if (n === 'utilidad global') d = mInY.map(mo=>getMetrics([mo]).ug); else if (n === 'costos operativos') d = mInY.map(mo=>getMetrics([mo]).cop); else d = mInY.map(mo => getV(mName, [mo])); return { label: mName.toUpperCase(), data: d, borderColor: dotColors[i % 10], borderWidth: 3, pointRadius: 4, tension: 0.4 }; })}, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { font: { size: 9, weight: 'bold' } } } }, scales: { y: { border: { display: false } }, x: { grid: { display: false } } } } });
     }
 
-    function renderMicro(m, validSelectedInYear) {
-      const pvM = validSelectedInYear.length > 0 && state.months.indexOf(validSelectedInYear[0]) > 0 ? state.months[state.months.indexOf(validSelectedInYear[0])-1] : null;
-      const p = pvM ? getMetrics([pvM]) : null; 
-      
-      // RESTAURA VALOR MANUAL PARA ROA
-      const rAct = (state.manualInputs && state.manualInputs.roaActivos !== undefined) ? state.manualInputs.roaActivos : '';
-      
+    function renderMicro(m, validS) {
+      const pvM = validS.length > 0 && state.months.indexOf(validS[0]) > 0 ? state.months[state.months.indexOf(validS[0])-1] : null;
+      const p = pvM ? getMetrics([pvM]) : null; const rAct = state.manualInputs.roaActivos || 0;
       const inds = [
-        { l: 'Margen Bruto', v: m.fb?m.mb/m.fb:0, pv: p?p.mb/p.fb:0, f: 'Margen Bruto / Facturación Bruta', i: 'pie-chart', c: 'emerald' },
-        { l: 'Costo Laboral', v: m.fb?m.lab/m.fb:0, pv: p?p.lab/p.fb:0, f: 'Salarios / Facturación Bruta', i: 'users', c: 'indigo', inv: true },
-        { l: 'TS Distri', v: m.fb?m.tsd/m.fb:0, pv: p?p.tsd/p.fb:0, f: 'TS Distri / Facturación Bruta', i: 'tag', c: 'amber', inv: true },
-        { l: 'Absorción', v: m.mb?m.cop/m.mb:0, pv: p?p.cop/p.mb:0, f: 'Costos Operativos / Margen Bruto', i: 'layers', c: 'rose', inv: true },
-        { l: 'Rent. Operativa', v: m.fb?m.ug/m.fb:0, pv: p?p.ug/p.fb:0, f: 'Utilidad Global / Facturación Bruta', i: 'award', c: 'brand' }
+        { l: 'MARGEN BRUTO %', v: m.fb?m.mb/m.fb:0, pv: p?p.mb/p.fb:0, f: 'MB / FACT. BRUTA', i: 'pie-chart', c: 'emerald' },
+        { l: 'COSTO LABORAL %', v: m.fb?m.lab/m.fb:0, pv: p?p.lab/p.fb:0, f: 'LABORAL / FACT. BRUTA', i: 'users', c: 'indigo', inv: true },
+        { l: 'TS DISTRI %', v: m.fb?m.tsd/m.fb:0, pv: p?p.tsd/p.fb:0, f: 'TS DISTRI / FACT. BRUTA', i: 'tag', c: 'amber', inv: true },
+        { l: 'ABSORCIÓN GASTOS', v: m.mb?m.cop/m.mb:0, pv: p?p.cop/p.mb:0, f: 'GASTOS / MARGEN BRUTO', i: 'layers', c: 'rose', inv: true },
+        { l: 'RENT. OPERATIVA', v: m.fb?m.ug/m.fb:0, pv: p?p.ug/p.fb:0, f: 'UTILIDAD / FACT. BRUTA', i: 'award', c: 'brand' }
       ];
-      
       document.getElementById('micro-kpis').innerHTML = inds.map(ind => {
         const d = p ? (ind.v-ind.pv)*100 : 0; const isG = ind.inv ? d < 0 : d > 0;
-        const b = p ? `<div class="flex flex-col items-end"><span class="text-[9px] text-slate-400 font-medium mb-0.5">vs ant.</span><span class="text-[10px] font-bold px-1.5 py-0.5 rounded border shadow-sm ${d===0?'text-slate-500 bg-slate-50':(isG?'text-emerald-700 bg-emerald-50':'text-rose-700 bg-rose-50')}">${d>0?'+':''}${d.toFixed(1)}%</span></div>` : '';
-        return `
-            <div class="modern-card p-4 border-l-4 border-l-${ind.c}-400 relative overflow-hidden group">
-                <div class="absolute -right-4 -top-4 opacity-[0.03] group-hover:scale-110 transition-all duration-500"><i data-lucide="${ind.i}" class="w-24 h-24 text-${ind.c}-900"></i></div>
-                <div class="flex justify-between items-start mb-4 relative z-10">
-                    <div class="w-10 h-10 rounded-xl text-${ind.c}-600 bg-${ind.c}-100 flex items-center justify-center shadow-sm"><i data-lucide="${ind.i}" class="w-5 h-5"></i></div>${b}
-                </div>
-                <div class="relative z-10"><p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">${ind.l}</p><p class="text-2xl font-[900] text-slate-900 tracking-tighter">${percF.format(ind.v)}</p></div>
-                <p class="text-[9px] text-slate-400 mt-4 pt-3 border-t border-slate-100 uppercase relative z-10 font-semibold truncate" title="${ind.f}">${ind.f}</p>
-            </div>`;
-      }).join('') + `
-            <div class="modern-card p-4 border-l-4 border-l-sky-400 relative overflow-hidden group bg-sky-50/30">
-                <div class="flex justify-between mb-4 relative z-10"><div class="w-10 h-10 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center shadow-sm"><i data-lucide="building-2" class="w-5 h-5"></i></div></div>
-                <div class="relative z-10 flex justify-between gap-2">
-                    <div class="min-w-0"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">ROA Operativo</p><p class="text-2xl font-[900] text-[#003A70]">${percF.format(rAct>0?m.ug/rAct:0)}</p></div>
-                    <div class="flex flex-col text-right"><span class="text-[9px] text-slate-500 font-bold uppercase mb-1">Activos Op. ($)</span>
-                    <input type="number" id="input-roa-activos" value="${rAct}" class="w-20 px-2 py-1.5 text-xs font-bold text-[#003A70] border rounded-lg text-right" oninput="window.updateROA(this.value)"></div>
-                </div>
-            </div>`;
+        const b = p ? `<div class="flex flex-col items-end shrink-0"><span class="text-[8px] text-slate-400 font-bold uppercase">vs ant.</span><span class="text-[9px] font-black px-1.5 py-0.5 rounded border ${d===0?'text-slate-500 bg-slate-50':(isG?'text-emerald-700 bg-emerald-50':'text-rose-700 bg-rose-50')}">${d>0?'+':''}${d.toFixed(1)}%</span></div>` : '';
+        return `<div class="modern-card p-4 border-l-4 border-l-${ind.c}-400 relative overflow-hidden group"><div class="absolute -right-2 -top-2 opacity-[0.03]"><i data-lucide="${ind.i}" class="w-16 h-16"></i></div><div class="flex justify-between items-start mb-3 relative z-10"><div class="w-8 h-8 rounded-lg text-${ind.c}-600 bg-${ind.c}-100 flex items-center justify-center"><i data-lucide="${ind.i}" class="w-4 h-4"></i></div>${b}</div><div class="relative z-10"><p class="text-[9px] font-bold text-slate-500 uppercase mb-0.5">${ind.l}</p><p class="text-xl font-[900] text-slate-900">${percF.format(ind.v)}</p></div><p class="text-[8px] text-slate-400 mt-3 pt-2 border-t border-slate-100 uppercase font-black">${ind.f}</p></div>`;
+      }).join('') + `<div class="modern-card p-4 border-l-4 border-l-sky-400 relative overflow-hidden group"><div class="flex justify-between mb-3 relative z-10"><div class="w-8 h-8 rounded-lg bg-sky-100 text-sky-600 flex items-center justify-center"><i data-lucide="building-2" class="w-4 h-4"></i></div></div><div class="relative z-10 flex justify-between gap-2"><div class="min-w-0"><p class="text-[9px] font-bold text-slate-500 uppercase mb-0.5">ROA OPERATIVO</p><p class="text-xl font-[900] text-[#003A70]">${percF.format(rAct>0?m.ug/rAct:0)}</p></div><div class="flex flex-col text-right"><span class="text-[8px] text-slate-500 font-black uppercase mb-1">ACTIVOS OP. ($)</span><input type="number" value="${rAct}" class="w-20 px-2 py-1 text-[10px] font-black text-[#003A70] border rounded-lg text-right outline-none focus:ring-1 focus:ring-sky-500 transition" oninput="window.updateROA(this.value)"></div></div></div>`;
     }
 
-    function renderTable(mInY, validSelectedInYear) {
-      const h = document.getElementById('table-head'); 
-      const b = document.getElementById('table-body'); 
-      const l = mInY[mInY.length-1];
-      
+    function renderTable(mInY, validS) {
+      const h = document.getElementById('table-head'); const b = document.getElementById('table-body'); const l = mInY[mInY.length-1];
       if (state.tab === 'simulador') {
-        const sim = window.simData || {}; 
-        h.innerHTML = `<th class="px-6 py-4">Concepto</th><th class="px-6 py-4 text-right">Base</th><th class="px-6 py-4 text-right bg-[#e6f0fa] text-[#003A70]">Proyección</th>`;
+        const sim = window.simData || {}; h.innerHTML = `<th class="px-6 py-4">CONCEPTO</th><th class="px-6 py-4 text-right">VALOR BASE</th><th class="px-6 py-4 text-right bg-blue-50 text-[#003A70]">PROYECCIÓN</th>`;
         b.innerHTML = state.accounts.map(acc => {
-          const n = norm(acc.name); 
-          if(n.includes('rentabilidad') || n.includes('margen operativo')) return '';
+          const n = norm(acc.name); if(n.includes('rentabilidad') || n.includes('margen operativo')) return '';
           let bV = l ? (acc.values[l] || 0) : 0; let pV = 0;
-          
-          if(n === 'facturacion bruta') pV = sim.fbReq || 0; 
-          else if(n === 'margen bruto') pV = sim.mbReq || 0; 
-          else if(n === 'utilidad global') pV = sim.meta || 0; 
-          else if(n.includes('utilidad bruta')) pV = (sim.meta || 0) - (sim.com || 0); 
-          else if(n.includes('comision financiera')) pV = sim.com || 0; 
-          else { 
-              const inp = document.querySelector(`input[data-sim-name="${n}"]`); 
-              pV = inp ? parseFloat(inp.value)||0 : ((l && getV('Facturacion Bruta', [l])) ? bV/getV('Facturacion Bruta', [l])*(sim.fbReq||0) : 0); 
-          }
-          return `<tr><td class="px-6 py-3 font-bold">${acc.name}</td><td class="px-6 py-3 text-right text-slate-400">${currF.format(bV)}</td><td class="px-6 py-3 text-right font-black bg-[#0055a5]/10 text-[#003A70]">${currF.format(pV)}</td></tr>`;
-        }).join(''); 
-        return;
+          if(n === 'facturacion bruta') pV = sim.fbReq || 0; else if(n === 'margen bruto') pV = sim.mbReq || 0; else if(n === 'utilidad global') pV = sim.meta || 0; else if(n.includes('utilidad bruta')) pV = (sim.meta || 0) - (sim.com || 0); else if(n.includes('comision financiera')) pV = sim.com || 0; else { const inp = document.querySelector(`input[data-sim-name="${n}"]`); pV = inp ? parseFloat(inp.value)||0 : ((l && getV('Facturacion Bruta', [l])) ? bV/getV('Facturacion Bruta', [l])*(sim.fbReq||0) : 0); }
+          return `<tr><td class="px-6 py-3 font-bold uppercase">${acc.name}</td><td class="px-6 py-3 text-right text-slate-400">${currF.format(bV)}</td><td class="px-6 py-3 text-right font-black bg-blue-50/10 text-[#003A70]">${currF.format(pV)}</td></tr>`;
+        }).join(''); return;
       }
-      
-      const cols = state.tab === 'periodo' ? validSelectedInYear : mInY; 
-      let accMs = mInY; let tL = 'Total Anual';
-      
-      if(state.tab === 'periodo') { 
-          if(cols.length > 0) {
-            accMs = mInY.slice(0, mInY.indexOf(cols[cols.length-1])+1); 
-          } else {
-            accMs = [];
-          }
-          tL = 'Acumulado YTD'; 
-      }
-      
-      if (cols.length === 0) {
-          h.innerHTML = `<th class="px-6 py-4">Seleccione al menos un mes para ver detalles</th>`;
-          b.innerHTML = '';
-          return;
-      }
-
-      h.innerHTML = `<th class="px-6 py-4">Concepto</th>` + cols.map(m=>`<th class="px-6 py-4 text-right">${m.replace(/\s?\d{4}/, '').trim()}</th>`).join('') + `<th class="px-6 py-4 text-right bg-[#e6f0fa] text-[#003A70]">${tL}</th>`;
+      const cols = state.tab === 'periodo' ? validS : mInY; let accMs = []; if(cols.length) accMs = mInY.slice(0, mInY.indexOf(cols[cols.length-1])+1);
+      if (!cols.length) { h.innerHTML = `<th class="px-6 py-4">SELECCIONE MESES</th>`; b.innerHTML = ''; return; }
+      h.innerHTML = `<th class="px-6 py-4">CONCEPTO</th>` + cols.map(m=>`<th class="px-6 py-4 text-right">${m.replace(/\s?\d{4}/, '').trim()}</th>`).join('') + `<th class="px-6 py-4 text-right bg-blue-50 text-[#003A70]">${state.tab==='periodo'?'ACUM. YTD':'TOTAL ANUAL'}</th>`;
       b.innerHTML = state.accounts.map(acc => {
-        let row = `<tr class="${['facturacion bruta', 'margen bruto', 'utilidad global'].some(x=>norm(acc.name).includes(x))?'font-black bg-slate-50 uppercase text-[11px]':''}"><td class="px-6 py-3 font-bold">${acc.name}</td>`;
+        let isBold = ['facturacion bruta', 'margen bruto', 'utilidad global'].some(x=>norm(acc.name).includes(x));
+        let row = `<tr class="${isBold?'font-black bg-slate-50 text-[11px]':''}"><td class="px-6 py-3 font-bold uppercase">${acc.name}</td>`;
         cols.forEach(m => row += `<td class="px-6 py-3 text-right">${currF.format(acc.values[m]||0)}</td>`);
-        row += `<td class="px-6 py-3 text-right font-black bg-[#0055a5]/10 text-[#003A70]">${currF.format(accMs.reduce((s,m)=>s+(acc.values[m]||0),0))}</td></tr>`; 
-        return row;
+        row += `<td class="px-6 py-3 text-right font-black bg-blue-50/10 text-[#003A70]">${currF.format(accMs.reduce((s,m)=>s+(acc.values[m]||0),0))}</td></tr>`; return row;
       }).join('');
     }
 
     function initSim(mInY) {
-      if(!mInY || !mInY.length) return;
-      const l = mInY[mInY.length-1]; const m = getMetrics([l]);
-      
-      // RESTAURA O CALCULA VALORES POR DEFECTO DEL SIMULADOR
-      const metaVal = state.manualInputs.simMeta !== undefined && state.manualInputs.simMeta !== '' ? state.manualInputs.simMeta : Math.round(m.ug * 1.15);
-      document.getElementById('sim-meta').value = metaVal;
-      
-      const mbPDef = (m.fb ? m.mb/m.fb*100 : 0).toFixed(2); 
-      const mbPVal = state.manualInputs.simMbPct !== undefined && state.manualInputs.simMbPct !== '' ? state.manualInputs.simMbPct : mbPDef;
-      document.getElementById('sim-mb-pct').value = mbPVal; 
-      document.getElementById('sim-mb-pct').setAttribute('data-original', mbPDef);
-      
-      const comDef = getV('Comision Financiera', [l]) || 0; 
-      const comVal = state.manualInputs.simCom !== undefined && state.manualInputs.simCom !== '' ? state.manualInputs.simCom : comDef;
-      document.getElementById('sim-com').value = comVal; 
-      document.getElementById('sim-com').setAttribute('data-original', comDef);
-
-      const acVal = state.manualInputs.simFactAc !== undefined ? state.manualInputs.simFactAc : '';
-      document.getElementById('sim-fact-ac').value = acVal;
-      
-      const cs = state.accounts.filter(a => { 
-          const i = state.accounts.findIndex(x => norm(x.name) === 'margen bruto'); 
-          const e = state.accounts.findIndex(x => norm(x.name) === 'utilidad bruta'); 
-          const idx = state.accounts.indexOf(a); 
-          return idx > i && idx < e && !norm(a.name).includes('costos'); 
-      }).map(a => ({ l: a.name, v: a.values[l] }));
-      
+      if(!mInY.length) return; const l = mInY[mInY.length-1]; const m = getMetrics([l]);
+      document.getElementById('sim-meta').value = state.manualInputs.simMeta || Math.round(m.ug * 1.15);
+      const mbPDef = (m.fb ? m.mb/m.fb*100 : 0).toFixed(2); document.getElementById('sim-mb-pct').value = state.manualInputs.simMbPct || mbPDef; document.getElementById('sim-mb-pct').dataset.original = mbPDef;
+      const comDef = getV('Comision Financiera', [l]) || 0; document.getElementById('sim-com').value = state.manualInputs.simCom || comDef; document.getElementById('sim-com').dataset.original = comDef;
+      document.getElementById('sim-fact-ac').value = state.manualInputs.simFactAc || '';
+      const cs = state.accounts.filter(a => { const i = state.accounts.findIndex(x => norm(x.name) === 'margen bruto'); const e = state.accounts.findIndex(x => norm(x.name) === 'utilidad bruta'); const idx = state.accounts.indexOf(a); return idx > i && idx < e && !norm(a.name).includes('costos'); }).map(a => ({ l: a.name, v: a.values[l] }));
       document.getElementById('sim-costs-grid').innerHTML = cs.map((c, i) => {
-        const nKey = norm(c.l);
-        const sVal = state.manualInputs.simCosts && state.manualInputs.simCosts[nKey] !== undefined ? state.manualInputs.simCosts[nKey] : c.v;
-        
-        return `
-        <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1 truncate">${c.l}</label>
-        <div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
-        <input type="number" id="sim-i-${i}" data-sim data-sim-name="${nKey}" value="${sVal}" data-original="${c.v}" class="w-full border rounded-xl pl-7 pr-12 h-10 text-xs font-black outline-none focus:ring-2 focus:ring-brand-500 transition" oninput="window.calcSim()">
-        <button type="button" onclick="window.restoreSimVal('sim-i-${i}')" class="absolute right-1 top-1/2 -translate-y-1/2 p-2 text-slate-400" title="Restaurar a original"><i data-lucide="history" class="w-4 h-4"></i></button></div></div>`;
-      }).join('');
-      
-      window.calcSim(true); // Calcula los totales con los valores cargados sin sobrescribir en bucle
-      lucide.createIcons();
+        const nKey = norm(c.l); const sVal = state.manualInputs.simCosts[nKey] !== undefined ? state.manualInputs.simCosts[nKey] : c.v;
+        return `<div><label class="block text-[9px] font-bold text-slate-500 uppercase mb-1 truncate">${c.l}</label><div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span><input type="number" data-sim data-sim-name="${nKey}" value="${sVal}" data-original="${c.v}" class="w-full border rounded-xl pl-7 pr-12 h-9 text-xs font-black outline-none focus:ring-1 focus:ring-brand-500 transition" oninput="window.calcSim()"><button type="button" onclick="window.restoreSimVal('sim-i-${i}')" class="absolute right-1 top-1/2 -translate-y-1/2 p-2 text-slate-400"><i data-lucide="history" class="w-3 h-3"></i></button></div></div>`;
+      }).join(''); window.calcSim(true); lucide.createIcons();
     }
 
     function renderGlosario() {
       document.getElementById('glosario-grid').innerHTML = [
-        { t: 'Facturación Bruta', d: 'Facturación Neta + TS Total (TS CMQ + TS Distri).' }, 
-        { t: 'Margen Bruto', d: 'Facturación Neta + TS WSC + TS CMQ - Costo de Mercadería Vendida (CMV).' }, 
-        { t: 'CMV y TS WSC', d: 'Métricas de costo e inversión independientes del Trade Spend de Distribución.' }, 
-        { t: 'Rentabilidad Op.', d: 'Porcentaje de Utilidad Global sobre la Facturación Bruta.' }, 
-        { t: 'TS Distri', d: 'Inversión en Trade Spend específica para la Distribución / Facturación Bruta.' }
-      ].map(i => `<div class="modern-card p-6 border-t-4 border-t-[#003A70]"><h4 class="font-black text-[#003A70] text-sm uppercase mb-2 tracking-widest pt-1 leading-relaxed">${i.t}</h4><p class="text-xs text-slate-600 font-medium pt-1 leading-relaxed">${i.d}</p></div>`).join('');
+        { t: 'FACTURACIÓN BRUTA', d: 'Facturación Neta + TS Total (CMQ + Distribución).' }, 
+        { t: 'MARGEN BRUTO', d: 'Ingresos directos menos Costo de Mercadería Vendida (CMV).' }, 
+        { t: 'RENTABILIDAD OP.', d: 'Porcentaje de Utilidad Global sobre la Facturación Bruta.' }, 
+        { t: 'TS DISTRI', d: 'Inversión comercial específica sobre la Facturación Bruta.' }
+      ].map(i => `<div class="modern-card p-6 border-t-4 border-t-[#003A70]"><h4 class="font-black text-[#003A70] text-[11px] uppercase mb-2 tracking-widest leading-relaxed">${i.t}</h4><p class="text-[10px] text-slate-600 font-medium leading-relaxed">${i.d}</p></div>`).join('');
     }
   </script>
 </body>
