@@ -142,16 +142,16 @@
 
         <div class="flex flex-col gap-6">
           <div class="modern-card p-6 w-full shadow-lg">
-            <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6">Cascada de Rentabilidad (P&L)</h3>
+            <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6">Cascada de Rentabilidad</h3>
             <div class="h-[300px] sm:h-[400px] w-full"><canvas id="chart-waterfall"></canvas></div>
           </div>
           <div class="modern-card p-6 w-full shadow-lg">
-            <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6">Composición Detallada de Egresos</h3>
+            <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6">Composición Detallada de Costos</h3>
             <div id="egresos-legend" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
           </div>
         </div>
 
-        <!-- Micro KPIs con Descripciones -->
+        <!-- Micro KPIs con Descripciones Detalladas -->
         <div id="micro-kpis" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
       </section>
 
@@ -211,17 +211,17 @@
     const percF = new Intl.NumberFormat('es-AR', { style: 'percent', minimumFractionDigits: 1 });
     const dotColors = ['#0055a5', '#10b981', '#f43f5e', '#f59e0b', '#0ea5e9', '#8b5cf6', '#d946ef', '#14b8a6', '#f97316', '#06b6d4'];
     
-    let state = { loaded: false, months: [], accounts: [], selected: [], tab: 'periodo', annualMetrics: ['Facturación Bruta', 'Utilidad Global'], selectedYear: "2026", manualInputs: { roaActivos: 0 } };
+    let state = { loaded: false, months: [], accounts: [], selected: [], tab: 'periodo', annualMetrics: ['Ingreso Neto (fact neta + Ts Total)', 'Utilidad Global'], selectedYear: "2026", manualInputs: { roaActivos: 0 } };
     let charts = {};
 
     function norm(t) { return String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim(); }
     
-    // Mapeo Estricto para Grupo Frías
+    // Mapeo específico para el archivo de Grupo Frías
     const ALIASES = {
-        fb: ['ingreso neto (fact neta + ts total)'], // Cuenta principal de Ingresos
-        ug: ['utilidad global'], // Resultado Final
-        mb: ['utilidad bruta'], // Margen Bruto / Utilidad Bruta
-        cop: ['costos totales'], // Egresos Operativos Totales
+        fb: ['ingreso neto (fact neta + ts total)'], // Ingreso Base
+        ug: ['utilidad global'], // Utilidad Final
+        mb: ['utilidad bruta'], // Margen Bruto
+        cop: ['costos totales'], // Egresos Operativos
         lab: ['salarios'], // Sueldos
         tsd: ['ts dis'], // Trade Spend Distribución
         neta: ['facturacion neta']
@@ -229,9 +229,8 @@
 
     function findAccount(key) {
         const terms = ALIASES[key] || [key];
-        // 1. Intentamos coincidencia exacta (normalizada)
+        // Búsqueda estricta por nombre exacto normalizado
         let found = state.accounts.find(a => terms.some(t => norm(a.name) === norm(t)));
-        // 2. Si no, coincidencia parcial contenida
         if (!found) found = state.accounts.find(a => terms.some(t => norm(a.name).includes(norm(t))));
         return found;
     }
@@ -314,12 +313,13 @@
         </label>`).join('');
       document.getElementById('month-dropdown-text').innerText = validS.length === 0 ? "SELECCIONAR" : `${validS.length} MESES SELECC.`;
       
-      // Cálculo de Totales
+      // Obtener objetos de cuenta específicos
       const accFb = findAccount('fb');
       const accUg = findAccount('ug');
       const accCop = findAccount('cop');
       const accMb = findAccount('mb');
 
+      // Calcular sumatorias basadas en la selección de meses
       const fb = validS.reduce((s, m) => s + (accFb?.values[m] || 0), 0);
       const ug = validS.reduce((s, m) => s + (accUg?.values[m] || 0), 0);
       const cop = validS.reduce((s, m) => s + (accCop?.values[m] || 0), 0);
@@ -330,7 +330,7 @@
       document.getElementById('kpi-cop').innerText = currF.format(cop);
       document.getElementById('kpi-ug').innerText = currF.format(ug);
       
-      // Rentabilidad Final (Badge)
+      // Rentabilidad Crítica (Badge de la tarjeta azul)
       const rentabilidad = fb !== 0 ? (ug / fb) : 0;
       document.getElementById('kpi-margen-pct').innerText = percF.format(rentabilidad);
       
@@ -365,10 +365,11 @@
           options: { responsive: true, maintainAspectRatio: false }
       });
 
+      // FILTRO DE EGRESOS: Solo costos reales, nada de ingresos o totales
       const list = state.accounts.filter(a => {
         const n = norm(a.name);
-        const totals = ['ingreso neto', 'utilidad global', 'utilidad bruta', 'costos totales', 'conceptos'];
-        return !totals.some(t => n === t);
+        const aExcluir = ['ingreso', 'facturacion', 'utilidad', 'margen', 'cmv', 'conceptos', 'ts total'];
+        return !aExcluir.some(ex => n.includes(ex));
       }).map(a => ({ n: a.name, v: validS.reduce((s,m)=>s+(a.values[m]||0),0) })).sort((a,b)=>b.v-a.v).slice(0,12);
       
       const totC = list.reduce((s,x)=>s+Math.abs(x.v), 0);
@@ -378,7 +379,7 @@
                 <span class="w-3 h-3 rounded-full mt-0.5 shrink-0" style="background-color: ${dotColors[i % 10]}"></span>
                 <div class="flex flex-col min-w-0">
                     <span class="text-[9px] font-black uppercase text-slate-800 truncate">${c.n}</span>
-                    <span class="text-[8px] text-slate-400 font-bold">${totC ? (Math.abs(c.v)/totC*100).toFixed(1) : 0}% DEL DESGLOSE</span>
+                    <span class="text-[8px] text-slate-400 font-bold">${totC ? (Math.abs(c.v)/totC*100).toFixed(1) : 0}% DEL TOTAL</span>
                 </div>
             </div>
             <span class="text-[10px] font-black text-[#003A70]">${currF.format(c.v)}</span>
@@ -394,8 +395,8 @@
             { l: 'MARGEN BRUTO %', v: fb ? mb/fb : 0, i: 'pie-chart', c: 'indigo', d: 'Peso de la Utilidad Bruta sobre los Ingresos Netos.', f: '(Utilidad Bruta / Ingreso Neto)' },
             { l: 'COSTO LABORAL %', v: fb ? lab/fb : 0, i: 'users', c: 'blue', d: 'Impacto de salarios en la facturación total.', f: '(Salarios / Ingreso Neto)' },
             { l: 'TS DISTRI %', v: fb ? tsd/fb : 0, i: 'tag', c: 'amber', d: 'Peso del Trade Spend de Distribución.', f: '(TS Dis / Ingreso Neto)' },
-            { l: 'ABSORCIÓN GASTOS', v: mb ? Math.abs(cop)/mb : 0, i: 'layers', c: 'rose', d: 'Qué % del Margen Bruto se consume en Costos Totales.', f: '(Costos Totales / Utilidad Bruta)' },
-            { l: 'RENTABILIDAD FINAL %', v: fb ? ug/fb : 0, i: 'award', c: 'emerald', d: 'Margen neto final disponible por cada peso vendido.', f: '(Utilidad Global / Ingreso Neto)' }
+            { l: 'ABSORCIÓN GASTOS', v: mb ? Math.abs(cop)/mb : 0, i: 'layers', c: 'rose', d: 'Porcentaje del Margen Bruto que se consume en Costos.', f: '(Costos Totales / Utilidad Bruta)' },
+            { l: 'RENTABILIDAD FINAL %', v: fb ? ug/fb : 0, i: 'award', c: 'emerald', d: 'Resultado neto final disponible por cada peso vendido.', f: '(Utilidad Global / Ingreso Neto)' }
         ];
 
         document.getElementById('micro-kpis').innerHTML = indicators.map(ind => `
@@ -410,7 +411,7 @@
                     <h4 class="text-2xl font-black text-slate-900">${percF.format(ind.v)}</h4>
                 </div>
                 <div class="mt-4 pt-3 border-t border-slate-100">
-                    <p class="text-[8px] text-slate-400 font-bold uppercase mb-1">${ind.d}</p>
+                    <p class="text-[8px] text-slate-400 font-bold uppercase mb-1 line-clamp-1">${ind.d}</p>
                     <p class="text-[8px] text-brand-500 font-black tracking-wider uppercase">${ind.f}</p>
                 </div>
             </div>
@@ -470,14 +471,6 @@
        document.addEventListener('click', (e) => { const b = document.getElementById('btn-month-dropdown'); const m = document.getElementById('month-dropdown-menu'); if (b && m) { if (b.contains(e.target)) m.classList.toggle('hidden'); else if (!m.contains(e.target)) m.classList.add('hidden'); } });
     }
     
-    function renderGlosario() {
-      document.getElementById('glosario-grid').innerHTML = [
-        { t: 'Facturación Bruta', d: 'Ingreso Neto (Facturación Neta + Ts Total).' }, 
-        { t: 'Absorción Gastos', d: 'Qué porcentaje del Margen Bruto se consume en Gastos Fijos.' }, 
-        { t: 'ROA Operativo', d: 'Rentabilidad sobre los activos destinados a la operación.' }
-      ].map(i => `<div class="modern-card p-6 border-t-4 border-t-[#003A70]"><h4 class="font-black text-[#003A70] text-[10px] uppercase mb-2">${i.t}</h4><p class="text-[11px] text-slate-600 leading-relaxed font-medium">${i.d}</p></div>`).join('');
-    }
-
     window.clearData = async function() { localStorage.removeItem('rf_dashboard_data'); location.reload(); }
     window.onload = init;
   </script>
