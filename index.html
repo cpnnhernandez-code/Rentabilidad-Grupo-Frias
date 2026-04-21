@@ -146,12 +146,12 @@
             <div class="h-[300px] sm:h-[400px] w-full"><canvas id="chart-waterfall"></canvas></div>
           </div>
           <div class="modern-card p-6 w-full shadow-lg">
-            <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6">Composición Detallada de Costos</h3>
+            <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6">Composición de Costos Operativos</h3>
             <div id="egresos-legend" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
           </div>
         </div>
 
-        <!-- Micro KPIs con Descripciones Detalladas -->
+        <!-- Micro KPIs -->
         <div id="micro-kpis" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
       </section>
 
@@ -216,20 +216,27 @@
 
     function norm(t) { return String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim(); }
     
-    // Mapeo específico para el archivo de Grupo Frías
+    // Mapeo Estricto para Grupo Frías
     const ALIASES = {
-        fb: ['ingreso neto (fact neta + ts total)'], // Ingreso Base
+        fb: ['ingreso neto (fact neta + ts total)'], // Cuenta de Ingreso Base
         ug: ['utilidad global'], // Utilidad Final
         mb: ['utilidad bruta'], // Margen Bruto
-        cop: ['costos totales'], // Egresos Operativos
+        cop: ['costos totales'], // Egresos Totales
         lab: ['salarios'], // Sueldos
-        tsd: ['ts dis'], // Trade Spend Distribución
-        neta: ['facturacion neta']
+        tsd: ['ts dis'] // Trade Spend Distribución
     };
+
+    // Whitelist de COSTOS (Solo estos aparecerán en el desglose de egresos)
+    const COST_WHITELIST = [
+        'salarios', 'gastos de personal', 'movilidad y viaticos', 
+        'juicios e indemnizaciones', 'honorarios', 'servicios tercerizados', 
+        'sistemas', 'servicios basicos', 'gastos oficina', 'comisiones', 
+        'tasas e impuestos', 'mantenimiento', 'impuesto debitos y creditos', 
+        'comision financiera', 'intereses'
+    ];
 
     function findAccount(key) {
         const terms = ALIASES[key] || [key];
-        // Búsqueda estricta por nombre exacto normalizado
         let found = state.accounts.find(a => terms.some(t => norm(a.name) === norm(t)));
         if (!found) found = state.accounts.find(a => terms.some(t => norm(a.name).includes(norm(t))));
         return found;
@@ -313,30 +320,29 @@
         </label>`).join('');
       document.getElementById('month-dropdown-text').innerText = validS.length === 0 ? "SELECCIONAR" : `${validS.length} MESES SELECC.`;
       
-      // Obtener objetos de cuenta específicos
+      // Totales para KPIs
       const accFb = findAccount('fb');
       const accUg = findAccount('ug');
       const accCop = findAccount('cop');
       const accMb = findAccount('mb');
 
-      // Calcular sumatorias basadas en la selección de meses
-      const fb = validS.reduce((s, m) => s + (accFb?.values[m] || 0), 0);
-      const ug = validS.reduce((s, m) => s + (accUg?.values[m] || 0), 0);
-      const cop = validS.reduce((s, m) => s + (accCop?.values[m] || 0), 0);
-      const mb = validS.reduce((s, m) => s + (accMb?.values[m] || 0), 0);
+      const fbValue = validS.reduce((s, m) => s + (accFb?.values[m] || 0), 0);
+      const ugValue = validS.reduce((s, m) => s + (accUg?.values[m] || 0), 0);
+      const copValue = validS.reduce((s, m) => s + (accCop?.values[m] || 0), 0);
+      const mbValue = validS.reduce((s, m) => s + (accMb?.values[m] || 0), 0);
       
-      document.getElementById('kpi-fb').innerText = currF.format(fb);
-      document.getElementById('kpi-mb').innerText = currF.format(mb);
-      document.getElementById('kpi-cop').innerText = currF.format(cop);
-      document.getElementById('kpi-ug').innerText = currF.format(ug);
+      document.getElementById('kpi-fb').innerText = currF.format(fbValue);
+      document.getElementById('kpi-mb').innerText = currF.format(mbValue);
+      document.getElementById('kpi-cop').innerText = currF.format(copValue);
+      document.getElementById('kpi-ug').innerText = currF.format(ugValue);
       
-      // Rentabilidad Crítica (Badge de la tarjeta azul)
-      const rentabilidad = fb !== 0 ? (ug / fb) : 0;
+      // RENTABILIDAD (Utilidad / Ingreso Neto)
+      const rentabilidad = fbValue !== 0 ? (ugValue / fbValue) : 0;
       document.getElementById('kpi-margen-pct').innerText = percF.format(rentabilidad);
       
-      renderCharts(fb, mb, ug, cop, mInY, validS);
+      renderCharts(fbValue, mbValue, ugValue, copValue, mInY, validS);
       renderTable(mInY, validS);
-      renderMicro(fb, mb, ug, cop, validS);
+      renderMicro(fbValue, mbValue, ugValue, copValue, validS);
       lucide.createIcons();
     }
 
@@ -365,12 +371,11 @@
           options: { responsive: true, maintainAspectRatio: false }
       });
 
-      // FILTRO DE EGRESOS: Solo costos reales, nada de ingresos o totales
+      // DESGLOSE DE COSTOS (WHITELIST ESTRICTA)
       const list = state.accounts.filter(a => {
         const n = norm(a.name);
-        const aExcluir = ['ingreso', 'facturacion', 'utilidad', 'margen', 'cmv', 'conceptos', 'ts total'];
-        return !aExcluir.some(ex => n.includes(ex));
-      }).map(a => ({ n: a.name, v: validS.reduce((s,m)=>s+(a.values[m]||0),0) })).sort((a,b)=>b.v-a.v).slice(0,12);
+        return COST_WHITELIST.some(w => n === w || n.includes(w));
+      }).map(a => ({ n: a.name, v: validS.reduce((s,m)=>s+(a.values[m]||0),0) })).sort((a,b)=>b.v-a.v);
       
       const totC = list.reduce((s,x)=>s+Math.abs(x.v), 0);
       document.getElementById('egresos-legend').innerHTML = list.map((c, i) => `
@@ -379,7 +384,7 @@
                 <span class="w-3 h-3 rounded-full mt-0.5 shrink-0" style="background-color: ${dotColors[i % 10]}"></span>
                 <div class="flex flex-col min-w-0">
                     <span class="text-[9px] font-black uppercase text-slate-800 truncate">${c.n}</span>
-                    <span class="text-[8px] text-slate-400 font-bold">${totC ? (Math.abs(c.v)/totC*100).toFixed(1) : 0}% DEL TOTAL</span>
+                    <span class="text-[8px] text-slate-400 font-bold">${totC ? (Math.abs(c.v)/totC*100).toFixed(1) : 0}% DEL DESGLOSE</span>
                 </div>
             </div>
             <span class="text-[10px] font-black text-[#003A70]">${currF.format(c.v)}</span>
@@ -471,6 +476,14 @@
        document.addEventListener('click', (e) => { const b = document.getElementById('btn-month-dropdown'); const m = document.getElementById('month-dropdown-menu'); if (b && m) { if (b.contains(e.target)) m.classList.toggle('hidden'); else if (!m.contains(e.target)) m.classList.add('hidden'); } });
     }
     
+    function renderGlosario() {
+      document.getElementById('glosario-grid').innerHTML = [
+        { t: 'Ingreso Neto', d: 'Monto total facturado incluyendo los conceptos de Trade Spend.' }, 
+        { t: 'Utilidad Bruta', d: 'Resultado directo del negocio antes de descontar los gastos operativos.' }, 
+        { t: 'ROA Operativo', d: 'Rentabilidad obtenida sobre los activos destinados a la operación.' }
+      ].map(i => `<div class="modern-card p-6 border-t-4 border-t-[#003A70]"><h4 class="font-black text-[#003A70] text-[10px] uppercase mb-2">${i.t}</h4><p class="text-[11px] text-slate-600 leading-relaxed font-medium">${i.d}</p></div>`).join('');
+    }
+
     window.clearData = async function() { localStorage.removeItem('rf_dashboard_data'); location.reload(); }
     window.onload = init;
   </script>
