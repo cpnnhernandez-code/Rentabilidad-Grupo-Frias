@@ -119,13 +119,13 @@
             </button>
             <div id="month-dropdown-menu" class="hidden absolute left-0 z-50 w-full mt-2 origin-top-left bg-white border border-slate-200 rounded-xl shadow-2xl max-h-[350px] overflow-y-auto custom-scrollbar">
                <div class="p-2 border-b border-slate-100 flex flex-col gap-1 bg-slate-50 rounded-t-xl">
-                   <button onclick="window.selectAllMonths()" class="text-left px-3 py-2 text-[10px] font-black text-brand-700 hover:bg-brand-100 rounded-lg transition uppercase">✓ Todos los meses</button>
+                   <button onclick="window.selectAllMonths()" class="text-left px-3 py-2 text-[10px] font-black text-brand-700 hover:bg-brand-100 rounded-lg transition uppercase">✓ Seleccionar Todos</button>
                    <button onclick="window.deselectAllMonths()" class="text-left px-3 py-2 text-[10px] font-black text-slate-500 hover:bg-slate-200 rounded-lg transition uppercase">✗ Limpiar</button>
                </div>
                <div class="p-2 flex flex-col gap-0.5" id="month-options"></div>
             </div>
           </div>
-          <button onclick="window.selectLastMonth()" class="shrink-0 ml-auto text-[10px] font-black text-brand-700 bg-brand-100 px-3 py-2 rounded-lg transition hover:bg-brand-200 hidden sm:block uppercase">Último Dato</button>
+          <button onclick="window.selectLastMonth()" class="shrink-0 ml-auto text-[10px] font-black text-brand-700 bg-brand-100 px-3 py-2 rounded-lg transition hover:bg-brand-200 hidden sm:block uppercase">Último Mes</button>
         </div>
       </div>
 
@@ -135,19 +135,19 @@
           <div class="modern-card p-6 border-b-4 border-b-brand-400"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Facturación Bruta</p><h3 id="kpi-fb" class="text-2xl sm:text-3xl font-[900] tracking-tighter text-slate-900">$0</h3></div>
           <div class="modern-card p-6 border-b-4 border-b-emerald-400"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Margen Bruto</p><h3 id="kpi-mb" class="text-2xl sm:text-3xl font-[900] tracking-tighter text-slate-900">$0</h3></div>
           <div class="modern-card p-6 border-b-4 border-b-rose-400"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Costos Op.</p><h3 id="kpi-cop" class="text-2xl sm:text-3xl font-[900] tracking-tighter text-slate-900">$0</h3></div>
-          <div class="modern-card p-6 bg-[#002855] text-white">
+          <div class="modern-card p-6 bg-[#002855] text-white shadow-xl shadow-black/20">
             <div class="flex items-center justify-between mb-1"><p class="text-[10px] font-bold text-blue-300 uppercase tracking-widest">Utilidad Global</p><span id="kpi-margen-pct" class="text-[10px] font-black px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">0%</span></div>
             <h3 id="kpi-ug" class="text-2xl sm:text-3xl font-[900] tracking-tighter text-white">$0</h3>
           </div>
         </div>
 
         <div class="flex flex-col gap-6">
-          <div class="modern-card p-6 w-full">
-            <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6">Cascada de Rentabilidad (Puente)</h3>
+          <div class="modern-card p-6 w-full shadow-lg">
+            <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6">Cascada de Rentabilidad</h3>
             <div class="h-[300px] sm:h-[400px] w-full"><canvas id="chart-waterfall"></canvas></div>
           </div>
-          <div class="modern-card p-6 w-full">
-            <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6">Desglose de Costos Operativos</h3>
+          <div class="modern-card p-6 w-full shadow-lg">
+            <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6">Composición de Egresos</h3>
             <div id="egresos-legend" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
           </div>
         </div>
@@ -157,19 +157,19 @@
 
       <!-- ACUMULADO -->
       <section id="content-acumulado" class="tab-content space-y-6">
-        <div class="modern-card p-6">
+        <div class="modern-card p-6 shadow-lg">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 relative z-20">
-              <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest">Evolución <span id="trend-year-label"></span></h3>
+              <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest">Tendencia Mensual <span id="trend-year-label"></span></h3>
               <div class="relative inline-block text-left w-full sm:w-72">
                 <button id="btn-metric-dropdown" class="flex items-center justify-between w-full px-4 py-2.5 text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded-xl shadow-sm hover:bg-slate-50 transition">
-                   <span>Métricas de Tendencia</span> <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
+                   <span>Métricas a comparar</span> <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
                 </button>
                 <div id="metric-dropdown-menu" class="hidden absolute right-0 z-50 w-full mt-2 bg-white border border-slate-200 rounded-xl shadow-xl max-h-[300px] overflow-y-auto custom-scrollbar">
                    <div class="p-2 flex flex-col gap-0.5" id="metric-options"></div>
                 </div>
               </div>
           </div>
-          <div class="h-[300px] sm:h-[450px] relative z-10"><canvas id="chart-anual"></canvas></div>
+          <div class="h-[350px] sm:h-[450px] relative z-10"><canvas id="chart-anual"></canvas></div>
         </div>
       </section>
 
@@ -178,7 +178,7 @@
         <div class="modern-card p-8 bg-[#002855] text-white flex flex-col md:flex-row justify-between items-center gap-6 shadow-xl border-white/10">
           <div class="text-center md:text-left">
             <h2 class="text-2xl font-black uppercase tracking-tight mb-2">Simulador de Metas</h2>
-            <p class="text-blue-200 text-sm font-medium text-balance">Define tu utilidad deseada y proyecta las ventas necesarias.</p>
+            <p class="text-blue-200 text-sm font-medium">Proyecta la facturación necesaria para alcanzar tu objetivo de utilidad.</p>
           </div>
           <button onclick="window.exportSimuladorPDF()" class="px-6 py-3 bg-white text-[#003A70] hover:bg-blue-50 font-black transition shadow-lg rounded-xl uppercase text-xs">
             Descargar PDF
@@ -186,28 +186,27 @@
         </div>
         <div id="sim-area" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div class="lg:col-span-2 space-y-6">
-            <div class="modern-card p-6 border-t-4 border-t-emerald-500">
-              <h3 class="text-[10px] font-black uppercase mb-6 tracking-widest">1. Parámetros de Simulación</h3>
+            <div class="modern-card p-6 border-t-4 border-t-emerald-500 shadow-md">
+              <h3 class="text-[10px] font-black uppercase mb-6 tracking-widest">1. Variables de Meta</h3>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5">Utilidad Global Meta ($)</label><div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span><input type="number" id="sim-meta" class="w-full border rounded-xl h-11 pl-7 pr-3 font-black bg-slate-50 outline-none" oninput="window.calcSim()"></div></div>
-                <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5">Margen Bruto Estimado (%)</label><div class="relative"><span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">%</span><input type="number" id="sim-mb-pct" class="w-full border rounded-xl h-11 pl-3 pr-12 font-black bg-slate-50 outline-none" oninput="window.calcSim()"></div></div>
-                <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5">Comisión Financiera ($)</label><div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span><input type="number" id="sim-com" class="w-full border rounded-xl h-11 pl-7 pr-12 font-black bg-slate-50 outline-none" oninput="window.calcSim()"></div></div>
+                <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5">Utilidad Deseada ($)</label><div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span><input type="number" id="sim-meta" class="w-full border rounded-xl h-11 pl-7 pr-3 font-black bg-slate-50 outline-none" oninput="window.calcSim()"></div></div>
+                <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5">Margen Bruto (%)</label><div class="relative"><span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">%</span><input type="number" id="sim-mb-pct" class="w-full border rounded-xl h-11 pl-3 pr-12 font-black bg-slate-50 outline-none" oninput="window.calcSim()"></div></div>
               </div>
             </div>
-            <div class="modern-card p-6 border-t-4 border-t-rose-500">
-              <h3 class="text-[10px] font-black uppercase mb-6 flex justify-between">2. Gastos de Estructura <button onclick="window.resetSim()" class="text-[8px] bg-slate-100 px-2 py-1 rounded">Reset</button></h3>
+            <div class="modern-card p-6 border-t-4 border-t-rose-500 shadow-md">
+              <h3 class="text-[10px] font-black uppercase mb-6 flex justify-between">2. Ajuste de Gastos Operativos <button onclick="window.resetSim()" class="text-[8px] bg-slate-100 px-2 py-1 rounded">Resetear</button></h3>
               <div id="sim-costs-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
             </div>
           </div>
           <div class="lg:col-span-1">
-            <div class="modern-card p-6 bg-brand-50 border-brand-200 sticky top-24">
-              <h4 class="text-[10px] font-black uppercase text-brand-800 mb-6">Resultado Proyectado</h4>
+            <div class="modern-card p-6 bg-brand-50 border-brand-200 sticky top-24 shadow-xl">
+              <h4 class="text-[10px] font-black uppercase text-brand-800 mb-6">Venta Objetivo</h4>
               <p class="text-[10px] font-bold text-slate-500 mb-1 uppercase">Facturación Bruta Req.:</p>
               <h2 id="res-fb" class="text-3xl font-[900] text-brand-700 mb-6">$0</h2>
               <div class="space-y-3 pt-4 border-t border-brand-100 text-[10px] font-black uppercase">
                 <div class="flex justify-between"><span>Margen Bruto</span><span id="res-mb">$0</span></div>
                 <div class="flex justify-between"><span>Gastos Fijos</span><span id="res-cop" class="text-rose-600">$0</span></div>
-                <div class="flex justify-between pt-2 border-t font-black"><span>Utilidad Meta</span><span id="res-ug" class="text-emerald-600">$0</span></div>
+                <div class="flex justify-between pt-2 border-t font-black"><span>Utilidad Final</span><span id="res-ug" class="text-emerald-600">$0</span></div>
               </div>
             </div>
           </div>
@@ -220,13 +219,13 @@
       </section>
 
       <!-- TABLE -->
-      <section id="table-container" class="modern-card overflow-hidden mt-8">
+      <section id="table-container" class="modern-card overflow-hidden mt-8 shadow-lg">
         <div class="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
-            <h3 class="text-[10px] font-black uppercase text-slate-800">P&L Mensual Detallado</h3>
-            <button onclick="window.exportCSV()" class="text-[10px] font-black text-slate-600 bg-white border px-4 py-2 rounded-xl">CSV</button>
+            <h3 class="text-[10px] font-black uppercase text-slate-800 tracking-wider">Estado de Resultados Detallado</h3>
+            <button onclick="window.exportCSV()" class="text-[10px] font-black text-slate-600 bg-white border border-slate-200 px-4 py-2 rounded-xl">EXPORTAR CSV</button>
         </div>
         <div class="overflow-x-auto custom-scrollbar">
-          <table class="w-full text-left text-xs whitespace-nowrap min-w-[800px]">
+          <table class="w-full text-left text-[11px] whitespace-nowrap min-w-[800px]">
             <thead><tr id="table-head" class="bg-slate-100 text-slate-500 font-black uppercase tracking-widest"></tr></thead>
             <tbody id="table-body" class="divide-y divide-slate-100 font-medium text-slate-600"></tbody>
           </table>
@@ -254,24 +253,29 @@
     };
     let charts = {};
 
-    // --- IDENTIFICADOR INTELIGENTE DE CUENTAS (CON ALIAS) ---
-    function norm(t) { return String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim(); }
+    // --- IDENTIFICADOR ULTRA-FLEXIBLE DE CUENTAS ---
+    function norm(t) { 
+        return String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim(); 
+    }
     
     const ALIASES = {
-        neta: ['facturacion neta', 'neta fact', 'venta neta', 'fact neta'],
-        tscmq: ['ts cmq', 'trade spend cmq'],
-        tsdis: ['ts dis comercial', 'ts distri', 'ts distribucion', 'trade spend distri'],
-        tswsc: ['ts wsc', 'trade spend wsc'],
-        cmv: ['cmv', 'costo mercaderia', 'costo de venta'],
-        ug: ['utilidad global', 'utilidad neta final', 'resultado neto'],
-        mb: ['margen bruto', 'm. bruto']
+        neta: ['facturacion neta', 'neta fact', 'venta neta', 'ingresos netos', 'neta'],
+        tscmq: ['ts cmq', 'trade spend cmq', 'tscmq'],
+        tsdis: ['ts dis comercial', 'ts distri', 'ts distribucion', 'trade spend comercial', 'ts comercial'],
+        tswsc: ['ts wsc', 'trade spend wsc', 'tswsc'],
+        cmv: ['cmv', 'costo mercaderia', 'costo mercaderias', 'costo de venta', 'costo de mercaderia vendida', 'costos variables'],
+        ug: ['utilidad global', 'utilidad neta final', 'resultado neto', 'utilidad del ejercicio', 'utilidad neta'],
+        mb: ['margen bruto', 'm. bruto', 'utilidad bruta']
     };
 
     function findAccount(key) {
         const searchTerms = ALIASES[key] || [key];
         return state.accounts.find(a => {
-            const normalizedName = norm(a.name);
-            return searchTerms.some(term => normalizedName === norm(term) || normalizedName.includes(norm(term)));
+            const rowName = norm(a.name);
+            return searchTerms.some(term => {
+                const nTerm = norm(term);
+                return rowName === nTerm || rowName.includes(nTerm);
+            });
         });
     }
 
@@ -281,7 +285,36 @@
         return ms.reduce((sum, m) => sum + (parseFloat(a.values[m]) || 0), 0);
     }
 
-    // --- LOGICA DE CALCULOS CORREGIDA ---
+    // --- LIMPIADOR DE NÚMEROS (MANEJA PARÉNTESIS Y COMAS ARGENTINAS) ---
+    function cleanNumber(val) {
+        if (val === null || val === undefined || val === '') return 0;
+        if (typeof val === 'number') return val;
+        
+        let s = String(val).trim();
+        let negative = false;
+        
+        // Detectar si es negativo por paréntesis: (1.200)
+        if (s.startsWith('(') && s.endsWith(')')) { negative = true; s = s.slice(1, -1); }
+        if (s.startsWith('-')) { negative = true; s = s.slice(1); }
+        
+        // Formato Arg: 1.234,56 -> Quitar puntos, cambiar coma por punto
+        const dotCount = (s.match(/\./g) || []).length;
+        const commaCount = (s.match(/,/g) || []).length;
+        
+        if (commaCount > 0 && dotCount > 0) {
+            if (s.lastIndexOf(',') > s.lastIndexOf('.')) s = s.replace(/\./g, '').replace(',', '.'); // Arg
+            else s = s.replace(/,/g, ''); // US
+        } else if (commaCount === 1) {
+            s = s.replace(',', '.');
+        } else if (dotCount > 1) {
+            s = s.replace(/\./g, '');
+        }
+        
+        const num = parseFloat(s.replace(/[^0-9.]/g, '')) || 0;
+        return negative ? -num : num;
+    }
+
+    // --- LÓGICA DE CALCULOS ---
     function getMetrics(ms) {
       if(!ms.length) return { fb: 0, mb: 0, ug: 0, cop: 0, lab: 0, tsd: 0 };
       
@@ -292,31 +325,37 @@
       const cmv = getV('cmv', ms);
       const ug = getV('ug', ms);
       
+      // FB = Neta + CMQ + Distribución
       const fb = neta + tscmq + tsdis;
-      const mb = neta + tswsc + tscmq - cmv;
+      // MB = Neta + WSC + CMQ - CMV (O directamente el Margen Bruto del Excel)
+      const mbExcel = getV('mb', ms);
+      const mb = (mbExcel !== 0) ? mbExcel : (neta + tswsc + tscmq - Math.abs(cmv));
       
-      // Gastos Operativos (COP): Diferencia entre Margen Bruto y Utilidad Bruta
-      // Si no se encuentran las cabeceras, sumamos las cuentas entre MB y UB
+      // Costos Operativos (Cálculo dinámico basado en la posición de las filas)
+      let cop = 0;
       const iStart = state.accounts.findIndex(a => norm(a.name).includes('margen bruto'));
       const iEnd = state.accounts.findIndex(a => norm(a.name).includes('utilidad bruta'));
-      let cop = 0;
-      if(iStart !== -1 && iEnd !== -1) {
+      
+      if(iStart !== -1 && iEnd !== -1 && iEnd > iStart) {
           for(let i=iStart+1; i<iEnd; i++) {
               cop += ms.reduce((s, m) => s + (parseFloat(state.accounts[i].values[m]) || 0), 0);
           }
       } else {
-          // Fallback si no encuentra las líneas de totales
-          const copAccount = findAccount('costos operativos') || findAccount('gastos operativos');
-          cop = copAccount ? ms.reduce((s, m) => s + (parseFloat(copAccount.values[m]) || 0), 0) : 0;
+          // Fallback: busca una fila que se llame Costos Operativos o Gastos
+          const cAcc = findAccount('costos operativos') || findAccount('gastos operativos') || findAccount('gastos de estructura');
+          cop = cAcc ? ms.reduce((s, m) => s + (parseFloat(cAcc.values[m]) || 0), 0) : (mb - getV('utilidad bruta', ms));
       }
 
-      const lab = state.accounts.reduce((s, a) => (norm(a.name).includes('sueldo') || norm(a.name).includes('jornal') || norm(a.name).includes('salario')) ? s + ms.reduce((sum,m)=>sum+(parseFloat(a.values[m])||0),0) : s, 0);
-      const tsd = tsdis;
+      // Costo Laboral (Sueldos)
+      const lab = state.accounts.reduce((s, a) => {
+          const name = norm(a.name);
+          return (name.includes('sueldo') || name.includes('jornal') || name.includes('salario') || name.includes('cargas soc')) ? s + ms.reduce((sum,m)=>sum+(parseFloat(a.values[m])||0),0) : s;
+      }, 0);
       
-      return { fb, mb, ug, cop, lab, tsd, neta, tscmq, tswsc, cmv };
+      return { fb, mb, ug, cop: Math.abs(cop), lab, tsd: tsdis };
     }
 
-    // --- NUBE Y PERSISTENCIA ---
+    // --- PERSISTENCIA ---
     async function saveData() {
         const data = { months: state.months, accounts: state.accounts, manualInputs: state.manualInputs };
         localStorage.setItem('rf_dashboard_data', JSON.stringify(data));
@@ -331,8 +370,12 @@
            const local = JSON.parse(localStorage.getItem('rf_dashboard_data'));
            const source = (data && data.content) ? data.content : local;
            if (source && source.months?.length) {
-               state.months = source.months; state.accounts = source.accounts; state.manualInputs = source.manualInputs || { simCosts: {} };
-               state.loaded = true; renderMetricDropdown(); window.render();
+               state.months = source.months; 
+               state.accounts = source.accounts; 
+               state.manualInputs = source.manualInputs || { simCosts: {} };
+               state.loaded = true; 
+               renderMetricDropdown(); 
+               window.render();
            } else { window.render(); }
        } catch(e) { window.render(); }
     }
@@ -349,47 +392,23 @@
       r.readAsArrayBuffer(f);
     }
 
-    function cleanNumber(val) {
-        if (val === null || val === undefined) return 0;
-        if (typeof val === 'number') return val;
-        let s = String(val).trim();
-        if (!s) return 0;
-        // Detectamos formato: 1.234,56 o 1,234.56
-        const dotCount = (s.match(/\./g) || []).length;
-        const commaCount = (s.match(/,/g) || []).length;
-        
-        if (commaCount > 0 && dotCount > 0) {
-            // Caso 1.234,56 (Arg)
-            if (s.lastIndexOf(',') > s.lastIndexOf('.')) s = s.replace(/\./g, '').replace(',', '.');
-            // Caso 1,234.56 (US)
-            else s = s.replace(/,/g, '');
-        } else if (commaCount > 0) {
-            // Caso 1234,56 (Arg sin punto de miles)
-            s = s.replace(',', '.');
-        }
-        return parseFloat(s.replace(/[^0-9.-]/g, '')) || 0;
-    }
-
     function parseExcel(data) {
       let hr = -1; let ms = [];
       for(let i=0; i<Math.min(data.length, 30); i++) {
         const det = (data[i]||[]).map(c => detectM(c)).filter(Boolean);
         if(det.length >= 2) { hr = i; ms = (data[i]||[]).map(c => detectM(c)); break; }
       }
-      if(hr === -1) return alert("No se detectaron columnas de meses en el Excel.");
+      if(hr === -1) return alert("No se detectaron columnas de meses (Enero, Febrero...) en el Excel.");
       
       const newAccs = [];
       for(let i = hr+1; i < data.length; i++) {
         const n = String(data[i][0] || '').trim(); if(!n) continue;
         const vs = {}; 
-        ms.forEach((m, idx) => { 
-            if(!m) return; 
-            vs[m] = cleanNumber(data[i][idx]); 
-        });
+        ms.forEach((m, idx) => { if(!m) return; vs[m] = cleanNumber(data[i][idx]); });
         newAccs.push({ name: n, values: vs });
       }
       state.months = ms.filter(Boolean); state.accounts = newAccs; state.loaded = true;
-      state.selectedYear = String(state.months[0]).match(/\d{4}/)?.[0];
+      state.selectedYear = String(state.months[0]).match(/\d{4}/)?.[0] || new Date().getFullYear().toString();
       state.selected = [state.months[state.months.length-1]];
       saveData(); renderMetricDropdown(); window.render();
     }
@@ -419,20 +438,18 @@
             <span class="text-[10px] font-black text-slate-700 uppercase">${m.replace(/\d{4}/, '').trim()}</span>
         </label>`).join('');
 
-      document.getElementById('month-dropdown-text').innerText = validS.length === 0 ? "SELECCIONAR MESES" : (validS.length === mInY.length ? "TODO EL AÑO" : `${validS.length} MESES SELECC.`);
+      document.getElementById('month-dropdown-text').innerText = validS.length === 0 ? "SELECCIONAR" : (validS.length === mInY.length ? "TODO EL AÑO" : `${validS.length} MESES`);
       
-      const metrics = getMetrics(validS);
-      document.getElementById('kpi-fb').innerText = currF.format(metrics.fb);
-      document.getElementById('kpi-mb').innerText = currF.format(metrics.mb);
-      document.getElementById('kpi-cop').innerText = currF.format(metrics.cop);
-      document.getElementById('kpi-ug').innerText = currF.format(metrics.ug);
+      const m = getMetrics(validS);
+      document.getElementById('kpi-fb').innerText = currF.format(m.fb);
+      document.getElementById('kpi-mb').innerText = currF.format(m.mb);
+      document.getElementById('kpi-cop').innerText = currF.format(m.cop);
+      document.getElementById('kpi-ug').innerText = currF.format(m.ug);
+      document.getElementById('kpi-margen-pct').innerText = m.fb !== 0 ? percF.format(m.ug/m.fb) : '0%';
       
-      const marginPct = (metrics.fb !== 0) ? (metrics.ug / metrics.fb) : 0;
-      document.getElementById('kpi-margen-pct').innerText = percF.format(marginPct);
-      
-      renderCharts(metrics, mInY, validS);
+      renderCharts(m, mInY, validS);
       renderTable(mInY, validS);
-      renderMicro(metrics, validS);
+      renderMicro(m, validS);
       if(state.tab === 'simulador') initSim(mInY);
       renderGlosario();
       lucide.createIcons();
@@ -443,7 +460,7 @@
       charts.w = new Chart(document.getElementById('chart-waterfall').getContext('2d'), {
           type: 'bar',
           data: {
-              labels: ['FACT. BRUTA', 'CMV/ADJ', 'MARGEN BRUTO', 'COSTOS OP', 'UTILIDAD'],
+              labels: ['FACT. BRUTA', 'COSTOS VAR.', 'MARGEN BRUTO', 'COSTOS OP.', 'UTILIDAD'],
               datasets: [{
                   data: [[0, m.fb], [m.mb, m.fb], [0, m.mb], [m.mb - m.cop, m.mb], [0, m.ug]],
                   backgroundColor: ['#0055a5', '#f43f5e', '#0055a5', '#f43f5e', '#10b981'],
@@ -474,6 +491,7 @@
           options: { responsive: true, maintainAspectRatio: false }
       });
 
+      // Lista de egresos
       const iStart = state.accounts.findIndex(a => norm(a.name).includes('margen bruto'));
       const iEnd = state.accounts.findIndex(a => norm(a.name).includes('utilidad bruta'));
       let legendHtml = '';
@@ -481,8 +499,8 @@
           const list = state.accounts.slice(iStart+1, iEnd).map(a => ({ n: a.name, v: validS.reduce((s, m) => s + (parseFloat(a.values[m])||0), 0) })).sort((a,b)=>b.v-a.v);
           legendHtml = list.map((c, i) => `
             <div class="flex justify-between p-3 border rounded-xl bg-slate-50">
-                <span class="text-[10px] font-black uppercase text-slate-800 truncate">${c.n}</span>
-                <span class="text-[11px] font-black text-[#003A70]">${currF.format(c.v)}</span>
+                <span class="text-[9px] font-black uppercase text-slate-700 truncate">${c.n}</span>
+                <span class="text-[10px] font-black text-[#003A70]">${currF.format(c.v)}</span>
             </div>`).join('');
       }
       document.getElementById('egresos-legend').innerHTML = legendHtml || '<p class="text-xs text-slate-400">No se detectaron cuentas de gastos.</p>';
@@ -492,26 +510,22 @@
         const pvM = validS.length > 0 && state.months.indexOf(validS[0]) > 0 ? state.months[state.months.indexOf(validS[0])-1] : null;
         const p = pvM ? getMetrics([pvM]) : null;
         const rAct = state.manualInputs.roaActivos || 0;
-        
         const indicators = [
-            { l: 'MARGEN BRUTO %', v: m.fb !== 0 ? m.mb/m.fb : 0, pv: p ? (p.fb !== 0 ? p.mb/p.fb : 0) : 0, i: 'pie-chart' },
-            { l: 'COSTO LABORAL %', v: m.fb !== 0 ? m.lab/m.fb : 0, pv: p ? (p.fb !== 0 ? p.lab/p.fb : 0) : 0, i: 'users' },
-            { l: 'TS DISTRI %', v: m.fb !== 0 ? m.tsd/m.fb : 0, pv: p ? (p.fb !== 0 ? p.tsd/p.fb : 0) : 0, i: 'tag' },
-            { l: 'RENT. OPERATIVA %', v: m.fb !== 0 ? m.ug/m.fb : 0, pv: p ? (p.fb !== 0 ? p.ug/p.fb : 0) : 0, i: 'award' }
+            { l: 'MARGEN BRUTO %', v: m.fb !== 0 ? m.mb/m.fb : 0, pv: p ? (p.fb !== 0 ? p.mb/p.fb : 0) : 0 },
+            { l: 'COSTO LABORAL %', v: m.fb !== 0 ? m.lab/m.fb : 0, pv: p ? (p.fb !== 0 ? p.lab/p.fb : 0) : 0 },
+            { l: 'TS DISTRI %', v: m.fb !== 0 ? m.tsd/m.fb : 0, pv: p ? (p.fb !== 0 ? p.tsd/p.fb : 0) : 0 },
+            { l: 'RENT. OPERATIVA %', v: m.fb !== 0 ? m.ug/m.fb : 0, pv: p ? (p.fb !== 0 ? p.ug/p.fb : 0) : 0 }
         ];
-        
         document.getElementById('micro-kpis').innerHTML = indicators.map(ind => {
             const diff = p ? (ind.v - ind.pv) * 100 : 0;
-            const colorClass = diff >= 0 ? 'text-emerald-600' : 'text-rose-600';
-            return `<div class="modern-card p-5"><p class="text-[9px] font-black text-slate-500 uppercase">${ind.l}</p><h4 class="text-2xl font-black text-slate-900">${percF.format(ind.v)}</h4><p class="text-[10px] mt-2 font-bold ${colorClass}">${p ? (diff >= 0 ? '+' : '') + diff.toFixed(1) + '% vs ant.' : 'Sin datos prev.'}</p></div>`;
-        }).join('') + `<div class="modern-card p-5"><p class="text-[9px] font-black text-slate-500 uppercase">ROA OP.</p><h4 class="text-2xl font-black text-[#003A70]">${percF.format(rAct > 0 ? m.ug/rAct : 0)}</h4><input type="number" value="${rAct}" class="w-full mt-2 text-[10px] border p-1 rounded font-black text-right" oninput="window.updateROA(this.value)" placeholder="ACTIVOS"></div>`;
+            return `<div class="modern-card p-5"><p class="text-[9px] font-black text-slate-500 uppercase">${ind.l}</p><h4 class="text-2xl font-black text-slate-900">${percF.format(ind.v)}</h4><p class="text-[10px] mt-2 font-bold ${diff>=0?'text-emerald-600':'text-rose-600'}">${p ? (diff>=0?'+':'')+diff.toFixed(1)+'% vs ant.' : 'Sin historial'}</p></div>`;
+        }).join('') + `<div class="modern-card p-5"><p class="text-[9px] font-black text-slate-500 uppercase">ROA OPERATIVO</p><h4 class="text-2xl font-black text-[#003A70]">${percF.format(rAct > 0 ? m.ug/rAct : 0)}</h4><input type="number" value="${rAct}" class="w-full mt-2 text-[10px] border p-1 rounded font-black text-right" oninput="window.updateROA(this.value)" placeholder="ACTIVOS"></div>`;
     }
 
     function renderTable(mInY, validS) {
         const h = document.getElementById('table-head'); const b = document.getElementById('table-body');
         const cols = state.tab === 'periodo' ? validS : mInY;
-        if(!cols.length) { h.innerHTML = ''; b.innerHTML = ''; return; }
-        
+        if(!cols.length) return;
         h.innerHTML = `<th>CONCEPTO</th>` + cols.map(m=>`<th class="text-right">${m.replace(/\d{4}/,'')}</th>`).join('') + `<th class="text-right bg-blue-50 text-[#003A70]">TOTAL</th>`;
         b.innerHTML = state.accounts.map(acc => {
             const total = cols.reduce((s, m) => s + (parseFloat(acc.values[m])||0), 0);
@@ -520,25 +534,18 @@
     }
 
     function initSim(mInY) {
-      if(!mInY.length) return; 
-      const l = mInY[mInY.length-1]; 
-      const m = getMetrics([l]);
-      
+      if(!mInY.length) return; const l = mInY[mInY.length-1]; const m = getMetrics([l]);
       document.getElementById('sim-meta').value = state.manualInputs.simMeta || Math.round(m.ug * 1.15);
-      const mbP = (m.fb !== 0 ? (m.mb/m.fb*100) : 0).toFixed(2); 
-      document.getElementById('sim-mb-pct').value = state.manualInputs.simMbPct || mbP;
-      
-      const com = getV('comision financiera', [l]); 
-      document.getElementById('sim-com').value = state.manualInputs.simCom || com;
+      const mbP = (m.fb !== 0 ? (m.mb/m.fb*100) : 0).toFixed(2); document.getElementById('sim-mb-pct').value = state.manualInputs.simMbPct || mbP;
+      const com = getV('comision financiera', [l]); document.getElementById('sim-com').value = state.manualInputs.simCom || com;
       
       const iStart = state.accounts.findIndex(a => norm(a.name).includes('margen bruto'));
       const iEnd = state.accounts.findIndex(a => norm(a.name).includes('utilidad bruta'));
       if(iStart !== -1 && iEnd !== -1) {
           const costs = state.accounts.slice(iStart+1, iEnd);
           document.getElementById('sim-costs-grid').innerHTML = costs.map((c, i) => {
-              const n = norm(c.name); 
-              const v = state.manualInputs.simCosts[n] !== undefined ? state.manualInputs.simCosts[n] : (parseFloat(c.values[l])||0);
-              return `<div><label class="block text-[9px] font-bold text-slate-500 uppercase">${c.name}</label><input type="number" data-sim data-sim-name="${n}" value="${v}" data-original="${c.values[l]}" class="w-full border rounded-lg h-9 text-xs font-black p-2 outline-none focus:ring-1 focus:ring-brand-500" oninput="window.calcSim()"></div>`;
+              const n = norm(c.name); const v = state.manualInputs.simCosts[n] !== undefined ? state.manualInputs.simCosts[n] : (parseFloat(c.values[l])||0);
+              return `<div><label class="block text-[9px] font-bold text-slate-500 uppercase">${c.name}</label><input type="number" data-sim data-sim-name="${n}" value="${v}" data-original="${c.values[l]}" class="w-full border rounded-lg h-9 text-xs font-black p-2" oninput="window.calcSim()"></div>`;
           }).join('');
       }
       window.calcSim(true);
@@ -553,15 +560,8 @@
             const v = parseFloat(i.value) || 0; cSum += v;
             if(!skipSave) state.manualInputs.simCosts[i.dataset.simName] = v;
         });
-        if(!skipSave) { 
-            state.manualInputs.simMeta = meta; 
-            state.manualInputs.simMbPct = (mbPct*100); 
-            state.manualInputs.simCom = com; 
-            saveData(); 
-        }
-        const mbReq = meta + cSum - com; 
-        const fbReq = mbPct !== 0 ? mbReq / mbPct : 0;
-        
+        if(!skipSave) { state.manualInputs.simMeta = meta; state.manualInputs.simMbPct = (mbPct*100); state.manualInputs.simCom = com; saveData(); }
+        const mbReq = meta + cSum - com; const fbReq = mbPct !== 0 ? mbReq / mbPct : 0;
         document.getElementById('res-fb').innerText = currF.format(fbReq);
         document.getElementById('res-mb').innerText = currF.format(mbReq);
         document.getElementById('res-cop').innerText = currF.format(cSum);
@@ -590,15 +590,22 @@
             <span class="text-xs font-bold text-slate-700 truncate uppercase">${o}</span>
         </label>`).join('');
     }
-    
-    window.toggleAnnualMetric = function(m) {
-      if (state.annualMetrics.includes(m)) {
-          if (state.annualMetrics.length > 1) state.annualMetrics = state.annualMetrics.filter(x => x !== m);
-      } else {
-          state.annualMetrics.push(m);
-      }
-      renderMetricDropdown();
-      window.render();
+
+    function renderGlosario() {
+      document.getElementById('glosario-grid').innerHTML = [
+        { t: 'Facturación Bruta', d: 'Suma de Facturación Neta + TS CMQ + TS Distribución.' }, 
+        { t: 'Margen Bruto', d: 'Ingresos netos tras descontar el costo de la mercadería vendida.' }, 
+        { t: 'Utilidad Global', d: 'Resultado neto final de la operación tras gastos y financieros.' }, 
+        { t: 'ROA Operativo', d: 'Retorno sobre Activos operativos (Utilidad / Activos).' }
+      ].map(i => `<div class="modern-card p-6 border-t-4 border-t-[#003A70]"><h4 class="font-black text-[#003A70] text-[10px] uppercase mb-2">${i.t}</h4><p class="text-[11px] text-slate-600 leading-relaxed font-medium">${i.d}</p></div>`).join('');
+    }
+
+    window.clearData = async function() {
+        if(confirm("¿Estás seguro de borrar todo?")) {
+            localStorage.removeItem('rf_dashboard_data');
+            if(supabase) await supabase.from('dashboard').delete().eq('id', 'main');
+            location.reload();
+        }
     }
 
     window.onload = init;
