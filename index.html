@@ -142,12 +142,12 @@
         </div>
 
         <div class="flex flex-col gap-6">
-          <div class="modern-card p-6 w-full">
+          <div class="modern-card p-6 w-full shadow-lg">
             <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6">Cascada de Rentabilidad</h3>
             <div class="h-[300px] sm:h-[400px] w-full"><canvas id="chart-waterfall"></canvas></div>
           </div>
-          <div class="modern-card p-6 w-full">
-            <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6">Desglose de Egresos</h3>
+          <div class="modern-card p-6 w-full shadow-lg">
+            <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6">Desglose de Egresos (Principales)</h3>
             <div id="egresos-legend" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
           </div>
         </div>
@@ -159,7 +159,7 @@
       <section id="content-acumulado" class="tab-content space-y-6">
         <div class="modern-card p-6">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 relative z-20">
-              <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest">Evolución <span id="trend-year-label"></span></h3>
+              <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest">Evolución Anual <span id="trend-year-label"></span></h3>
               <div class="relative inline-block text-left w-full sm:w-72">
                 <button id="btn-metric-dropdown" class="flex items-center justify-between w-full px-4 py-2.5 text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded-xl shadow-sm hover:bg-slate-50 transition">
                    <span>Métricas de Tendencia</span> <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
@@ -185,9 +185,8 @@
           </button>
         </div>
         <div id="sim-area" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <!-- El simulador usa la misma lógica de cálculo dinámico -->
           <div class="lg:col-span-2 space-y-6">
-            <div class="modern-card p-6 border-t-4 border-t-emerald-500">
+            <div class="modern-card p-6 border-t-4 border-t-emerald-500 shadow-md">
               <h3 class="text-[10px] font-black uppercase mb-6 tracking-widest">1. Parámetros de Simulación</h3>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5">Meta Utilidad Global ($)</label><div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span><input type="number" id="sim-meta" class="w-full border rounded-xl h-11 pl-7 pr-3 font-black bg-slate-50 outline-none" oninput="window.calcSim()"></div></div>
@@ -196,13 +195,13 @@
             </div>
           </div>
           <div class="lg:col-span-1">
-            <div class="modern-card p-6 bg-brand-50 border-brand-200 sticky top-24">
+            <div class="modern-card p-6 bg-brand-50 border-brand-200 sticky top-24 shadow-xl">
               <h4 class="text-[10px] font-black uppercase text-brand-800 mb-6">Resultado Proyectado</h4>
               <p class="text-[10px] font-bold text-slate-500 mb-1 uppercase">Facturación Bruta Req.:</p>
               <h2 id="res-fb" class="text-3xl font-[900] text-brand-700 mb-6">$0</h2>
               <div class="space-y-3 pt-4 border-t border-brand-100 text-[10px] font-black uppercase">
                 <div class="flex justify-between"><span>Margen Bruto</span><span id="res-mb">$0</span></div>
-                <div class="flex justify-between font-black"><span>Utilidad Meta</span><span id="res-ug" class="text-emerald-600">$0</span></div>
+                <div class="flex justify-between pt-2 border-t font-black"><span>Utilidad Meta</span><span id="res-ug" class="text-emerald-600">$0</span></div>
               </div>
             </div>
           </div>
@@ -217,8 +216,8 @@
       <!-- TABLE -->
       <section id="table-container" class="modern-card overflow-hidden mt-8 shadow-lg">
         <div class="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
-            <h3 class="text-[10px] font-black uppercase text-slate-800">Planilla Mensual</h3>
-            <button onclick="window.exportCSV()" class="text-[10px] font-black text-slate-600 bg-white border px-4 py-2 rounded-xl">CSV</button>
+            <h3 class="text-[10px] font-black uppercase text-slate-800 tracking-wider">Estado de Resultados Detallado</h3>
+            <button onclick="window.exportCSV()" class="text-[10px] font-black text-slate-600 bg-white border border-slate-200 px-4 py-2 rounded-xl">CSV</button>
         </div>
         <div class="overflow-x-auto custom-scrollbar">
           <table class="w-full text-left text-[11px] whitespace-nowrap min-w-[800px]">
@@ -245,19 +244,22 @@
     let state = { 
         loaded: false, months: [], accounts: [], selected: [], tab: 'periodo', 
         annualMetrics: ['Facturación Bruta', 'Utilidad Global'], 
-        selectedYear: null, manualInputs: { simCosts: {} } 
+        selectedYear: "2026", manualInputs: { simCosts: {} } 
     };
     let charts = {};
 
     function norm(t) { return String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim(); }
     
     const ALIASES = {
-        neta: ['facturacion neta', 'neta fact', 'venta neta', 'fact neta'],
         fb: ['ingreso neto (fact neta + ts total)', 'facturacion bruta', 'ingreso neto'],
-        tsdis: ['ts dis', 'ts distribucion', 'ts dis comercial'],
-        ug: ['utilidad global', 'utilidad neta', 'resultado del ejercicio', 'utilidad del ejercicio'],
+        neta: ['facturacion neta'],
+        tscmq: ['ts cmq'],
+        tsdis: ['ts dis'],
+        tswsc: ['ts wsc'],
+        cmv: ['cmv'],
+        ug: ['utilidad global', 'resultado neto', 'utilidad neta', 'resultado del ejercicio', 'utilidad del ejercicio'],
         mb: ['margen bruto', 'm. bruto'],
-        cop: ['costos totales', 'costos operativos', 'gastos de estructura'],
+        cop: ['costos totales', 'costos operativos', 'gastos operativos'],
         lab: ['salarios', 'sueldos', 'costo laboral']
     };
 
@@ -280,10 +282,10 @@
         if (typeof val === 'number') return val;
         let s = String(val).trim();
         let negative = s.includes('(') || s.includes('-');
-        // Caso Argentina: $1.200.000,50 -> Quitar $, quitar puntos, cambiar coma por punto
+        // Caso Argentina: $1.200.000,50 -> Quitar $, quitar puntos (miles), cambiar coma por punto (decimal)
         s = s.replace(/\$/g, '').replace(/\./g, '').replace(',', '.').replace(/[()]/g, '');
         const num = parseFloat(s) || 0;
-        return negative ? -num : num;
+        return negative ? -Math.abs(num) : num;
     }
 
     function getMetrics(ms) {
@@ -295,9 +297,9 @@
       const tsd = getV('tsdis', ms);
       const lab = getV('lab', ms);
       
-      // MB aproximado si no existe la fila Margen Bruto: FB - CMV (estimado)
+      // Si no existe Margen Bruto, estimamos: UG + COP
       const mbExcel = getV('mb', ms);
-      const mb = (mbExcel !== 0) ? mbExcel : (ug + cop); // Puentes: UG = MB - COP
+      const mb = (mbExcel !== 0) ? mbExcel : (ug + cop);
       
       return { fb, mb, ug, cop, lab, tsd };
     }
@@ -315,8 +317,17 @@
        const local = JSON.parse(localStorage.getItem('rf_dashboard_data'));
        const source = (data && data.content) ? data.content : local;
        if (source && source.months?.length) {
-           state.months = source.months; state.accounts = source.accounts; state.manualInputs = source.manualInputs || { simCosts: {} };
-           state.loaded = true; renderMetricDropdown(); window.render();
+           state.months = source.months; 
+           state.accounts = source.accounts; 
+           state.manualInputs = source.manualInputs || { simCosts: {} };
+           state.loaded = true; 
+           
+           // Detectar año por defecto
+           const years = [...new Set(state.months.map(m => String(m).match(/\d{4}/)?.[0] || "2026"))].sort();
+           state.selectedYear = years[years.length-1];
+           
+           renderMetricDropdown(); 
+           window.render();
        } else { window.render(); }
     }
 
@@ -325,34 +336,43 @@
       const r = new FileReader();
       r.onload = ev => { 
           const wb = XLSX.read(new Uint8Array(ev.target.result), { type: 'array' }); 
-          parseExcel(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: true }));
+          const sheetData = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: true });
+          parseExcel(sheetData);
       };
       r.readAsArrayBuffer(f);
     }
 
     function parseExcel(data) {
       let hr = -1; let ms = [];
+      // Buscamos la fila que tiene los meses (Enero, Febrero...)
       for(let i=0; i<Math.min(data.length, 30); i++) {
         const det = (data[i]||[]).map(c => detectM(c)).filter(Boolean);
         if(det.length >= 2) { hr = i; ms = (data[i]||[]).map(c => detectM(c)); break; }
       }
-      if(hr === -1) return alert("Error: No se detectaron los meses en la cabecera.");
+      
+      if(hr === -1) return alert("Error: No se encontró la cabecera de meses (ENERO, FEBRERO...) en el archivo.");
       
       const newAccs = [];
       for(let i = hr+1; i < data.length; i++) {
-        const n = String(data[i][0] || '').trim(); if(!n || n === 'CONCEPTOS') continue;
+        const n = String(data[i][0] || '').trim(); 
+        if(!n || n === 'CONCEPTOS') continue;
         const vs = {}; 
         ms.forEach((m, idx) => { if(!m) return; vs[m] = cleanNumber(data[i][idx]); });
         newAccs.push({ name: n, values: vs });
       }
-      state.months = ms.filter(Boolean); state.accounts = newAccs; state.loaded = true;
       
-      // Año dinámico si el Excel no lo trae
-      const yearInFile = String(state.months[0]).match(/\d{4}/);
-      state.selectedYear = yearInFile ? yearInFile[0] : "2026"; 
+      state.months = ms.filter(Boolean); 
+      state.accounts = newAccs; 
+      state.loaded = true;
+      
+      // Ajuste de año para filtro
+      const years = [...new Set(state.months.map(m => String(m).match(/\d{4}/)?.[0] || "2026"))].sort();
+      state.selectedYear = years[years.length-1];
       
       state.selected = [state.months[state.months.length-1]];
-      saveData(); renderMetricDropdown(); window.render();
+      saveData(); 
+      renderMetricDropdown(); 
+      window.render();
     }
 
     function detectM(c) {
@@ -361,7 +381,7 @@
       const s = norm(c); 
       for(let n of names) { 
           if(s.includes(n)) {
-              // Si no tiene año, le agregamos 2026 para el filtro interno
+              // Si el nombre no tiene año, forzamos 2026 para que el filtro interno funcione
               return String(c).trim().toUpperCase().includes('20') ? String(c).trim().toUpperCase() : `${String(c).trim().toUpperCase()} 2026`;
           } 
       } 
@@ -369,12 +389,19 @@
     }
 
     window.render = function() {
-      if (!state.months.length) { document.getElementById('dashboard-content').classList.add('hidden'); document.getElementById('empty-state').classList.remove('hidden'); return; }
-      document.getElementById('dashboard-content').classList.remove('hidden'); document.getElementById('empty-state').classList.add('hidden');
+      if (!state.months.length) { 
+          document.getElementById('dashboard-content').classList.add('hidden'); 
+          document.getElementById('empty-state').classList.remove('hidden'); 
+          return; 
+      }
+      document.getElementById('dashboard-content').classList.remove('hidden'); 
+      document.getElementById('empty-state').classList.add('hidden');
       
       const years = [...new Set(state.months.map(m => String(m).match(/\d{4}/)?.[0] || "2026"))].sort();
-      if(!state.selectedYear) state.selectedYear = years[years.length-1];
+      if(!state.selectedYear || !years.includes(state.selectedYear)) state.selectedYear = years[years.length-1];
+      
       document.getElementById('year-select').innerHTML = years.map(y => `<option value="${y}" ${y === state.selectedYear ? 'selected' : ''}>AÑO ${y}</option>`).join('');
+      document.getElementById('trend-year-label').innerText = `(${state.selectedYear})`;
       
       const mInY = state.months.filter(m => String(m).includes(state.selectedYear));
       const validS = state.selected.filter(m => mInY.includes(m));
@@ -407,7 +434,7 @@
       charts.w = new Chart(document.getElementById('chart-waterfall').getContext('2d'), {
           type: 'bar',
           data: {
-              labels: ['FACT. BRUTA', 'MARGEN BRUTO', 'GASTOS', 'UTILIDAD'],
+              labels: ['FACT. BRUTA', 'MARGEN BRUTO', 'GASTOS TOTALES', 'UTILIDAD'],
               datasets: [{
                   data: [[0, m.fb], [0, m.mb], [m.mb - m.cop, m.mb], [0, m.ug]],
                   backgroundColor: ['#0055a5', '#0055a5', '#f43f5e', '#10b981'],
@@ -426,8 +453,8 @@
                   label: mName.toUpperCase(),
                   data: mInY.map(mo => {
                       const met = getMetrics([mo]);
-                      if(norm(mName) === 'facturacion bruta') return met.fb;
-                      if(norm(mName) === 'utilidad global') return met.ug;
+                      if(norm(mName).includes('facturacion bruta')) return met.fb;
+                      if(norm(mName).includes('utilidad global')) return met.ug;
                       return getV(mName, [mo]);
                   }),
                   borderColor: dotColors[i % 10], borderWidth: 4, tension: 0.4
@@ -436,10 +463,9 @@
           options: { responsive: true, maintainAspectRatio: false }
       });
 
-      // Egresos (Filas que no son totales)
       const list = state.accounts.filter(a => {
           const n = norm(a.name);
-          return !n.includes('ingreso') && !n.includes('utilidad') && !n.includes('margen') && !n.includes('costos totales');
+          return !n.includes('ingreso neto') && !n.includes('utilidad') && !n.includes('margen') && !n.includes('costos totales') && !n.includes('conceptos');
       }).map(a => ({ n: a.name, v: validS.reduce((s, m) => s + (parseFloat(a.values[m])||0), 0) })).sort((a,b)=>b.v-a.v).slice(0, 15);
       
       document.getElementById('egresos-legend').innerHTML = list.map((c, i) => `
@@ -481,6 +507,7 @@
     window.changeYear = function(y) { state.selectedYear = y; window.render(); }
     window.selectLastMonth = function() { state.selected = [state.months[state.months.length-1]]; window.render(); }
     window.switchT = function(id) { state.tab = id; window.render(); }
+    
     function renderMetricDropdown() {
       document.getElementById('metric-options').innerHTML = ['Facturación Bruta', 'Utilidad Global', 'Salarios', 'Costos Totales'].map(o => `
         <label class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 cursor-pointer uppercase">
@@ -489,13 +516,15 @@
         </label>`).join('');
     }
     window.toggleAnnualMetric = function(m) { state.annualMetrics = state.annualMetrics.includes(m) ? state.annualMetrics.filter(x => x !== m) : [...state.annualMetrics, m]; window.render(); }
+    
     function renderGlosario() {
       document.getElementById('glosario-grid').innerHTML = [
-        { t: 'Facturación Bruta', d: 'Ingreso Neto (Neta + Ts Total).' }, 
-        { t: 'Margen Bruto', d: 'Ingresos netos descontando costos variables (Estimado MB = UG + COP).' }, 
-        { t: 'Costos Totales', d: 'Estructura de gastos operativos (Personal, Servicios, etc).' }
-      ].map(i => `<div class="modern-card p-6 border-t-4 border-t-[#003A70]"><h4 class="font-black text-[#003A70] text-[10px] uppercase mb-2">${i.t}</h4><p class="text-[11px] text-slate-600 leading-relaxed">${i.d}</p></div>`).join('');
+        { t: 'Facturación Bruta', d: 'Ingreso Neto (Facturación Neta + Ts Total).' }, 
+        { t: 'Costos Totales', d: 'Suma de todos los gastos operativos y salarios del mes.' }, 
+        { t: 'Utilidad Global', d: 'Resultado neto final de la operación.' }
+      ].map(i => `<div class="modern-card p-6 border-t-4 border-t-[#003A70]"><h4 class="font-black text-[#003A70] text-[10px] uppercase mb-2">${i.t}</h4><p class="text-[11px] text-slate-600 leading-relaxed font-medium">${i.d}</p></div>`).join('');
     }
+    
     window.clearData = async function() { localStorage.removeItem('rf_dashboard_data'); location.reload(); }
     window.onload = init;
   </script>
