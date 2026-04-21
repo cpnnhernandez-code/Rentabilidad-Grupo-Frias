@@ -128,12 +128,12 @@
 
       <section id="content-periodo" class="tab-content active space-y-6">
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
-          <div class="modern-card p-6 border-b-4 border-b-brand-400"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Facturación Bruta</p><h3 id="kpi-fb" class="text-2xl sm:text-3xl font-[900] tracking-tighter text-slate-900">$0</h3></div>
-          <div class="modern-card p-6 border-b-4 border-b-emerald-400"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Margen Bruto</p><h3 id="kpi-mb" class="text-2xl sm:text-3xl font-[900] tracking-tighter text-slate-900">$0</h3></div>
+          <div class="modern-card p-6 border-b-4 border-b-brand-400"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Ingreso Neto (Fact+TS)</p><h3 id="kpi-fb" class="text-2xl sm:text-3xl font-[900] tracking-tighter text-slate-900">$0</h3></div>
+          <div class="modern-card p-6 border-b-4 border-b-emerald-400"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Utilidad Bruta</p><h3 id="kpi-mb" class="text-2xl sm:text-3xl font-[900] tracking-tighter text-slate-900">$0</h3></div>
           <div class="modern-card p-6 border-b-4 border-b-rose-400"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Costos Totales</p><h3 id="kpi-cop" class="text-2xl sm:text-3xl font-[900] tracking-tighter text-slate-900">$0</h3></div>
           <div class="modern-card p-6 bg-[#002855] text-white shadow-xl">
             <div class="flex items-center justify-between mb-1">
-                <p class="text-[10px] font-bold text-blue-300 uppercase tracking-widest">Rentabilidad Final</p>
+                <p class="text-[10px] font-bold text-blue-300 uppercase tracking-widest">Rentabilidad Operativa</p>
                 <span id="kpi-margen-pct" class="text-[10px] font-black px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">0.0%</span>
             </div>
             <h3 id="kpi-ug" class="text-2xl sm:text-3xl font-[900] tracking-tighter text-white">$0</h3>
@@ -142,7 +142,7 @@
 
         <div class="flex flex-col gap-6">
           <div class="modern-card p-6 w-full shadow-lg">
-            <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6">Cascada de Rentabilidad</h3>
+            <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6">Cascada de Rentabilidad (P&L)</h3>
             <div class="h-[300px] sm:h-[400px] w-full"><canvas id="chart-waterfall"></canvas></div>
           </div>
           <div class="modern-card p-6 w-full shadow-lg">
@@ -151,6 +151,7 @@
           </div>
         </div>
 
+        <!-- Micro KPIs con Descripciones -->
         <div id="micro-kpis" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
       </section>
 
@@ -215,21 +216,22 @@
 
     function norm(t) { return String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim(); }
     
+    // Mapeo Estricto para Grupo Frías
     const ALIASES = {
-        fb: ['ingreso neto (fact neta + ts total)', 'facturacion bruta', 'ingreso neto'],
-        ug: ['utilidad global', 'resultado neto', 'utilidad neta', 'utilidad del ejercicio'],
-        mb: ['utilidad bruta', 'margen bruto', 'm. bruto'],
-        cop: ['costos totales', 'costos operativos', 'gastos'],
-        lab: ['salarios', 'sueldos', 'costo laboral'],
-        tsd: ['ts dis', 'ts distribucion', 'ts dis comercial'],
+        fb: ['ingreso neto (fact neta + ts total)'], // Cuenta principal de Ingresos
+        ug: ['utilidad global'], // Resultado Final
+        mb: ['utilidad bruta'], // Margen Bruto / Utilidad Bruta
+        cop: ['costos totales'], // Egresos Operativos Totales
+        lab: ['salarios'], // Sueldos
+        tsd: ['ts dis'], // Trade Spend Distribución
         neta: ['facturacion neta']
     };
 
     function findAccount(key) {
         const terms = ALIASES[key] || [key];
-        // Primero intentamos coincidencia exacta de algún término
+        // 1. Intentamos coincidencia exacta (normalizada)
         let found = state.accounts.find(a => terms.some(t => norm(a.name) === norm(t)));
-        // Si no, coincidencia parcial
+        // 2. Si no, coincidencia parcial contenida
         if (!found) found = state.accounts.find(a => terms.some(t => norm(a.name).includes(norm(t))));
         return found;
     }
@@ -239,7 +241,6 @@
         if (typeof val === 'number') return val;
         let s = String(val).trim();
         let neg = s.includes('(') || s.includes('-');
-        // Limpieza robusta: quitar $, quitar puntos de miles, cambiar coma por punto decimal
         s = s.replace(/\$/g, '').replace(/\./g, '').replace(',', '.').replace(/[()\-]/g, '');
         const n = parseFloat(s) || 0;
         return neg ? -n : n;
@@ -313,7 +314,7 @@
         </label>`).join('');
       document.getElementById('month-dropdown-text').innerText = validS.length === 0 ? "SELECCIONAR" : `${validS.length} MESES SELECC.`;
       
-      // Totales
+      // Cálculo de Totales
       const accFb = findAccount('fb');
       const accUg = findAccount('ug');
       const accCop = findAccount('cop');
@@ -322,15 +323,16 @@
       const fb = validS.reduce((s, m) => s + (accFb?.values[m] || 0), 0);
       const ug = validS.reduce((s, m) => s + (accUg?.values[m] || 0), 0);
       const cop = validS.reduce((s, m) => s + (accCop?.values[m] || 0), 0);
-      const mb = validS.reduce((s, m) => s + (accMb?.values[m] || 0), 0) || (ug + cop);
+      const mb = validS.reduce((s, m) => s + (accMb?.values[m] || 0), 0);
       
       document.getElementById('kpi-fb').innerText = currF.format(fb);
       document.getElementById('kpi-mb').innerText = currF.format(mb);
       document.getElementById('kpi-cop').innerText = currF.format(cop);
       document.getElementById('kpi-ug').innerText = currF.format(ug);
       
-      // Rentabilidad Badge
-      document.getElementById('kpi-margen-pct').innerText = fb ? percF.format(ug/fb) : '0.0%';
+      // Rentabilidad Final (Badge)
+      const rentabilidad = fb !== 0 ? (ug / fb) : 0;
+      document.getElementById('kpi-margen-pct').innerText = percF.format(rentabilidad);
       
       renderCharts(fb, mb, ug, cop, mInY, validS);
       renderTable(mInY, validS);
@@ -343,10 +345,10 @@
       charts.w = new Chart(document.getElementById('chart-waterfall').getContext('2d'), {
           type: 'bar',
           data: { 
-              labels: ['FACT. BRUTA', 'MARGEN BRUTO', 'GASTOS', 'UTILIDAD FINAL'], 
+              labels: ['ING. NETO', 'UTIL. BRUTA', 'EGRESOS', 'RESULTADO'], 
               datasets: [{ 
                   data: [[0, fb], [0, mb], [mb-cop, mb], [0, ug]], 
-                  backgroundColor: ['#0055a5', '#0055a5', '#f43f5e', '#10b981'], 
+                  backgroundColor: ['#0055a5', '#10b981', '#f43f5e', '#0055a5'], 
                   borderRadius: 8 
               }] 
           },
@@ -365,18 +367,18 @@
 
       const list = state.accounts.filter(a => {
         const n = norm(a.name);
-        const totals = ['ingreso', 'utilidad', 'margen', 'conceptos', 'costos totales', 'ts total'];
-        return !totals.some(t => n.includes(t));
+        const totals = ['ingreso neto', 'utilidad global', 'utilidad bruta', 'costos totales', 'conceptos'];
+        return !totals.some(t => n === t);
       }).map(a => ({ n: a.name, v: validS.reduce((s,m)=>s+(a.values[m]||0),0) })).sort((a,b)=>b.v-a.v).slice(0,12);
       
-      const totC = list.reduce((s,x)=>s+x.v, 0);
+      const totC = list.reduce((s,x)=>s+Math.abs(x.v), 0);
       document.getElementById('egresos-legend').innerHTML = list.map((c, i) => `
         <div class="flex justify-between p-3 border rounded-xl bg-slate-50">
             <div class="flex gap-2 min-w-0">
                 <span class="w-3 h-3 rounded-full mt-0.5 shrink-0" style="background-color: ${dotColors[i % 10]}"></span>
                 <div class="flex flex-col min-w-0">
                     <span class="text-[9px] font-black uppercase text-slate-800 truncate">${c.n}</span>
-                    <span class="text-[8px] text-slate-400 font-bold">${totC ? (c.v/totC*100).toFixed(1) : 0}% DEL TOTAL</span>
+                    <span class="text-[8px] text-slate-400 font-bold">${totC ? (Math.abs(c.v)/totC*100).toFixed(1) : 0}% DEL DESGLOSE</span>
                 </div>
             </div>
             <span class="text-[10px] font-black text-[#003A70]">${currF.format(c.v)}</span>
@@ -389,33 +391,44 @@
         const rAct = state.manualInputs?.roaActivos || 0;
 
         const indicators = [
-            { l: 'MARGEN BRUTO %', v: fb ? mb/fb : 0, i: 'pie-chart', c: 'indigo' },
-            { l: 'COSTO LABORAL %', v: fb ? lab/fb : 0, i: 'blue', c: 'blue' },
-            { l: 'TS DISTRI %', v: fb ? tsd/fb : 0, i: 'tag', c: 'amber' },
-            { l: 'ABSORCIÓN GASTOS', v: mb ? cop/mb : 0, i: 'layers', c: 'rose' },
-            { l: 'RENT. OPERATIVA %', v: fb ? ug/fb : 0, i: 'award', c: 'emerald' }
+            { l: 'MARGEN BRUTO %', v: fb ? mb/fb : 0, i: 'pie-chart', c: 'indigo', d: 'Peso de la Utilidad Bruta sobre los Ingresos Netos.', f: '(Utilidad Bruta / Ingreso Neto)' },
+            { l: 'COSTO LABORAL %', v: fb ? lab/fb : 0, i: 'users', c: 'blue', d: 'Impacto de salarios en la facturación total.', f: '(Salarios / Ingreso Neto)' },
+            { l: 'TS DISTRI %', v: fb ? tsd/fb : 0, i: 'tag', c: 'amber', d: 'Peso del Trade Spend de Distribución.', f: '(TS Dis / Ingreso Neto)' },
+            { l: 'ABSORCIÓN GASTOS', v: mb ? Math.abs(cop)/mb : 0, i: 'layers', c: 'rose', d: 'Qué % del Margen Bruto se consume en Costos Totales.', f: '(Costos Totales / Utilidad Bruta)' },
+            { l: 'RENTABILIDAD FINAL %', v: fb ? ug/fb : 0, i: 'award', c: 'emerald', d: 'Margen neto final disponible por cada peso vendido.', f: '(Utilidad Global / Ingreso Neto)' }
         ];
 
         document.getElementById('micro-kpis').innerHTML = indicators.map(ind => `
-            <div class="modern-card p-5 border-l-4 border-l-${ind.c}-500">
-                <div class="flex justify-between mb-2">
-                    <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">
-                        <i data-lucide="${ind.i === 'blue' ? 'users' : ind.i}" class="w-4 h-4"></i>
+            <div class="modern-card p-5 border-l-4 border-l-${ind.c}-500 flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between mb-2">
+                        <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">
+                            <i data-lucide="${ind.i}" class="w-4 h-4"></i>
+                        </div>
                     </div>
+                    <p class="text-[9px] font-black text-slate-500 uppercase mb-0.5">${ind.l}</p>
+                    <h4 class="text-2xl font-black text-slate-900">${percF.format(ind.v)}</h4>
                 </div>
-                <p class="text-[9px] font-black text-slate-500 uppercase mb-0.5">${ind.l}</p>
-                <h4 class="text-2xl font-black text-slate-900">${percF.format(ind.v)}</h4>
+                <div class="mt-4 pt-3 border-t border-slate-100">
+                    <p class="text-[8px] text-slate-400 font-bold uppercase mb-1">${ind.d}</p>
+                    <p class="text-[8px] text-brand-500 font-black tracking-wider uppercase">${ind.f}</p>
+                </div>
             </div>
         `).join('') + `
-            <div class="modern-card p-5 border-l-4 border-l-sky-500">
-                <div class="flex justify-between mb-2">
-                    <p class="text-[9px] font-black text-slate-500 uppercase">ROA OPERATIVO</p>
-                    <i data-lucide="building-2" class="w-4 h-4 text-sky-500"></i>
+            <div class="modern-card p-5 border-l-4 border-l-sky-500 flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between mb-2">
+                        <p class="text-[9px] font-black text-slate-500 uppercase">ROA OPERATIVO</p>
+                        <i data-lucide="building-2" class="w-4 h-4 text-sky-500"></i>
+                    </div>
+                    <h4 class="text-2xl font-black text-[#003A70]">${percF.format(rAct > 0 ? ug/rAct : 0)}</h4>
                 </div>
-                <h4 class="text-2xl font-black text-[#003A70]">${percF.format(rAct > 0 ? ug/rAct : 0)}</h4>
-                <div class="flex items-center gap-2 mt-2">
-                   <span class="text-[8px] font-black text-slate-400 uppercase">ACTIVOS:</span>
-                   <input type="number" value="${rAct}" class="w-24 px-2 py-0.5 text-[10px] border rounded font-black outline-none" oninput="window.updateROA(this.value)">
+                <div class="mt-4 pt-3 border-t border-slate-100">
+                    <p class="text-[8px] text-slate-400 font-bold uppercase mb-2">Rentabilidad sobre activos.</p>
+                    <div class="flex items-center gap-2">
+                       <span class="text-[8px] font-black text-slate-500 uppercase">ACTIVOS ($):</span>
+                       <input type="number" value="${rAct}" class="w-full px-2 py-0.5 text-[10px] border rounded font-black outline-none bg-slate-50" oninput="window.updateROA(this.value)">
+                    </div>
                 </div>
             </div>
         `;
