@@ -87,7 +87,7 @@
         <div class="w-24 h-24 bg-white/10 text-white rounded-full flex items-center justify-center mb-6 shadow-inner border border-white/20">
             <i data-lucide="bar-chart-2" class="w-12 h-12"></i>
         </div>
-        <h2 class="text-3xl font-black text-white mb-3 uppercase">Cargar información</h2>
+        <h2 class="text-3xl font-black text-white mb-3 uppercase tracking-tighter leading-tight">Cargar información</h2>
         <p class="text-blue-100 max-w-md mx-auto mb-8 text-sm font-medium">Sube el reporte mensual de rentabilidad para visualizar los indicadores.</p>
         <label for="file-upload-empty" class="cursor-pointer px-8 py-4 rounded-xl bg-white text-[#003A70] font-black hover:bg-blue-50 transition shadow-xl flex items-center gap-3 text-lg uppercase">
             <i data-lucide="upload-cloud" class="w-6 h-6"></i>
@@ -161,7 +161,7 @@
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 relative z-20">
               <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest">Evolución <span id="trend-year-label"></span></h3>
               <div class="relative inline-block text-left w-full sm:w-72">
-                <button id="btn-metric-dropdown" class="flex items-center justify-between w-full px-4 py-2.5 text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition">
+                <button id="btn-metric-dropdown" class="flex items-center justify-between w-full px-4 py-2.5 text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded-xl shadow-sm hover:bg-slate-50 transition">
                    <span>Métricas de Tendencia</span> <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
                 </button>
                 <div id="metric-dropdown-menu" class="hidden absolute right-0 z-50 w-full mt-2 bg-white border border-slate-200 rounded-xl shadow-xl max-h-[300px] overflow-y-auto custom-scrollbar">
@@ -178,7 +178,7 @@
         <div class="modern-card p-8 bg-[#002855] text-white flex flex-col md:flex-row justify-between items-center gap-6 shadow-xl border-white/10">
           <div class="text-center md:text-left">
             <h2 class="text-2xl font-black uppercase tracking-tight mb-2">Simulador de Metas</h2>
-            <p class="text-blue-200 text-sm font-medium">Define tu utilidad deseada y proyecta las ventas necesarias.</p>
+            <p class="text-blue-200 text-sm font-medium text-balance">Define tu utilidad deseada y proyecta las ventas necesarias.</p>
           </div>
           <button onclick="window.exportSimuladorPDF()" class="px-6 py-3 bg-white text-[#003A70] hover:bg-blue-50 font-black transition shadow-lg rounded-xl uppercase text-xs">
             Descargar PDF
@@ -254,16 +254,29 @@
     };
     let charts = {};
 
-    // --- IDENTIFICADOR INTELIGENTE DE CUENTAS ---
+    // --- IDENTIFICADOR INTELIGENTE DE CUENTAS (CON ALIAS) ---
     function norm(t) { return String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim(); }
     
-    function findAccount(searchName) {
-        const s = norm(searchName);
-        return state.accounts.find(a => norm(a.name) === s || norm(a.name).includes(s));
+    const ALIASES = {
+        neta: ['facturacion neta', 'neta fact', 'venta neta', 'fact neta'],
+        tscmq: ['ts cmq', 'trade spend cmq'],
+        tsdis: ['ts dis comercial', 'ts distri', 'ts distribucion', 'trade spend distri'],
+        tswsc: ['ts wsc', 'trade spend wsc'],
+        cmv: ['cmv', 'costo mercaderia', 'costo de venta'],
+        ug: ['utilidad global', 'utilidad neta final', 'resultado neto'],
+        mb: ['margen bruto', 'm. bruto']
+    };
+
+    function findAccount(key) {
+        const searchTerms = ALIASES[key] || [key];
+        return state.accounts.find(a => {
+            const normalizedName = norm(a.name);
+            return searchTerms.some(term => normalizedName === norm(term) || normalizedName.includes(norm(term)));
+        });
     }
 
-    function getV(accountName, ms) {
-        const a = findAccount(accountName);
+    function getV(accountKey, ms) {
+        const a = findAccount(accountKey);
         if (!a) return 0;
         return ms.reduce((sum, m) => sum + (parseFloat(a.values[m]) || 0), 0);
     }
@@ -272,19 +285,18 @@
     function getMetrics(ms) {
       if(!ms.length) return { fb: 0, mb: 0, ug: 0, cop: 0, lab: 0, tsd: 0 };
       
-      const neta = getV('Facturacion Neta', ms);
-      const tscmq = getV('TS CMQ', ms);
-      const tsdis = getV('TS Dis Comercial', ms);
-      const tswsc = getV('TS WSC', ms);
-      const cmv = getV('CMV', ms);
-      const ug = getV('Utilidad Global', ms);
+      const neta = getV('neta', ms);
+      const tscmq = getV('tscmq', ms);
+      const tsdis = getV('tsdis', ms);
+      const tswsc = getV('tswsc', ms);
+      const cmv = getV('cmv', ms);
+      const ug = getV('ug', ms);
       
-      // FB = Neta + TS CMQ + TS Distri
       const fb = neta + tscmq + tsdis;
-      // MB = Neta + TS WSC + TS CMQ - CMV
       const mb = neta + tswsc + tscmq - cmv;
       
-      // COP: Sumamos los gastos entre Margen Bruto y Utilidad Bruta
+      // Gastos Operativos (COP): Diferencia entre Margen Bruto y Utilidad Bruta
+      // Si no se encuentran las cabeceras, sumamos las cuentas entre MB y UB
       const iStart = state.accounts.findIndex(a => norm(a.name).includes('margen bruto'));
       const iEnd = state.accounts.findIndex(a => norm(a.name).includes('utilidad bruta'));
       let cop = 0;
@@ -293,7 +305,9 @@
               cop += ms.reduce((s, m) => s + (parseFloat(state.accounts[i].values[m]) || 0), 0);
           }
       } else {
-          cop = getV('Costos Operativos', ms);
+          // Fallback si no encuentra las líneas de totales
+          const copAccount = findAccount('costos operativos') || findAccount('gastos operativos');
+          cop = copAccount ? ms.reduce((s, m) => s + (parseFloat(copAccount.values[m]) || 0), 0) : 0;
       }
 
       const lab = state.accounts.reduce((s, a) => (norm(a.name).includes('sueldo') || norm(a.name).includes('jornal') || norm(a.name).includes('salario')) ? s + ms.reduce((sum,m)=>sum+(parseFloat(a.values[m])||0),0) : s, 0);
@@ -312,13 +326,15 @@
 
     async function init() {
        lucide.createIcons();
-       const { data } = await supabase.from('dashboard').select('content').eq('id', 'main').single();
-       const local = JSON.parse(localStorage.getItem('rf_dashboard_data'));
-       const source = (data && data.content) ? data.content : local;
-       if (source && source.months?.length) {
-           state.months = source.months; state.accounts = source.accounts; state.manualInputs = source.manualInputs || { simCosts: {} };
-           state.loaded = true; renderMetricDropdown(); window.render();
-       } else { window.render(); }
+       try {
+           const { data } = await supabase.from('dashboard').select('content').eq('id', 'main').single();
+           const local = JSON.parse(localStorage.getItem('rf_dashboard_data'));
+           const source = (data && data.content) ? data.content : local;
+           if (source && source.months?.length) {
+               state.months = source.months; state.accounts = source.accounts; state.manualInputs = source.manualInputs || { simCosts: {} };
+               state.loaded = true; renderMetricDropdown(); window.render();
+           } else { window.render(); }
+       } catch(e) { window.render(); }
     }
 
     // --- ACCIONES UI ---
@@ -333,20 +349,42 @@
       r.readAsArrayBuffer(f);
     }
 
+    function cleanNumber(val) {
+        if (val === null || val === undefined) return 0;
+        if (typeof val === 'number') return val;
+        let s = String(val).trim();
+        if (!s) return 0;
+        // Detectamos formato: 1.234,56 o 1,234.56
+        const dotCount = (s.match(/\./g) || []).length;
+        const commaCount = (s.match(/,/g) || []).length;
+        
+        if (commaCount > 0 && dotCount > 0) {
+            // Caso 1.234,56 (Arg)
+            if (s.lastIndexOf(',') > s.lastIndexOf('.')) s = s.replace(/\./g, '').replace(',', '.');
+            // Caso 1,234.56 (US)
+            else s = s.replace(/,/g, '');
+        } else if (commaCount > 0) {
+            // Caso 1234,56 (Arg sin punto de miles)
+            s = s.replace(',', '.');
+        }
+        return parseFloat(s.replace(/[^0-9.-]/g, '')) || 0;
+    }
+
     function parseExcel(data) {
       let hr = -1; let ms = [];
       for(let i=0; i<Math.min(data.length, 30); i++) {
         const det = (data[i]||[]).map(c => detectM(c)).filter(Boolean);
         if(det.length >= 2) { hr = i; ms = (data[i]||[]).map(c => detectM(c)); break; }
       }
-      if(hr === -1) return alert("No se detectaron meses.");
+      if(hr === -1) return alert("No se detectaron columnas de meses en el Excel.");
+      
       const newAccs = [];
       for(let i = hr+1; i < data.length; i++) {
         const n = String(data[i][0] || '').trim(); if(!n) continue;
-        const vs = {}; ms.forEach((m, idx) => { if(!m) return; let v = data[i][idx]; 
-            // Limpieza de números (borra puntos, cambia comas por puntos si es string)
-            if(typeof v === 'string') v = parseFloat(v.replace(/\./g, '').replace(',', '.').replace(/[^0-9.-]/g, '')) || 0;
-            vs[m] = v || 0; 
+        const vs = {}; 
+        ms.forEach((m, idx) => { 
+            if(!m) return; 
+            vs[m] = cleanNumber(data[i][idx]); 
         });
         newAccs.push({ name: n, values: vs });
       }
@@ -357,8 +395,11 @@
     }
 
     function detectM(c) {
-      if (!c) return null; const names = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','setiembre','octubre','noviembre','diciembre'];
-      const s = norm(c); for(let n of names) { if(s.includes(n)) return String(c).trim().toUpperCase().replace('SETIEMBRE','SEPTIEMBRE'); } return null;
+      if (!c) return null; 
+      const names = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','setiembre','octubre','noviembre','diciembre'];
+      const s = norm(c); 
+      for(let n of names) { if(s.includes(n)) return String(c).trim().toUpperCase().replace('SETIEMBRE','SEPTIEMBRE'); } 
+      return null;
     }
 
     window.render = function() {
@@ -378,14 +419,16 @@
             <span class="text-[10px] font-black text-slate-700 uppercase">${m.replace(/\d{4}/, '').trim()}</span>
         </label>`).join('');
 
-      document.getElementById('month-dropdown-text').innerText = validS.length === 0 ? "Seleccionar" : (validS.length === mInY.length ? "Todo el año" : `${validS.length} meses`);
+      document.getElementById('month-dropdown-text').innerText = validS.length === 0 ? "SELECCIONAR MESES" : (validS.length === mInY.length ? "TODO EL AÑO" : `${validS.length} MESES SELECC.`);
       
       const metrics = getMetrics(validS);
       document.getElementById('kpi-fb').innerText = currF.format(metrics.fb);
       document.getElementById('kpi-mb').innerText = currF.format(metrics.mb);
       document.getElementById('kpi-cop').innerText = currF.format(metrics.cop);
       document.getElementById('kpi-ug').innerText = currF.format(metrics.ug);
-      document.getElementById('kpi-margen-pct').innerText = metrics.fb ? percF.format(metrics.ug/metrics.fb) : '0%';
+      
+      const marginPct = (metrics.fb !== 0) ? (metrics.ug / metrics.fb) : 0;
+      document.getElementById('kpi-margen-pct').innerText = percF.format(marginPct);
       
       renderCharts(metrics, mInY, validS);
       renderTable(mInY, validS);
@@ -419,8 +462,10 @@
                   label: mName.toUpperCase(),
                   data: mInY.map(mo => {
                       const met = getMetrics([mo]);
-                      if(norm(mName) === 'facturacion bruta') return met.fb;
-                      if(norm(mName) === 'utilidad global') return met.ug;
+                      const n = norm(mName);
+                      if(n === 'facturacion bruta') return met.fb;
+                      if(n === 'utilidad global') return met.ug;
+                      if(n === 'margen bruto') return met.mb;
                       return getV(mName, [mo]);
                   }),
                   borderColor: dotColors[i % 10], borderWidth: 4, tension: 0.4
@@ -436,53 +481,64 @@
           const list = state.accounts.slice(iStart+1, iEnd).map(a => ({ n: a.name, v: validS.reduce((s, m) => s + (parseFloat(a.values[m])||0), 0) })).sort((a,b)=>b.v-a.v);
           legendHtml = list.map((c, i) => `
             <div class="flex justify-between p-3 border rounded-xl bg-slate-50">
-                <span class="text-[10px] font-black uppercase text-slate-800">${c.n}</span>
+                <span class="text-[10px] font-black uppercase text-slate-800 truncate">${c.n}</span>
                 <span class="text-[11px] font-black text-[#003A70]">${currF.format(c.v)}</span>
             </div>`).join('');
       }
-      document.getElementById('egresos-legend').innerHTML = legendHtml;
+      document.getElementById('egresos-legend').innerHTML = legendHtml || '<p class="text-xs text-slate-400">No se detectaron cuentas de gastos.</p>';
     }
 
     function renderMicro(m, validS) {
         const pvM = validS.length > 0 && state.months.indexOf(validS[0]) > 0 ? state.months[state.months.indexOf(validS[0])-1] : null;
         const p = pvM ? getMetrics([pvM]) : null;
         const rAct = state.manualInputs.roaActivos || 0;
+        
         const indicators = [
-            { l: 'MARGEN BRUTO %', v: m.fb ? m.mb/m.fb : 0, pv: p ? p.mb/p.fb : 0, i: 'pie-chart' },
-            { l: 'COSTO LABORAL %', v: m.fb ? m.lab/m.fb : 0, pv: p ? p.lab/p.fb : 0, i: 'users' },
-            { l: 'TS DISTRI %', v: m.fb ? m.tsd/m.fb : 0, pv: p ? p.tsd/p.fb : 0, i: 'tag' },
-            { l: 'RENT. OPERATIVA %', v: m.fb ? m.ug/m.fb : 0, pv: p ? p.ug/p.fb : 0, i: 'award' }
+            { l: 'MARGEN BRUTO %', v: m.fb !== 0 ? m.mb/m.fb : 0, pv: p ? (p.fb !== 0 ? p.mb/p.fb : 0) : 0, i: 'pie-chart' },
+            { l: 'COSTO LABORAL %', v: m.fb !== 0 ? m.lab/m.fb : 0, pv: p ? (p.fb !== 0 ? p.lab/p.fb : 0) : 0, i: 'users' },
+            { l: 'TS DISTRI %', v: m.fb !== 0 ? m.tsd/m.fb : 0, pv: p ? (p.fb !== 0 ? p.tsd/p.fb : 0) : 0, i: 'tag' },
+            { l: 'RENT. OPERATIVA %', v: m.fb !== 0 ? m.ug/m.fb : 0, pv: p ? (p.fb !== 0 ? p.ug/p.fb : 0) : 0, i: 'award' }
         ];
+        
         document.getElementById('micro-kpis').innerHTML = indicators.map(ind => {
             const diff = p ? (ind.v - ind.pv) * 100 : 0;
-            return `<div class="modern-card p-5"><p class="text-[9px] font-black text-slate-500 uppercase">${ind.l}</p><h4 class="text-2xl font-black text-slate-900">${percF.format(ind.v)}</h4><p class="text-[10px] mt-2 font-bold ${diff>0?'text-emerald-600':'text-rose-600'}">${p ? (diff>0?'+':'')+diff.toFixed(1)+'% vs ant.' : ''}</p></div>`;
+            const colorClass = diff >= 0 ? 'text-emerald-600' : 'text-rose-600';
+            return `<div class="modern-card p-5"><p class="text-[9px] font-black text-slate-500 uppercase">${ind.l}</p><h4 class="text-2xl font-black text-slate-900">${percF.format(ind.v)}</h4><p class="text-[10px] mt-2 font-bold ${colorClass}">${p ? (diff >= 0 ? '+' : '') + diff.toFixed(1) + '% vs ant.' : 'Sin datos prev.'}</p></div>`;
         }).join('') + `<div class="modern-card p-5"><p class="text-[9px] font-black text-slate-500 uppercase">ROA OP.</p><h4 class="text-2xl font-black text-[#003A70]">${percF.format(rAct > 0 ? m.ug/rAct : 0)}</h4><input type="number" value="${rAct}" class="w-full mt-2 text-[10px] border p-1 rounded font-black text-right" oninput="window.updateROA(this.value)" placeholder="ACTIVOS"></div>`;
     }
 
     function renderTable(mInY, validS) {
         const h = document.getElementById('table-head'); const b = document.getElementById('table-body');
         const cols = state.tab === 'periodo' ? validS : mInY;
-        if(!cols.length) return;
-        h.innerHTML = `<th>CONCEPTO</th>` + cols.map(m=>`<th class="text-right">${m.replace(/\d{4}/,'')}</th>`) + `<th class="text-right bg-blue-50 text-[#003A70]">TOTAL</th>`;
+        if(!cols.length) { h.innerHTML = ''; b.innerHTML = ''; return; }
+        
+        h.innerHTML = `<th>CONCEPTO</th>` + cols.map(m=>`<th class="text-right">${m.replace(/\d{4}/,'')}</th>`).join('') + `<th class="text-right bg-blue-50 text-[#003A70]">TOTAL</th>`;
         b.innerHTML = state.accounts.map(acc => {
             const total = cols.reduce((s, m) => s + (parseFloat(acc.values[m])||0), 0);
-            return `<tr><td class="font-bold uppercase">${acc.name}</td>` + cols.map(m => `<td class="text-right">${currF.format(acc.values[m])}</td>`).join('') + `<td class="text-right font-black bg-blue-50/20">${currF.format(total)}</td></tr>`;
+            return `<tr><td class="font-bold uppercase text-[10px]">${acc.name}</td>` + cols.map(m => `<td class="text-right">${currF.format(acc.values[m])}</td>`).join('') + `<td class="text-right font-black bg-blue-50/20">${currF.format(total)}</td></tr>`;
         }).join('');
     }
 
     function initSim(mInY) {
-      if(!mInY.length) return; const l = mInY[mInY.length-1]; const m = getMetrics([l]);
+      if(!mInY.length) return; 
+      const l = mInY[mInY.length-1]; 
+      const m = getMetrics([l]);
+      
       document.getElementById('sim-meta').value = state.manualInputs.simMeta || Math.round(m.ug * 1.15);
-      const mbP = (m.fb ? m.mb/m.fb*100 : 0).toFixed(2); document.getElementById('sim-mb-pct').value = state.manualInputs.simMbPct || mbP;
-      const com = getV('Comision Financiera', [l]); document.getElementById('sim-com').value = state.manualInputs.simCom || com;
+      const mbP = (m.fb !== 0 ? (m.mb/m.fb*100) : 0).toFixed(2); 
+      document.getElementById('sim-mb-pct').value = state.manualInputs.simMbPct || mbP;
+      
+      const com = getV('comision financiera', [l]); 
+      document.getElementById('sim-com').value = state.manualInputs.simCom || com;
       
       const iStart = state.accounts.findIndex(a => norm(a.name).includes('margen bruto'));
       const iEnd = state.accounts.findIndex(a => norm(a.name).includes('utilidad bruta'));
       if(iStart !== -1 && iEnd !== -1) {
           const costs = state.accounts.slice(iStart+1, iEnd);
           document.getElementById('sim-costs-grid').innerHTML = costs.map((c, i) => {
-              const n = norm(c.n); const v = state.manualInputs.simCosts[n] !== undefined ? state.manualInputs.simCosts[n] : (parseFloat(c.values[l])||0);
-              return `<div><label class="block text-[9px] font-bold text-slate-500 uppercase">${c.name}</label><input type="number" data-sim data-sim-name="${n}" value="${v}" data-original="${c.values[l]}" class="w-full border rounded-lg h-9 text-xs font-black p-2" oninput="window.calcSim()"></div>`;
+              const n = norm(c.name); 
+              const v = state.manualInputs.simCosts[n] !== undefined ? state.manualInputs.simCosts[n] : (parseFloat(c.values[l])||0);
+              return `<div><label class="block text-[9px] font-bold text-slate-500 uppercase">${c.name}</label><input type="number" data-sim data-sim-name="${n}" value="${v}" data-original="${c.values[l]}" class="w-full border rounded-lg h-9 text-xs font-black p-2 outline-none focus:ring-1 focus:ring-brand-500" oninput="window.calcSim()"></div>`;
           }).join('');
       }
       window.calcSim(true);
@@ -497,8 +553,15 @@
             const v = parseFloat(i.value) || 0; cSum += v;
             if(!skipSave) state.manualInputs.simCosts[i.dataset.simName] = v;
         });
-        if(!skipSave) { state.manualInputs.simMeta = meta; state.manualInputs.simMbPct = (mbPct*100); state.manualInputs.simCom = com; saveData(); }
-        const mbReq = meta + cSum - com; const fbReq = mbPct ? mbReq / mbPct : 0;
+        if(!skipSave) { 
+            state.manualInputs.simMeta = meta; 
+            state.manualInputs.simMbPct = (mbPct*100); 
+            state.manualInputs.simCom = com; 
+            saveData(); 
+        }
+        const mbReq = meta + cSum - com; 
+        const fbReq = mbPct !== 0 ? mbReq / mbPct : 0;
+        
         document.getElementById('res-fb').innerText = currF.format(fbReq);
         document.getElementById('res-mb').innerText = currF.format(mbReq);
         document.getElementById('res-cop').innerText = currF.format(cSum);
@@ -516,6 +579,26 @@
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === id));
         document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === `content-${id}`));
         window.render(); 
+    }
+
+    function renderMetricDropdown() {
+      const bOpts = ['Facturación Bruta', 'Margen Bruto', 'Costos Operativos', 'Utilidad Global'];
+      const aOpts = state.accounts.map(a => a.name).filter(n => !bOpts.some(b => norm(b) === norm(n)));
+      document.getElementById('metric-options').innerHTML = [...bOpts, ...aOpts].map(o => `
+        <label class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-lg cursor-pointer">
+            <input type="checkbox" value="${o}" class="w-4 h-4 text-brand-600 rounded" ${state.annualMetrics.includes(o)?'checked':''} onchange="window.toggleAnnualMetric('${o}')">
+            <span class="text-xs font-bold text-slate-700 truncate uppercase">${o}</span>
+        </label>`).join('');
+    }
+    
+    window.toggleAnnualMetric = function(m) {
+      if (state.annualMetrics.includes(m)) {
+          if (state.annualMetrics.length > 1) state.annualMetrics = state.annualMetrics.filter(x => x !== m);
+      } else {
+          state.annualMetrics.push(m);
+      }
+      renderMetricDropdown();
+      window.render();
     }
 
     window.onload = init;
