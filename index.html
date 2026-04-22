@@ -146,12 +146,11 @@
             <div class="h-[300px] sm:h-[400px] w-full"><canvas id="chart-waterfall"></canvas></div>
           </div>
           <div class="modern-card p-6 w-full shadow-lg">
-            <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6">Composición de Costos Operativos</h3>
+            <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6">Desglose de Costos Operativos</h3>
             <div id="egresos-legend" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
           </div>
         </div>
 
-        <!-- Micro KPIs -->
         <div id="micro-kpis" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
       </section>
 
@@ -218,15 +217,15 @@
     
     // Mapeo Estricto para Grupo Frías
     const ALIASES = {
-        fb: ['ingreso neto (fact neta + ts total)'], // Cuenta de Ingreso Base
-        ug: ['utilidad global'], // Utilidad Final
+        fb: ['ingreso neto (fact neta + ts total)'], // Ingreso Base para cálculos
+        ug: ['utilidad global'], // Resultado Final
         mb: ['utilidad bruta'], // Margen Bruto
         cop: ['costos totales'], // Egresos Totales
         lab: ['salarios'], // Sueldos
         tsd: ['ts dis'] // Trade Spend Distribución
     };
 
-    // Whitelist de COSTOS (Solo estos aparecerán en el desglose de egresos)
+    // WHITELIST DE COSTOS: Solo estos aparecerán en el desglose de egresos
     const COST_WHITELIST = [
         'salarios', 'gastos de personal', 'movilidad y viaticos', 
         'juicios e indemnizaciones', 'honorarios', 'servicios tercerizados', 
@@ -320,7 +319,7 @@
         </label>`).join('');
       document.getElementById('month-dropdown-text').innerText = validS.length === 0 ? "SELECCIONAR" : `${validS.length} MESES SELECC.`;
       
-      // Totales para KPIs
+      // Cálculo de Totales Agregados
       const accFb = findAccount('fb');
       const accUg = findAccount('ug');
       const accCop = findAccount('cop');
@@ -336,7 +335,7 @@
       document.getElementById('kpi-cop').innerText = currF.format(copValue);
       document.getElementById('kpi-ug').innerText = currF.format(ugValue);
       
-      // RENTABILIDAD (Utilidad / Ingreso Neto)
+      // RENTABILIDAD REAL: (Utilidad Sumada / Ingreso Sumado)
       const rentabilidad = fbValue !== 0 ? (ugValue / fbValue) : 0;
       document.getElementById('kpi-margen-pct').innerText = percF.format(rentabilidad);
       
@@ -371,10 +370,10 @@
           options: { responsive: true, maintainAspectRatio: false }
       });
 
-      // DESGLOSE DE COSTOS (WHITELIST ESTRICTA)
+      // DESGLOSE DE COSTOS (SOLO ÍTEMS DE LA CAPTURA)
       const list = state.accounts.filter(a => {
         const n = norm(a.name);
-        return COST_WHITELIST.some(w => n === w || n.includes(w));
+        return COST_WHITELIST.some(w => n === norm(w) || n.includes(norm(w)));
       }).map(a => ({ n: a.name, v: validS.reduce((s,m)=>s+(a.values[m]||0),0) })).sort((a,b)=>b.v-a.v);
       
       const totC = list.reduce((s,x)=>s+Math.abs(x.v), 0);
@@ -401,7 +400,7 @@
             { l: 'COSTO LABORAL %', v: fb ? lab/fb : 0, i: 'users', c: 'blue', d: 'Impacto de salarios en la facturación total.', f: '(Salarios / Ingreso Neto)' },
             { l: 'TS DISTRI %', v: fb ? tsd/fb : 0, i: 'tag', c: 'amber', d: 'Peso del Trade Spend de Distribución.', f: '(TS Dis / Ingreso Neto)' },
             { l: 'ABSORCIÓN GASTOS', v: mb ? Math.abs(cop)/mb : 0, i: 'layers', c: 'rose', d: 'Porcentaje del Margen Bruto que se consume en Costos.', f: '(Costos Totales / Utilidad Bruta)' },
-            { l: 'RENTABILIDAD FINAL %', v: fb ? ug/fb : 0, i: 'award', c: 'emerald', d: 'Resultado neto final disponible por cada peso vendido.', f: '(Utilidad Global / Ingreso Neto)' }
+            { l: 'RENTABILIDAD FINAL %', v: fb ? ug/fb : 0, i: 'award', c: 'emerald', d: 'Margen neto final obtenido por cada peso vendido.', f: '(Utilidad Global / Ingreso Neto)' }
         ];
 
         document.getElementById('micro-kpis').innerHTML = indicators.map(ind => `
