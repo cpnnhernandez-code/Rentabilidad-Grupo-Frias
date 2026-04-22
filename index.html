@@ -146,12 +146,13 @@
           </div>
         </div>
 
+        <!-- Micro KPIs (Rentabilidad Final, Margen Bruto, Costo Laboral) -->
         <div id="micro-kpis" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
 
         <!-- TABLA P&L CONSOLIDADO -->
         <div class="modern-card overflow-hidden shadow-lg border-t-4 border-t-[#003A70]">
           <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-            <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest">P&L Consolidado Detallado</h3>
+            <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest uppercase">P&L Consolidado Detallado</h3>
           </div>
           <div class="overflow-x-auto custom-scrollbar">
             <table class="w-full text-left text-[11px] whitespace-nowrap">
@@ -165,15 +166,15 @@
       <!-- SECCIÓN TENDENCIA -->
       <section id="content-tendencia" class="tab-content space-y-6">
         <div class="modern-card p-6 shadow-lg">
-          <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6">Evolución de Utilidad Global</h3>
-          <div class="h-[400px] relative"><canvas id="chart-anual"></canvas></div>
+          <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6">Evolución Mensual de Utilidad Global</h3>
+          <div class="h-[450px] relative"><canvas id="chart-anual"></canvas></div>
         </div>
       </section>
 
       <!-- SECCIÓN SIMULADOR -->
       <section id="content-simulador" class="tab-content space-y-6">
         <div class="modern-card p-8 bg-[#002855] text-white flex flex-col md:flex-row justify-between items-center gap-6 shadow-xl border-white/10">
-          <h2 class="text-2xl font-black uppercase tracking-tighter">Simulador de Metas</h2>
+          <h2 class="text-2xl font-black uppercase tracking-tighter">Simulador de Metas de Ingreso</h2>
           <div class="flex gap-2">
             <button onclick="window.print()" class="px-6 py-3 bg-white text-[#003A70] hover:bg-blue-50 font-black transition shadow-lg rounded-xl uppercase text-xs">Imprimir Reporte</button>
           </div>
@@ -198,7 +199,7 @@
               <div class="modern-card p-6 bg-brand-50 border-brand-200 sticky top-24 shadow-xl">
                 <h4 class="text-[10px] font-black uppercase text-brand-800 mb-6">Ingreso Requerido para Meta</h4>
                 <h2 id="res-fb" class="text-3xl font-[900] text-brand-700 mb-4 tracking-tighter">$0</h2>
-                <p class="text-[9px] text-brand-600 font-bold uppercase leading-relaxed italic border-t border-brand-200 pt-3">Calculado en base a tus costos operativos actuales.</p>
+                <p class="text-[9px] text-brand-600 font-bold uppercase leading-relaxed italic border-t border-brand-200 pt-3">Calculado en base al promedio de tus costos operativos seleccionados.</p>
               </div>
             </div>
         </div>
@@ -228,19 +229,18 @@
     function norm(t) { return String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim(); }
     
     const ALIASES = {
-        fb: ['ingreso neto (fact neta + ts total)'], 
-        ug: ['utilidad global'], 
-        mb: ['utilidad bruta'], 
+        fb: ['ingreso neto (fact neta + ts total)', 'ingreso neto'], 
+        ug: ['utilidad global', 'utilidad del ejercicio'], 
+        mb: ['utilidad bruta', 'margen bruto'], 
         cop: ['costos totales'], 
         lab: ['salarios']
     };
 
     const COST_WHITELIST = [
         'salarios', 'gastos de personal', 'movilidad y viaticos', 
-        'juicios e indemnizaciones', 'honorarios', 'servicios tercerizados', 
-        'sistemas', 'servicios basicos', 'gastos oficina', 'comisiones', 
-        'tasas e impuestos', 'mantenimiento', 'impuesto debitos y creditos', 
-        'comision financiera', 'intereses'
+        'honorarios', 'servicios tercerizados', 'sistemas', 'servicios basicos', 
+        'gastos oficina', 'comisiones', 'tasas e impuestos', 'mantenimiento', 
+        'impuesto debitos y creditos', 'comision financiera', 'intereses'
     ];
 
     function findAccount(key) {
@@ -373,7 +373,7 @@
       charts.w = new Chart(document.getElementById('chart-waterfall').getContext('2d'), {
           type: 'bar',
           data: { 
-              labels: ['ING. NETO', 'UTIL. BRUTA', 'COSTOS', 'RESULTADO'], 
+              labels: ['ING. NETO', 'UTIL. BRUTA', 'COSTOS', 'UTIL. GLOBAL'], 
               datasets: [{ 
                   data: [[0, fb], [0, mb], [mb-cop, mb], [0, ug]], 
                   backgroundColor: ['#0055a5', '#10b981', '#f43f5e', '#0055a5'], 
@@ -410,7 +410,7 @@
         data: {
           labels: state.months,
           datasets: [{
-            label: 'Utilidad Global',
+            label: 'Utilidad Global Mensual',
             data: state.months.map(m => accUg?.values[m] || 0),
             borderColor: '#10b981',
             backgroundColor: 'rgba(16, 185, 129, 0.1)',
@@ -444,7 +444,7 @@
                 </div>
                 <div class="mt-4 pt-3 border-t border-slate-100">
                     <p class="text-[8px] text-slate-400 font-bold uppercase mb-1 line-clamp-1">${ind.d}</p>
-                    <p class="text-[8px] text-brand-500 font-black tracking-wider uppercase">${ind.f}</p>
+                    <p class="text-[8px] text-brand-500 font-black tracking-wider uppercase leading-none">${ind.f}</p>
                 </div>
             </div>
         `).join('');
@@ -453,11 +453,41 @@
     function renderTable(validS) {
         const h = document.getElementById('table-head'); const b = document.getElementById('table-body');
         if(!validS.length) return;
-        h.innerHTML = `<th>CONCEPTO</th>` + validS.map(m=>`<th class="text-right uppercase">${m}</th>`) + `<th class="text-right bg-blue-50">TOTAL</th>`;
+
+        const accFb = findAccount('fb');
+        const accUg = findAccount('ug');
+
+        h.innerHTML = `<th>CONCEPTO</th>` + validS.map(m=>`<th class="text-right uppercase">${m}</th>`).join('') + `<th class="text-right bg-blue-50">TOTAL</th>`;
+        
         b.innerHTML = state.accounts.map(acc => {
-            const total = validS.reduce((s, m) => s + (Number(acc.values[m])||0), 0);
-            const isMainRow = ['ingreso neto', 'utilidad bruta', 'utilidad global', 'costos totales'].some(x => norm(acc.name).includes(x));
-            return `<tr class="${isMainRow ? 'bg-slate-50 font-black text-slate-900' : ''}"><td class="font-bold uppercase">${acc.name}</td>` + validS.map(m => `<td class="text-right">${currF.format(acc.values[m])}</td>`).join('') + `<td class="text-right font-black bg-blue-50/20">${currF.format(total)}</td></tr>`;
+            const n = norm(acc.name);
+            const isRentRow = n.includes('rentabilidad');
+            const isMainRow = ['ingreso neto', 'utilidad bruta', 'utilidad global', 'costos totales'].some(x => n.includes(x));
+            
+            let rowHtml = `<td class="font-bold uppercase">${acc.name}</td>`;
+            
+            if (isRentRow) {
+                // RECALCULAR RENTABILIDAD PARA CADA MES
+                validS.forEach(m => {
+                    const monthFb = Number(accFb?.values[m]) || 0;
+                    const monthUg = Number(accUg?.values[m]) || 0;
+                    const rent = monthFb !== 0 ? (monthUg / monthFb) : 0;
+                    rowHtml += `<td class="text-right font-bold text-brand-600">${percF.format(rent)}</td>`;
+                });
+                // CALCULAR RENTABILIDAD PARA EL TOTAL
+                const totalFb = validS.reduce((s, m) => s + (Number(accFb?.values[m]) || 0), 0);
+                const totalUg = validS.reduce((s, m) => s + (Number(accUg?.values[m]) || 0), 0);
+                const totalRent = totalFb !== 0 ? (totalUg / totalFb) : 0;
+                rowHtml += `<td class="text-right font-black bg-blue-50/20 text-brand-600">${percF.format(totalRent)}</td>`;
+                
+                return `<tr class="bg-blue-50/10 font-bold">${rowHtml}</tr>`;
+            } else {
+                const totalVal = validS.reduce((s, m) => s + (Number(acc.values[m])||0), 0);
+                rowHtml += validS.map(m => `<td class="text-right">${currF.format(acc.values[m])}</td>`).join('');
+                rowHtml += `<td class="text-right font-black bg-blue-50/20">${currF.format(totalVal)}</td>`;
+                
+                return `<tr class="${isMainRow ? 'bg-slate-50 font-black text-slate-900' : ''}">${rowHtml}</tr>`;
+            }
         }).join('');
     }
 
@@ -468,16 +498,15 @@
         const validS = state.selected;
         const copMedio = validS.length ? (validS.reduce((s, m) => s + Math.abs(accCop?.values[m] || 0), 0) / validS.length) : 0;
         
-        // fb = (meta + costos) / mb%
         const req = mbPct > 0 ? (meta + copMedio) / mbPct : 0;
         document.getElementById('res-fb').innerText = currF.format(req);
     }
 
     function renderGlosario() {
       document.getElementById('glosario-grid').innerHTML = [
-        { t: 'Rentabilidad Final', d: 'Resultado neto obtenido por cada peso de venta neta.' }, 
-        { t: 'Utilidad Bruta', d: 'Monto que queda tras restar el costo de mercadería vendida.' }, 
-        { t: 'Ingreso Neto', d: 'Facturación neta más los conceptos de Trade Spend.' }
+        { t: 'Rentabilidad Final', d: 'Margen neto obtenido tras descontar todos los costos operativos.' }, 
+        { t: 'Utilidad Bruta', d: 'Monto que queda tras restar el CMV del Ingreso Neto.' }, 
+        { t: 'Ingreso Neto', d: 'Total facturado incluyendo Facturación Neta y Trade Spend.' }
       ].map(i => `<div class="modern-card p-6 border-t-4 border-t-[#003A70]"><h4 class="font-black text-[#003A70] text-[10px] uppercase mb-2">${i.t}</h4><p class="text-[11px] text-slate-600 leading-relaxed font-medium">${i.d}</p></div>`).join('');
     }
 
@@ -490,14 +519,14 @@
     
     async function saveData() { 
       const d = { accounts: state.accounts, months: state.months };
-      localStorage.setItem('frias_db_data_full', JSON.stringify(d)); 
+      localStorage.setItem('frias_db_data_full_final', JSON.stringify(d)); 
       try { await supabase.from('dashboard').upsert({ id: 'main', content: d }); } catch(e) {}
     }
 
-    window.clearData = () => { localStorage.removeItem('frias_db_data_full'); location.reload(); }
+    window.clearData = () => { localStorage.removeItem('frias_db_data_full_final'); location.reload(); }
 
     window.onload = () => {
-      const saved = JSON.parse(localStorage.getItem('frias_db_data_full'));
+      const saved = JSON.parse(localStorage.getItem('frias_db_data_full_final'));
       if(saved) { state.accounts = saved.accounts; state.months = saved.months; state.selected = [...state.months]; state.loaded = true; window.render(); }
       document.getElementById('btn-month-dropdown')?.addEventListener('click', () => document.getElementById('month-dropdown-menu').classList.toggle('hidden'));
     };
