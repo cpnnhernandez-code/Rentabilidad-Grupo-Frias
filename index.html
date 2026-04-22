@@ -63,7 +63,6 @@
         <div class="min-w-0 py-1">
           <div class="flex items-center gap-3">
             <h1 class="text-xl sm:text-2xl font-[900] text-white truncate tracking-tighter uppercase leading-tight">DASHBOARD DE RENTABILIDAD</h1>
-            <span id="cloud-status" class="hidden sm:flex items-center gap-1 text-[10px] font-bold bg-white/10 text-blue-100 px-2 py-0.5 rounded-full border border-white/20"><i data-lucide="cloud-check" class="w-3 h-3"></i> Nube Activa</span>
           </div>
           <p class="text-[11px] sm:text-xs text-blue-300 font-[800] uppercase tracking-[0.2em] mt-0.5">Grupo Frías S.R.L.</p>
         </div>
@@ -74,20 +73,20 @@
         </button>
         <label for="file-upload" class="cursor-pointer px-4 py-2 rounded-xl bg-white text-[#003A70] font-black hover:bg-blue-50 transition flex items-center gap-2 text-sm shadow-lg">
           <i data-lucide="upload-cloud" class="w-4 h-4"></i>
-          <span id="upload-btn-text">Subir Excel</span>
+          <span>Subir Excel</span>
           <input type="file" id="file-upload" accept=".xlsx,.xls,.csv" class="hidden" onchange="window.handleFile(event)" />
         </label>
       </div>
     </div>
   </header>
 
-  <main class="flex-1 max-w-7xl mx-auto w-full px-4 py-6 md:py-8">
+  <main class="flex-1 max-w-7xl mx-auto w-full px-4 py-6">
     <div id="empty-state" class="flex flex-col items-center justify-center py-24 text-center hidden">
-        <div class="w-24 h-24 bg-white/10 text-white rounded-full flex items-center justify-center mb-6 shadow-inner border border-white/20">
-            <i data-lucide="bar-chart-2" class="w-12 h-12"></i>
+        <div class="w-20 h-20 bg-white/10 text-white rounded-full flex items-center justify-center mb-6 shadow-inner border border-white/20">
+            <i data-lucide="bar-chart-2" class="w-10 h-10"></i>
         </div>
-        <h2 class="text-3xl font-black text-white mb-3 uppercase tracking-tighter">Cargar información</h2>
-        <p class="text-blue-100 max-w-md mx-auto mb-8 text-sm font-medium">Sube el reporte de rentabilidad para visualizar los indicadores mensuales.</p>
+        <h2 class="text-2xl font-black text-white mb-3 uppercase">Cargar Información</h2>
+        <p class="text-blue-100 max-w-md mx-auto mb-8 text-sm font-medium">Sube el reporte de rentabilidad para visualizar los indicadores.</p>
         <label for="file-upload-empty" class="cursor-pointer px-8 py-4 rounded-xl bg-white text-[#003A70] font-black hover:bg-blue-50 transition shadow-xl flex items-center gap-3 text-lg uppercase">
             <i data-lucide="upload-cloud" class="w-6 h-6"></i>
             Seleccionar archivo
@@ -96,34 +95,27 @@
     </div>
 
     <div id="dashboard-content" class="hidden">
-      <div class="flex flex-col xl:flex-row gap-4 mb-8">
-        <div class="w-full xl:w-auto overflow-x-auto pb-2 xl:pb-0 shrink-0">
-          <div class="tab-container whitespace-nowrap">
-            <button onclick="window.switchT('periodo')" id="tab-periodo-btn" class="tab-btn active uppercase">Período</button>
-            <button onclick="window.switchT('acumulado')" id="tab-acumulado-btn" class="tab-btn uppercase">Tendencia</button>
-            <button onclick="window.switchT('simulador')" id="tab-simulador-btn" class="tab-btn uppercase">Simulador</button>
+      <!-- Filtros -->
+      <div class="flex justify-between items-center mb-8">
+          <div class="tab-container">
+            <button onclick="window.switchT('periodo')" id="tab-periodo-btn" class="tab-btn active uppercase">Resumen</button>
             <button onclick="window.switchT('glosario')" id="tab-glosario-btn" class="tab-btn uppercase">Ayuda</button>
           </div>
-        </div>
-        
-        <div id="month-filter-wrapper" class="modern-card p-3 px-4 flex items-center gap-3 bg-white text-slate-800 flex-1 min-w-0 shadow-lg">
-          <div class="flex items-center gap-2 border-r border-slate-200 pr-3 shrink-0">
-            <select id="year-select" class="text-xs font-black text-slate-800 bg-transparent outline-none cursor-pointer" onchange="window.changeYear(this.value)"></select>
-          </div>
-          <div class="relative inline-block text-left flex-1 sm:w-64">
-            <button id="btn-month-dropdown" class="flex items-center justify-between w-full px-4 py-2 text-xs font-bold text-[#003A70] bg-blue-50 border border-blue-100 rounded-xl hover:bg-blue-100 transition">
-               <span id="month-dropdown-text" class="truncate uppercase font-black">Seleccionar Meses</span> <i data-lucide="chevron-down" class="w-4 h-4 text-brand-500"></i>
-            </button>
-            <div id="month-dropdown-menu" class="hidden absolute left-0 z-50 w-full mt-2 origin-top-left bg-white border border-slate-200 rounded-xl shadow-2xl max-h-[350px] overflow-y-auto custom-scrollbar">
-               <div class="p-2 border-b border-slate-100 flex flex-col gap-1 bg-slate-50 rounded-t-xl">
-                   <button onclick="window.selectAllMonths()" class="text-left px-3 py-2 text-[10px] font-black text-brand-700 hover:bg-brand-100 rounded-lg transition uppercase">✓ Seleccionar Todo</button>
-                   <button onclick="window.deselectAllMonths()" class="text-left px-3 py-2 text-[10px] font-black text-slate-500 hover:bg-slate-200 rounded-lg transition uppercase">✗ Limpiar</button>
-               </div>
-               <div class="p-2 flex flex-col gap-0.5" id="month-options"></div>
+          
+          <div id="month-filter-wrapper" class="modern-card p-2 px-4 flex items-center gap-3 bg-white text-slate-800 shadow-lg">
+            <div class="relative inline-block text-left">
+              <button id="btn-month-dropdown" class="flex items-center gap-2 px-4 py-2 text-xs font-bold text-[#003A70] bg-blue-50 rounded-xl hover:bg-blue-100 transition">
+                 <span id="month-dropdown-text" class="uppercase font-black">Seleccionar Meses</span> <i data-lucide="chevron-down" class="w-4 h-4"></i>
+              </button>
+              <div id="month-dropdown-menu" class="hidden absolute right-0 z-50 w-64 mt-2 bg-white border border-slate-200 rounded-xl shadow-2xl overflow-hidden">
+                 <div class="p-2 border-b border-slate-100 bg-slate-50 flex justify-between">
+                     <button onclick="window.selectAllMonths()" class="text-[10px] font-black text-brand-700 uppercase p-1">Todo</button>
+                     <button onclick="window.deselectAllMonths()" class="text-[10px] font-black text-slate-500 uppercase p-1">Nada</button>
+                 </div>
+                 <div class="max-h-60 overflow-y-auto p-2 flex flex-col gap-1" id="month-options"></div>
+              </div>
             </div>
           </div>
-          <button onclick="window.selectLastMonth()" class="shrink-0 ml-auto text-[10px] font-black text-brand-700 bg-brand-100 px-3 py-2 rounded-lg transition hover:bg-brand-200 hidden sm:block uppercase">Último Dato</button>
-        </div>
       </div>
 
       <section id="content-periodo" class="tab-content active space-y-6">
@@ -141,85 +133,38 @@
           </div>
         </div>
 
-        <div class="flex flex-col gap-6">
-          <div class="modern-card p-6 w-full shadow-lg">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="modern-card p-6 shadow-lg">
             <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6">Cascada de Rentabilidad</h3>
-            <div class="h-[300px] sm:h-[400px] w-full"><canvas id="chart-waterfall"></canvas></div>
+            <div class="h-[300px] w-full"><canvas id="chart-waterfall"></canvas></div>
           </div>
-          <!-- Desglose de Costos con Whitelist Estricta -->
-          <div class="modern-card p-6 w-full shadow-lg">
-            <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6">Composición de Costos Operativos</h3>
-            <div id="egresos-legend" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+          <div class="modern-card p-6 shadow-lg overflow-hidden">
+            <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6">Desglose de Costos Operativos</h3>
+            <div id="egresos-legend" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[300px] overflow-y-auto custom-scrollbar pr-2"></div>
           </div>
         </div>
 
-        <!-- Micro KPIs (Solo los 3 solicitados) -->
+        <!-- Micro KPIs (Solo los 3 Solicitados) -->
         <div id="micro-kpis" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
       </section>
 
-      <section id="content-acumulado" class="tab-content space-y-6">
-        <div class="modern-card p-6 shadow-lg">
-          <div class="h-[350px] sm:h-[450px] relative z-10"><canvas id="chart-anual"></canvas></div>
-        </div>
-      </section>
-
-      <!-- Simulador, Ayuda y Tabla se mantienen iguales -->
-      <section id="content-simulador" class="tab-content space-y-6">
-        <div class="modern-card p-8 bg-[#002855] text-white flex flex-col md:flex-row justify-between items-center gap-6 shadow-xl border-white/10">
-          <h2 class="text-2xl font-black uppercase">Simulador de Metas</h2>
-          <button onclick="window.exportSimuladorPDF()" class="px-6 py-3 bg-white text-[#003A70] hover:bg-blue-50 font-black transition shadow-lg rounded-xl uppercase text-xs">Descargar PDF</button>
-        </div>
-        <div id="sim-area" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-2 space-y-6">
-              <div class="modern-card p-6 border-t-4 border-t-emerald-500 shadow-md">
-                <h3 class="text-[10px] font-black uppercase mb-6">Variables Meta</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5">Utilidad Deseada ($)</label><input type="number" id="sim-meta" class="w-full border rounded-xl h-11 p-3 font-black bg-slate-50 outline-none" oninput="window.calcSim()"></div>
-                  <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5">Margen Bruto (%)</label><input type="number" id="sim-mb-pct" class="w-full border rounded-xl h-11 p-3 font-black bg-slate-50 outline-none" oninput="window.calcSim()"></div>
-                </div>
-              </div>
-            </div>
-            <div class="lg:col-span-1">
-              <div class="modern-card p-6 bg-brand-50 border-brand-200 sticky top-24 shadow-xl">
-                <h4 class="text-[10px] font-black uppercase text-brand-800 mb-6">Venta Requerida</h4>
-                <h2 id="res-fb" class="text-3xl font-[900] text-brand-700 mb-6">$0</h2>
-              </div>
-            </div>
-        </div>
-      </section>
-
       <section id="content-glosario" class="tab-content py-8">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="glosario-grid"></div>
-      </section>
-
-      <section id="table-container" class="modern-card overflow-hidden mt-8 shadow-lg">
-        <div class="overflow-x-auto custom-scrollbar">
-          <table class="w-full text-left text-[11px] whitespace-nowrap min-w-[800px]">
-            <thead><tr id="table-head" class="bg-slate-100 text-slate-500 font-black uppercase tracking-widest"></tr></thead>
-            <tbody id="table-body" class="divide-y divide-slate-100 font-medium text-slate-600"></tbody>
-          </table>
-        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="glosario-grid"></div>
       </section>
     </div>
   </main>
 
   <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-
-    const supabaseUrl = 'https://qefhvntgskqzrmayovaa.supabase.co';
-    const supabaseKey = 'sb_publishable_XcfkFhLnMQqelqCGlkvVag_q-BL8cKD';
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
     const currF = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0, maximumFractionDigits: 0 });
     const percF = new Intl.NumberFormat('es-AR', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 });
     const dotColors = ['#0055a5', '#10b981', '#f43f5e', '#f59e0b', '#0ea5e9', '#8b5cf6', '#d946ef', '#14b8a6', '#f97316', '#06b6d4'];
     
-    let state = { loaded: false, months: [], accounts: [], selected: [], tab: 'periodo', annualMetrics: ['Ingreso Neto (fact neta + Ts Total)', 'Utilidad Global'], selectedYear: "2026", manualInputs: { roaActivos: 0 } };
+    let state = { loaded: false, months: [], accounts: [], selected: [], tab: 'periodo' };
     let charts = {};
 
     function norm(t) { return String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim(); }
     
-    // Whitelist Estricta de Costos (Basada en tus capturas)
+    // Whitelist exacta de Costos
     const COST_WHITELIST = [
         'salarios', 'gastos de personal', 'movilidad y viaticos', 
         'juicios e indemnizaciones', 'honorarios', 'servicios tercerizados', 
@@ -229,18 +174,33 @@
     ];
 
     const ALIASES = {
-        fb: ['ingreso neto (fact neta + ts total)'], 
-        ug: ['utilidad global'], 
-        mb: ['utilidad bruta'], 
-        cop: ['costos totales'], 
+        fb: ['ingreso neto (fact neta + ts total)', 'ingreso neto'],
+        ug: ['utilidad global', 'utilidad del ejercicio', 'resultado neto'],
+        mb: ['utilidad bruta', 'margen bruto'],
+        cop: ['costos totales'],
         lab: ['salarios']
     };
 
     function findAccount(key) {
         const terms = ALIASES[key] || [key];
-        let found = state.accounts.find(a => terms.some(t => norm(a.name) === norm(t)));
-        if (!found) found = state.accounts.find(a => terms.some(t => norm(a.name).includes(norm(t))));
-        return found;
+        // Búsqueda inteligente: coincide exacto o si contiene las palabras clave críticas
+        let bestMatch = state.accounts.find(a => {
+            const n = norm(a.name);
+            return terms.some(t => {
+                const parts = norm(t).split(' ');
+                return n === norm(t) || parts.every(p => n.includes(p));
+            });
+        });
+        
+        // Refuerzo específico para Utilidad Global si falla el anterior
+        if (!bestMatch && key === 'ug') {
+            bestMatch = state.accounts.find(a => {
+                const n = norm(a.name);
+                return n.includes('utilidad') && n.includes('global');
+            });
+        }
+        
+        return bestMatch;
     }
 
     function cleanNumber(val) {
@@ -249,15 +209,15 @@
         let s = String(val).trim();
         let neg = s.includes('(') || s.includes('-');
         s = s.replace(/\$/g, '').replace(/\./g, '').replace(',', '.').replace(/[()\-]/g, '');
-        const n = parseFloat(s) || 0;
-        return neg ? -n : n;
+        const n = parseFloat(s);
+        return isNaN(n) ? 0 : (neg ? -n : n);
     }
 
     window.switchT = function(id) {
         state.tab = id;
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.id === `tab-${id}-btn`));
         document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === `content-${id}`));
-        window.render();
+        if(id === 'glosario') renderGlosario();
     }
 
     window.handleFile = function(e) {
@@ -274,49 +234,55 @@
     function parseExcel(data) {
       let hr = -1; let ms = [];
       for(let i=0; i<Math.min(data.length, 30); i++) {
-        const det = (data[i]||[]).map(c => detectM(c)).filter(Boolean);
-        if(det.length >= 2) { hr = i; ms = (data[i]||[]).map(c => detectM(c)); break; }
+        const row = data[i] || [];
+        const monthIndices = row.map((c, idx) => detectM(c) ? idx : -1).filter(idx => idx !== -1);
+        if(monthIndices.length >= 2) { hr = i; ms = row.map(c => detectM(c)); break; }
       }
-      if(hr === -1) return alert("No se detectó la fila de meses.");
+      
+      if(hr === -1) return alert("No se detectaron meses.");
+      
       const newAccs = [];
       for(let i = hr+1; i < data.length; i++) {
-        const n = String(data[i][0] || '').trim(); if(!n || n === 'CONCEPTOS') continue;
-        const vs = {}; ms.forEach((m, idx) => { if(!m) return; vs[m] = cleanNumber(data[i][idx]); });
-        newAccs.push({ name: n, values: vs });
+        const label = String(data[i][0] || data[i][1] || '').trim();
+        if(!label || label === 'CONCEPTOS') continue;
+        const vs = {}; 
+        ms.forEach((m, idx) => { if(m) vs[m] = cleanNumber(data[i][idx]); });
+        newAccs.push({ name: label, values: vs });
       }
+      
       state.months = ms.filter(Boolean); 
       state.accounts = newAccs; 
       state.loaded = true;
       state.selected = [...state.months]; 
-      saveData(); window.render();
+      saveToLocal();
+      window.render();
     }
 
     function detectM(c) {
       if (!c) return null; 
       const nms = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','setiembre','octubre','noviembre','diciembre'];
       const s = norm(c); 
-      for(let n of nms) { if(s.includes(n)) return String(c).trim().toUpperCase().includes('20') ? String(c).trim().toUpperCase() : `${String(c).trim().toUpperCase()} 2026`; } 
+      for(let n of nms) { if(s.includes(n)) return String(c).trim().toUpperCase(); } 
       return null;
     }
 
     window.render = function() {
-      if (!state.months.length) { document.getElementById('dashboard-content').classList.add('hidden'); document.getElementById('empty-state').classList.remove('hidden'); return; }
-      document.getElementById('dashboard-content').classList.remove('hidden'); document.getElementById('empty-state').classList.add('hidden');
+      if (!state.months.length) { 
+        document.getElementById('dashboard-content').classList.add('hidden'); 
+        document.getElementById('empty-state').classList.remove('hidden'); 
+        return; 
+      }
+      document.getElementById('dashboard-content').classList.remove('hidden'); 
+      document.getElementById('empty-state').classList.add('hidden');
       
-      const mInY = state.months.filter(m => String(m).includes(state.selectedYear));
-      const validS = state.selected.filter(m => mInY.includes(m));
+      const validS = state.selected;
       
       const accFb = findAccount('fb');
       const accUg = findAccount('ug');
       const accCop = findAccount('cop');
       const accMb = findAccount('mb');
 
-      // SUMA MATEMÁTICA AGREGADA
-      let fbTotal = 0;
-      let ugTotal = 0;
-      let copTotal = 0;
-      let mbTotal = 0;
-
+      let fbTotal = 0, ugTotal = 0, copTotal = 0, mbTotal = 0;
       validS.forEach(m => {
         fbTotal += (Number(accFb?.values[m]) || 0);
         ugTotal += (Number(accUg?.values[m]) || 0);
@@ -329,31 +295,29 @@
       document.getElementById('kpi-cop').innerText = currF.format(copTotal);
       document.getElementById('kpi-ug').innerText = currF.format(ugTotal);
       
-      // CALCULO RENTABILIDAD (Utilidad / Ingreso Neto)
+      // CALCULO RENTABILIDAD FINAL (Utilidad Global / Ingreso Neto)
       const rentabilidad = fbTotal !== 0 ? (ugTotal / fbTotal) : 0;
       document.getElementById('kpi-margen-pct').innerText = percF.format(rentabilidad);
       
-      renderCharts(fbTotal, mbTotal, ugTotal, copTotal, mInY, validS);
-      renderTable(mInY, validS);
+      renderCharts(fbTotal, mbTotal, ugTotal, copTotal, validS);
       renderMicro(fbTotal, mbTotal, ugTotal, validS);
       
-      // Actualizar opciones del dropdown de meses
-      document.getElementById('month-options').innerHTML = mInY.map(m => `
-        <label class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 cursor-pointer">
+      document.getElementById('month-options').innerHTML = state.months.map(m => `
+        <label class="flex items-center gap-3 px-3 py-2 hover:bg-slate-50 cursor-pointer rounded-lg">
             <input type="checkbox" value="${m}" ${validS.includes(m)?'checked':''} onchange="window.toggleM('${m}')">
-            <span class="text-[10px] font-black text-slate-700 uppercase">${m.replace(' 2026', '').trim()}</span>
+            <span class="text-[10px] font-black text-slate-700 uppercase">${m}</span>
         </label>`).join('');
-      document.getElementById('month-dropdown-text').innerText = validS.length === 0 ? "SELECCIONAR" : `${validS.length} MESES SELECC.`;
+      document.getElementById('month-dropdown-text').innerText = validS.length === 0 ? "SELECCIONAR" : `${validS.length} MESES`;
       
       lucide.createIcons();
     }
 
-    function renderCharts(fb, mb, ug, cop, mInY, validS) {
+    function renderCharts(fb, mb, ug, cop, validS) {
       if(charts.w) charts.w.destroy();
       charts.w = new Chart(document.getElementById('chart-waterfall').getContext('2d'), {
           type: 'bar',
           data: { 
-              labels: ['ING. NETO', 'UTIL. BRUTA', 'EGRESOS', 'RESULTADO'], 
+              labels: ['ING. NETO', 'UTIL. BRUTA', 'COSTOS', 'RESULTADO'], 
               datasets: [{ 
                   data: [[0, fb], [0, mb], [mb-cop, mb], [0, ug]], 
                   backgroundColor: ['#0055a5', '#10b981', '#f43f5e', '#0055a5'], 
@@ -362,24 +326,23 @@
           },
           options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {display:false} } }
       });
-      
-      // DESGLOSE DE COSTOS (WHITELIST ESTRICTA)
+
       const list = state.accounts.filter(a => {
         const n = norm(a.name);
         return COST_WHITELIST.some(w => norm(w) === n || n.includes(norm(w)));
-      }).map(a => ({ n: a.name, v: validS.reduce((s,m)=>s+(Number(a.values[m])||0),0) })).sort((a,b)=>b.v-a.v);
+      }).map(a => ({ n: a.name, v: validS.reduce((s,m)=>s+(a.values[m]||0),0) })).sort((a,b)=>b.v-a.v);
       
       const totC = list.reduce((s,x)=>s+Math.abs(x.v), 0);
       document.getElementById('egresos-legend').innerHTML = list.map((c, i) => `
         <div class="flex justify-between p-3 border rounded-xl bg-slate-50">
             <div class="flex gap-2 min-w-0">
                 <span class="w-3 h-3 rounded-full mt-0.5 shrink-0" style="background-color: ${dotColors[i % 10]}"></span>
-                <div class="flex flex-col min-w-0">
-                    <span class="text-[9px] font-black uppercase text-slate-800 truncate">${c.n}</span>
-                    <span class="text-[8px] text-slate-400 font-bold">${totC ? (Math.abs(c.v)/totC*100).toFixed(1) : 0}% DEL DESGLOSE</span>
-                </div>
+                <span class="text-[9px] font-black uppercase text-slate-800 truncate">${c.n}</span>
             </div>
-            <span class="text-[10px] font-black text-[#003A70]">${currF.format(c.v)}</span>
+            <div class="text-right shrink-0">
+                <p class="text-[10px] font-black text-[#003A70]">${currF.format(c.v)}</p>
+                <p class="text-[8px] text-slate-400 font-bold">${totC ? (Math.abs(c.v)/totC*100).toFixed(1) : 0}%</p>
+            </div>
         </div>`).join('');
     }
 
@@ -388,18 +351,16 @@
         const labValue = validS.reduce((s, m) => s + (Number(labRow?.values[m]) || 0), 0);
 
         const indicators = [
-            { l: 'RENTABILIDAD FINAL %', v: fb ? ug/fb : 0, i: 'award', c: 'emerald', d: 'Margen neto final obtenido por cada peso vendido.', f: '(Utilidad Global / Ingreso Neto)' },
-            { l: 'MARGEN BRUTO %', v: fb ? mb/fb : 0, i: 'pie-chart', c: 'indigo', d: 'Peso de la Utilidad Bruta sobre los Ingresos Netos.', f: '(Utilidad Bruta / Ingreso Neto)' },
+            { l: 'RENTABILIDAD FINAL %', v: fb ? ug/fb : 0, i: 'award', c: 'emerald', d: 'Resultado neto obtenido por cada peso vendido.', f: '(Utilidad Global / Ingreso Neto)' },
+            { l: 'MARGEN BRUTO %', v: fb ? mb/fb : 0, i: 'pie-chart', c: 'indigo', d: 'Peso de la utilidad bruta sobre los ingresos netos.', f: '(Utilidad Bruta / Ingreso Neto)' },
             { l: 'COSTO LABORAL %', v: fb ? labValue/fb : 0, i: 'users', c: 'blue', d: 'Impacto de salarios en la facturación total.', f: '(Salarios / Ingreso Neto)' }
         ];
 
         document.getElementById('micro-kpis').innerHTML = indicators.map(ind => `
             <div class="modern-card p-5 border-l-4 border-l-${ind.c}-500 flex flex-col justify-between">
                 <div>
-                    <div class="flex justify-between mb-2">
-                        <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">
-                            <i data-lucide="${ind.i}" class="w-4 h-4"></i>
-                        </div>
+                    <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600 mb-4">
+                        <i data-lucide="${ind.i}" class="w-4 h-4"></i>
                     </div>
                     <p class="text-[9px] font-black text-slate-500 uppercase mb-0.5">${ind.l}</p>
                     <h4 class="text-2xl font-black text-slate-900">${percF.format(ind.v)}</h4>
@@ -412,44 +373,28 @@
         `).join('');
     }
 
-    function renderTable(mInY, validS) {
-        const h = document.getElementById('table-head'); const b = document.getElementById('table-body');
-        const cols = state.tab === 'periodo' ? validS : mInY;
-        if(!cols.length) return;
-        h.innerHTML = `<th>CONCEPTO</th>` + cols.map(m=>`<th class="text-right uppercase">${m.replace(' 2026','')}</th>`).join('') + `<th class="text-right bg-blue-50">TOTAL</th>`;
-        b.innerHTML = state.accounts.map(acc => {
-            const total = cols.reduce((s, m) => s + (Number(acc.values[m])||0), 0);
-            return `<tr><td class="font-bold uppercase">${acc.name}</td>` + cols.map(m => `<td class="text-right">${currF.format(acc.values[m])}</td>`).join('') + `<td class="text-right font-black bg-blue-50/20">${currF.format(total)}</td></tr>`;
-        }).join('');
+    function renderGlosario() {
+      document.getElementById('glosario-grid').innerHTML = [
+        { t: 'Ingreso Neto', d: 'Total facturado (Facturación Neta + Ts Total).' }, 
+        { t: 'Utilidad Bruta', d: 'Resultado operativo antes de gastos fijos.' }, 
+        { t: 'Rentabilidad Final', d: 'Utilidad Global dividida por el Ingreso Neto.' }
+      ].map(i => `<div class="modern-card p-6 border-t-4 border-t-[#003A70]"><h4 class="font-black text-[#003A70] text-[10px] uppercase mb-2">${i.t}</h4><p class="text-[11px] text-slate-600 leading-relaxed font-medium">${i.d}</p></div>`).join('');
     }
 
-    window.toggleM = function(m) { state.selected = state.selected.includes(m) ? state.selected.filter(x => x!==m) : [...state.selected, m]; window.render(); }
+    window.toggleM = function(m) { 
+      state.selected = state.selected.includes(m) ? state.selected.filter(x => x!==m) : [...state.selected, m]; 
+      window.render(); 
+    }
     window.selectAllMonths = function() { state.selected = [...state.months]; window.render(); }
     window.deselectAllMonths = function() { state.selected = []; window.render(); }
-    window.selectLastMonth = function() { state.selected = [state.months[state.months.length-1]]; window.render(); }
+    function saveToLocal() { localStorage.setItem('frias_db_data', JSON.stringify({ accounts: state.accounts, months: state.months })); }
+    window.clearData = () => { localStorage.removeItem('frias_db_data'); location.reload(); }
 
-    async function saveData() { 
-      const d = { months: state.months, accounts: state.accounts, manualInputs: state.manualInputs };
-      localStorage.setItem('rf_dashboard_data', JSON.stringify(d)); 
-      if(supabase) await supabase.from('dashboard').upsert({ id: 'main', content: d }); 
-    }
-
-    async function init() {
-       const { data } = await supabase.from('dashboard').select('content').eq('id', 'main').single();
-       const local = JSON.parse(localStorage.getItem('rf_dashboard_data'));
-       const s = data?.content || local;
-       if (s?.months) { 
-         state.months = s.months; 
-         state.accounts = s.accounts; 
-         state.manualInputs = s.manualInputs || { roaActivos: 0 };
-         state.loaded = true; 
-         window.render(); 
-       } else { window.render(); }
-       document.addEventListener('click', (e) => { const b = document.getElementById('btn-month-dropdown'); const m = document.getElementById('month-dropdown-menu'); if (b && m) { if (b.contains(e.target)) m.classList.toggle('hidden'); else if (!m.contains(e.target)) m.classList.add('hidden'); } });
-    }
-    
-    window.clearData = async function() { localStorage.removeItem('rf_dashboard_data'); location.reload(); }
-    window.onload = init;
+    window.onload = () => {
+      const saved = JSON.parse(localStorage.getItem('frias_db_data'));
+      if(saved) { state.accounts = saved.accounts; state.months = saved.months; state.selected = [...state.months]; state.loaded = true; window.render(); }
+      document.getElementById('btn-month-dropdown')?.addEventListener('click', () => document.getElementById('month-dropdown-menu').classList.toggle('hidden'));
+    };
   </script>
 </body>
 </html>
