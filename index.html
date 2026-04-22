@@ -39,7 +39,7 @@
   <style>
     body { background-color: #003A70; color: #ffffff; -webkit-font-smoothing: antialiased; }
     .modern-card { background: #ffffff; color: #0f172a; border: 1px solid #e2e8f0; border-radius: 1.25rem; transition: all 0.2s ease-in-out; }
-    .modern-card:hover { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2); }
+    .modern-card:hover { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
     
     .tab-container { background: rgba(0, 40, 85, 0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 999px; padding: 0.375rem; display: inline-flex; }
     .tab-btn { padding: 0.5rem 1.25rem; border-radius: 999px; font-weight: 700; font-size: 0.875rem; color: #94a3b8; transition: all 0.2s; white-space: nowrap; cursor: pointer; border: none; background: transparent; }
@@ -53,6 +53,16 @@
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
     
     @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    .input-sim { border: 2px solid #e2e8f0; border-radius: 0.75rem; height: 3rem; padding: 0 0.75rem; font-weight: 800; font-size: 1rem; width: 100%; outline: none; background: #f8fafc; transition: all 0.2s; }
+    .input-sim:focus { border-color: #0055a5; background: #ffffff; }
+
+    .table-pnl { width: 100%; border-collapse: separate; border-spacing: 0; }
+    .table-pnl th { background: #f8fafc; padding: 12px 16px; font-size: 10px; font-weight: 900; color: #64748b; text-transform: uppercase; border-bottom: 2px solid #e2e8f0; }
+    .table-pnl td { padding: 10px 16px; border-bottom: 1px solid #f1f5f9; font-size: 11px; }
+
+    .btn-replicate { padding: 0.5rem; background-color: #f1f5f9; color: #0055a5; border-radius: 0.5rem; transition: all 0.2s; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; }
+    .btn-replicate:hover { background-color: #e2e8f0; color: #003A70; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -61,19 +71,16 @@
     <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div class="flex items-center gap-4 min-w-0">
         <div class="min-w-0 py-1">
-          <div class="flex items-center gap-3">
-            <h1 class="text-xl sm:text-2xl font-[900] text-white truncate tracking-tighter uppercase leading-tight">DASHBOARD DE RENTABILIDAD</h1>
-          </div>
+          <h1 class="text-xl sm:text-2xl font-[900] text-white truncate tracking-tighter uppercase leading-tight">DASHBOARD DE RENTABILIDAD</h1>
           <p class="text-[11px] sm:text-xs text-blue-300 font-[800] uppercase tracking-[0.2em] mt-0.5">Grupo Frías S.R.L.</p>
         </div>
       </div>
       <div class="flex flex-wrap items-center gap-2">
-        <button onclick="window.clearData()" class="px-3 py-2 rounded-xl bg-white/10 text-rose-300 font-bold hover:bg-rose-500 hover:text-white transition border border-rose-500/30 text-xs flex items-center gap-1">
-          <i data-lucide="trash-2" class="w-4 h-4"></i> <span class="hidden sm:inline">Limpiar Todo</span>
+        <button onclick="window.clearData()" class="px-3 py-2 rounded-xl bg-white/10 text-rose-300 font-bold hover:bg-rose-500 hover:text-white transition border border-rose-500/30 text-xs flex items-center gap-1 uppercase">
+          <i data-lucide="trash-2" class="w-4 h-4"></i> Limpiar
         </button>
         <label for="file-upload" class="cursor-pointer px-4 py-2 rounded-xl bg-white text-[#003A70] font-black hover:bg-blue-50 transition flex items-center gap-2 text-sm shadow-lg">
-          <i data-lucide="upload-cloud" class="w-4 h-4"></i>
-          <span>Subir Excel</span>
+          <i data-lucide="upload-cloud" class="w-4 h-4"></i> Subir Excel
           <input type="file" id="file-upload" accept=".xlsx,.xls,.csv" class="hidden" onchange="window.handleFile(event)" />
         </label>
       </div>
@@ -85,17 +92,16 @@
         <div class="w-20 h-20 bg-white/10 text-white rounded-full flex items-center justify-center mb-6 shadow-inner border border-white/20">
             <i data-lucide="bar-chart-2" class="w-10 h-10"></i>
         </div>
-        <h2 class="text-2xl font-black text-white mb-3 uppercase">Cargar información</h2>
-        <p class="text-blue-100 max-w-md mx-auto mb-8 text-sm font-medium">Sube el reporte de rentabilidad para visualizar los indicadores.</p>
+        <h2 class="text-2xl font-black text-white mb-3 uppercase">Sin datos cargados</h2>
+        <p class="text-blue-100 max-w-md mx-auto mb-8 text-sm font-medium text-balance">Sube el reporte de rentabilidad de Grupo Frías para activar el tablero y el simulador.</p>
         <label for="file-upload-empty" class="cursor-pointer px-8 py-4 rounded-xl bg-white text-[#003A70] font-black hover:bg-blue-50 transition shadow-xl flex items-center gap-3 text-lg uppercase">
-            <i data-lucide="upload-cloud" class="w-6 h-6"></i>
-            Seleccionar archivo
+            <i data-lucide="upload-cloud" class="w-6 h-6"></i> Seleccionar archivo
             <input type="file" id="file-upload-empty" accept=".xlsx,.xls,.csv" class="hidden" onchange="window.handleFile(event)" />
         </label>
     </div>
 
     <div id="dashboard-content" class="hidden">
-      <!-- Filtros y Tabs -->
+      <!-- Navegación -->
       <div class="flex flex-col xl:flex-row gap-4 mb-8 items-center justify-between">
           <div class="tab-container shrink-0">
             <button onclick="window.switchT('periodo')" id="tab-periodo-btn" class="tab-btn active uppercase">Resumen</button>
@@ -120,7 +126,7 @@
           </div>
       </div>
 
-      <!-- SECCIÓN PERÍODO -->
+      <!-- RESUMEN -->
       <section id="content-periodo" class="tab-content active space-y-6">
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
           <div class="modern-card p-6 border-b-4 border-b-brand-400"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Ingreso Neto (Fact+TS)</p><h3 id="kpi-fb" class="text-2xl sm:text-3xl font-[900] tracking-tighter text-slate-900">$0</h3></div>
@@ -141,21 +147,19 @@
             <div class="h-[300px] w-full"><canvas id="chart-waterfall"></canvas></div>
           </div>
           <div class="modern-card p-6 shadow-lg overflow-hidden">
-            <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6">Desglose de Costos Operativos</h3>
+            <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6 text-brand-600">Composición de Costos Operativos</h3>
             <div id="egresos-legend" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[300px] overflow-y-auto custom-scrollbar pr-2"></div>
           </div>
         </div>
 
-        <!-- Micro KPIs (Rentabilidad Final, Margen Bruto, Costo Laboral) -->
         <div id="micro-kpis" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
 
-        <!-- TABLA P&L CONSOLIDADO -->
-        <div class="modern-card overflow-hidden shadow-lg border-t-4 border-t-[#003A70]">
-          <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-            <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest uppercase">P&L Consolidado Detallado</h3>
+        <div class="modern-card overflow-hidden shadow-lg border-t-4 border-t-[#003A70] mt-8">
+          <div class="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+            <h3 class="text-[11px] font-black text-slate-900 uppercase tracking-widest">Estado de Resultados (P&L) Detallado</h3>
           </div>
           <div class="overflow-x-auto custom-scrollbar">
-            <table class="w-full text-left text-[11px] whitespace-nowrap">
+            <table class="table-pnl">
               <thead><tr id="table-head" class="bg-slate-100 text-slate-500 font-black uppercase tracking-widest"></tr></thead>
               <tbody id="table-body" class="divide-y divide-slate-100 font-medium text-slate-600"></tbody>
             </table>
@@ -163,49 +167,143 @@
         </div>
       </section>
 
-      <!-- SECCIÓN TENDENCIA -->
+      <!-- TENDENCIA -->
       <section id="content-tendencia" class="tab-content space-y-6">
-        <div class="modern-card p-6 shadow-lg">
-          <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6">Evolución Mensual de Utilidad Global</h3>
-          <div class="h-[450px] relative"><canvas id="chart-anual"></canvas></div>
+        <div class="modern-card p-8 shadow-xl">
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+            <h3 class="text-[11px] font-black text-[#003A70] uppercase tracking-widest">Análisis de Tendencia Histórica</h3>
+            <div class="flex flex-wrap gap-4">
+              <div class="space-y-1">
+                <label class="text-[9px] font-black text-slate-400 uppercase">Variable A</label>
+                <select id="trend-v1" class="block w-48 text-[11px] font-bold border rounded-lg p-2 bg-slate-50 outline-none" onchange="window.renderTrendChart()"></select>
+              </div>
+              <div class="space-y-1">
+                <label class="text-[9px] font-black text-slate-400 uppercase">Variable B</label>
+                <select id="trend-v2" class="block w-48 text-[11px] font-bold border rounded-lg p-2 bg-slate-50 outline-none" onchange="window.renderTrendChart()"></select>
+              </div>
+            </div>
+          </div>
+          <div class="h-[400px] w-full"><canvas id="chart-trend-comp"></canvas></div>
+        </div>
+
+        <div class="modern-card overflow-hidden shadow-xl mt-8">
+          <div class="p-6 border-b border-slate-100 bg-slate-50">
+            <h3 class="text-[11px] font-black text-[#003A70] uppercase tracking-widest">P&L Consolidado Anual Acumulado</h3>
+          </div>
+          <div class="overflow-x-auto custom-scrollbar">
+            <table class="table-pnl">
+              <thead><tr id="table-annual-head" class="bg-slate-100 text-slate-500 font-black uppercase tracking-widest"></tr></thead>
+              <tbody id="table-annual-body" class="divide-y divide-slate-100 font-medium text-slate-600"></tbody>
+            </table>
+          </div>
         </div>
       </section>
 
-      <!-- SECCIÓN SIMULADOR -->
-      <section id="content-simulador" class="tab-content space-y-6">
-        <div class="modern-card p-8 bg-[#002855] text-white flex flex-col md:flex-row justify-between items-center gap-6 shadow-xl border-white/10">
-          <h2 class="text-2xl font-black uppercase tracking-tighter">Simulador de Metas de Ingreso</h2>
-          <div class="flex gap-2">
-            <button onclick="window.print()" class="px-6 py-3 bg-white text-[#003A70] hover:bg-blue-50 font-black transition shadow-lg rounded-xl uppercase text-xs">Imprimir Reporte</button>
-          </div>
-        </div>
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-2 space-y-6">
-              <div class="modern-card p-6 border-t-4 border-t-emerald-500 shadow-md">
-                <h3 class="text-[10px] font-black uppercase mb-6 text-slate-500">Variables de Simulación</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  <div>
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5">Utilidad Deseada ($)</label>
-                    <input type="number" id="sim-meta" class="w-full border rounded-xl h-11 p-3 font-black bg-slate-50 outline-none focus:ring-2 focus:ring-emerald-500 transition" oninput="window.calcSim()">
+      <!-- SIMULADOR -->
+      <section id="content-simulador" class="tab-content space-y-8">
+        <div id="sim-export-area">
+          <div class="modern-card p-10 bg-[#002855] text-white shadow-2xl relative overflow-hidden mb-8">
+            <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
+              <div>
+                  <h2 class="text-3xl font-black uppercase tracking-tighter mb-2">Simulador Gerencial</h2>
+                  <p class="text-blue-200 text-sm font-medium uppercase tracking-widest italic">Define objetivos y ajusta costos para proyectar la rentabilidad.</p>
+              </div>
+              <div class="flex flex-col items-center gap-4">
+                  <div class="bg-white/10 p-6 rounded-2xl border border-white/20 text-center min-w-[240px] backdrop-blur-sm">
+                      <p class="text-[10px] font-black uppercase text-blue-200 mb-2 tracking-widest">Venta Neta Requerida</p>
+                      <h2 id="res-fb" class="text-3xl font-[900] text-white tracking-tighter">$0</h2>
                   </div>
+                  <button onclick="window.exportSimPDF()" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-black rounded-xl transition shadow-lg text-xs uppercase border-none cursor-pointer">
+                    <i data-lucide="file-text" class="w-4 h-4"></i> Exportar Proyectado (PDF)
+                  </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- Parámetros Meta -->
+            <div class="lg:col-span-1 space-y-6">
+              <div class="modern-card p-8 border-t-4 border-t-emerald-500 shadow-lg h-full">
+                <h3 class="text-[11px] font-black uppercase text-slate-500 mb-8 tracking-widest">Variables de Meta</h3>
+                <div class="space-y-6">
                   <div>
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5">Margen Bruto (%)</label>
-                    <input type="number" id="sim-mb-pct" class="w-full border rounded-xl h-11 p-3 font-black bg-slate-50 outline-none focus:ring-2 focus:ring-emerald-500 transition" oninput="window.calcSim()">
+                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Meta Utilidad Global ($)</label>
+                    <input type="number" id="sim-meta" class="input-sim" oninput="window.calcSim()">
+                  </div>
+                  
+                  <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-[10px] font-black text-slate-400 uppercase">Margen Bruto Objetivo (%)</label>
+                        <button onclick="window.replicateMB()" class="btn-replicate" title="Traer Margen real del mes pasado">
+                            <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+                    <input type="number" id="sim-mb-pct" class="input-sim" oninput="window.calcSim()">
+                  </div>
+
+                  <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-[10px] font-black text-slate-400 uppercase">Ganancia Financiera ($)</label>
+                        <button onclick="window.replicateFinancial()" class="btn-replicate" title="Traer Ganancia Financiera del mes pasado">
+                            <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+                    <input type="number" id="sim-financial" class="input-sim" oninput="window.calcSim()">
                   </div>
                 </div>
               </div>
             </div>
-            <div class="lg:col-span-1">
-              <div class="modern-card p-6 bg-brand-50 border-brand-200 sticky top-24 shadow-xl">
-                <h4 class="text-[10px] font-black uppercase text-brand-800 mb-6">Ingreso Requerido para Meta</h4>
-                <h2 id="res-fb" class="text-3xl font-[900] text-brand-700 mb-4 tracking-tighter">$0</h2>
-                <p class="text-[9px] text-brand-600 font-bold uppercase leading-relaxed italic border-t border-brand-200 pt-3">Calculado en base al promedio de tus costos operativos seleccionados.</p>
+
+            <!-- Tabla de Gastos Editables -->
+            <div class="lg:col-span-3">
+              <div class="modern-card shadow-xl overflow-hidden h-full flex flex-col">
+                <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                  <h3 class="text-[11px] font-black text-slate-900 uppercase tracking-widest">Ajuste de Egresos Operativos</h3>
+                  <span id="sim-mes-base" class="text-[9px] font-black bg-brand-100 text-brand-700 px-3 py-1 rounded-full uppercase tracking-tighter">BASE: ---</span>
+                </div>
+                <div class="overflow-x-auto custom-scrollbar flex-grow max-h-[600px]">
+                  <table class="w-full text-left">
+                    <thead>
+                      <tr class="text-[10px] text-slate-400 font-black uppercase border-b bg-white sticky top-0 z-10">
+                        <th class="px-6 py-4">Concepto del P&L</th>
+                        <th class="px-6 py-4 text-right">Real (Mes Anterior)</th>
+                        <th class="px-6 py-4 text-right text-brand-600">Simulado (Editable)</th>
+                      </tr>
+                    </thead>
+                    <tbody id="sim-table-body" class="divide-y font-bold text-slate-700"></tbody>
+                  </table>
+                </div>
+                <div class="p-6 bg-slate-50 border-t flex justify-between items-center">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Gastos Operativos Simulados</p>
+                    <h4 id="sim-total-costs" class="text-xl font-black text-slate-900">$0</h4>
+                </div>
               </div>
             </div>
+          </div>
+
+          <!-- P&L Proyectado Comparativo -->
+          <div class="modern-card overflow-hidden shadow-xl mt-8 border-t-4 border-t-brand-500">
+            <div class="p-6 border-b border-slate-100 bg-slate-50">
+              <h3 class="text-[11px] font-black text-slate-900 uppercase tracking-widest">Estado de Resultados Proyectado vs Mes Anterior</h3>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left table-pnl">
+                <thead>
+                  <tr class="text-[10px] text-slate-400 font-black uppercase border-b-2">
+                    <th class="py-4">LINEA DE RESULTADOS</th>
+                    <th class="py-4 text-right">REAL (MES BASE)</th>
+                    <th class="py-4 text-right text-brand-600">PROYECTADO</th>
+                    <th class="py-4 text-right">VARIACIÓN %</th>
+                  </tr>
+                </thead>
+                <tbody id="sim-pnl-summary" class="divide-y font-bold text-slate-700 text-sm"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </section>
 
-      <!-- SECCIÓN AYUDA -->
+      <!-- AYUDA -->
       <section id="content-glosario" class="tab-content py-8">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="glosario-grid"></div>
       </section>
@@ -213,34 +311,32 @@
   </main>
 
   <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-
-    const supabaseUrl = 'https://qefhvntgskqzrmayovaa.supabase.co';
-    const supabaseKey = 'sb_publishable_XcfkFhLnMQqelqCGlkvVag_q-BL8cKD';
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
     const currF = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0, maximumFractionDigits: 0 });
     const percF = new Intl.NumberFormat('es-AR', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 });
     const dotColors = ['#0055a5', '#10b981', '#f43f5e', '#f59e0b', '#0ea5e9', '#8b5cf6', '#d946ef', '#14b8a6', '#f97316', '#06b6d4'];
     
-    let state = { loaded: false, months: [], accounts: [], selected: [], tab: 'periodo' };
+    let state = { loaded: false, months: [], accounts: [], selected: [], tab: 'periodo', simCosts: {} };
     let charts = {};
 
     function norm(t) { return String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim(); }
     
     const ALIASES = {
-        fb: ['ingreso neto (fact neta + ts total)', 'ingreso neto'], 
-        ug: ['utilidad global', 'utilidad del ejercicio'], 
-        mb: ['utilidad bruta', 'margen bruto'], 
+        fb: ['ingreso neto (fact neta + ts total)', 'ingreso neto', 'facturacion neta + ts total'], 
+        ug: ['utilidad global (utilidad bruta + gan financiera)', 'utilidad global', 'utilidad del ejercicio'], 
+        mb: ['utilidad bruta (mg bruto - costos totales)', 'utilidad bruta', 'margen bruto operativo'], 
+        mgo: ['margen bruto (fact neta + ts cmq + ts wsc - cmv)', 'margen bruto'],
         cop: ['costos totales'], 
-        lab: ['salarios']
+        lab: ['salarios'],
+        fin: ['ganancia financiera', 'resultado financiero', 'intereses']
     };
 
+    // Listado COMPLETO de 17 conceptos basado en la captura del usuario
     const COST_WHITELIST = [
         'salarios', 'gastos de personal', 'movilidad y viaticos', 
-        'honorarios', 'servicios tercerizados', 'sistemas', 'servicios basicos', 
-        'gastos oficina', 'comisiones', 'tasas e impuestos', 'mantenimiento', 
-        'impuesto debitos y creditos', 'comision financiera', 'intereses'
+        'juicios e indemnizaciones', 'honorarios', 'servicios tercerizados', 
+        'sistemas', 'servicios basicos', 'alquileres', 'reparaciones y mantenimiento',
+        'combustibles y lubricantes', 'seguros y patentes', 'impuestos, tasas y multas', 
+        'gastos bancarios/financieros', 'perdidas y robos', 'otros gastos comerciales', 'otros gastos fijos'
     ];
 
     function findAccount(key) {
@@ -248,8 +344,8 @@
         return state.accounts.find(a => {
             const n = norm(a.name);
             return terms.some(t => {
-                const parts = norm(t).split(' ').filter(p => p.length > 2);
-                return n === norm(t) || parts.every(p => n.includes(p));
+                const nt = norm(t);
+                return n === nt || (nt.length > 5 && n.includes(nt)) || (n.length > 5 && nt.includes(n));
             });
         });
     }
@@ -269,7 +365,45 @@
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.id === `tab-${id}-btn`));
         document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === `content-${id}`));
         if(id === 'glosario') renderGlosario();
+        if(id === 'simulador' && !Object.keys(state.simCosts).length) initSimData();
         window.render();
+    }
+
+    function initSimData() {
+        const lastM = state.months[state.months.length - 1];
+        if(!lastM) return;
+
+        state.simCosts = {};
+        state.accounts.forEach(acc => {
+            const n = norm(acc.name);
+            if (COST_WHITELIST.some(w => n.includes(norm(w)))) {
+                state.simCosts[acc.name] = Math.abs(acc.values[lastM] || 0);
+            }
+        });
+        
+        const currentUg = findAccount('ug')?.values[lastM] || 0;
+        document.getElementById('sim-meta').value = Math.round(currentUg);
+        window.replicateMB();
+        window.replicateFinancial();
+    }
+
+    window.replicateMB = () => {
+        const lastM = state.months[state.months.length - 1];
+        const accFb = findAccount('fb');
+        const accMgo = findAccount('mgo');
+        const valFb = accFb?.values[lastM] || 0;
+        const valMgo = accMgo?.values[lastM] || 0;
+        const mbPct = valFb !== 0 ? Math.round((valMgo / valFb) * 1000) / 10 : 25;
+        document.getElementById('sim-mb-pct').value = mbPct;
+        window.calcSim();
+    }
+
+    window.replicateFinancial = () => {
+        const lastM = state.months[state.months.length - 1];
+        const accFin = findAccount('fin');
+        const val = accFin?.values[lastM] || 0;
+        document.getElementById('sim-financial').value = Math.round(val);
+        window.calcSim();
     }
 
     window.handleFile = function(e) {
@@ -294,7 +428,7 @@
       const newAccs = [];
       for(let i = hr+1; i < data.length; i++) {
         const label = String(data[i][0] || data[i][1] || '').trim();
-        if(!label || label === 'CONCEPTOS') continue;
+        if(!label || label === 'CONCEPTOS' || label === '') continue;
         const vs = {}; 
         ms.forEach((m, idx) => { if(m) vs[m] = cleanNumber(data[i][idx]); });
         newAccs.push({ name: label, values: vs });
@@ -303,7 +437,13 @@
       state.accounts = newAccs; 
       state.loaded = true;
       state.selected = [...state.months]; 
-      saveData();
+      
+      const accList = state.accounts.map(a => `<option value="${a.name}">${a.name.toUpperCase()}</option>`).join('');
+      const t1 = document.getElementById('trend-v1'); const t2 = document.getElementById('trend-v2');
+      if(t1 && t2) { t1.innerHTML = accList; t2.innerHTML = accList; t1.value = findAccount('fb')?.name; t2.value = findAccount('ug')?.name; }
+      
+      state.simCosts = {};
+      saveToLocal();
       window.render();
     }
 
@@ -351,10 +491,12 @@
       if(state.tab === 'periodo') {
         renderCharts(fbTotal, mbTotal, ugTotal, copTotal, validS);
         renderMicro(fbTotal, mbTotal, ugTotal, labTotal);
-        renderTable(validS);
+        renderTable(validS, 'table-head', 'table-body');
       } else if (state.tab === 'tendencia') {
-        renderTrendChart();
+        window.renderTrendChart();
+        renderAnnualTable();
       } else if (state.tab === 'simulador') {
+        window.renderSimTable();
         window.calcSim();
       }
 
@@ -368,12 +510,149 @@
       lucide.createIcons();
     }
 
+    window.renderTrendChart = function() {
+      const canvas = document.getElementById('chart-trend-comp');
+      if(!canvas) return;
+      if(charts.t) charts.t.destroy();
+      const v1Name = document.getElementById('trend-v1').value;
+      const v2Name = document.getElementById('trend-v2').value;
+      const v1 = state.accounts.find(a => a.name === v1Name);
+      const v2 = state.accounts.find(a => a.name === v2Name);
+      
+      charts.t = new Chart(canvas.getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: state.months,
+          datasets: [
+            { label: v1Name.toUpperCase(), data: state.months.map(m => v1?.values[m] || 0), borderColor: '#0055a5', backgroundColor: 'rgba(0, 85, 165, 0.1)', borderWidth: 4, tension: 0.4, fill: true, yAxisID: 'y' },
+            { label: v2Name.toUpperCase(), data: state.months.map(m => v2?.values[m] || 0), borderColor: '#10b981', borderWidth: 4, tension: 0.4, fill: false, yAxisID: 'y' }
+          ]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+      });
+    }
+
+    function renderAnnualTable() {
+        const h = document.getElementById('table-annual-head');
+        const b = document.getElementById('table-annual-body');
+        if(!h || !b) return;
+        h.innerHTML = `<th>Concepto</th><th class="text-right px-6">Total Acumulado Año</th>`;
+        const accFb = findAccount('fb');
+        const accUg = findAccount('ug');
+
+        b.innerHTML = state.accounts.map(acc => {
+            const n = norm(acc.name);
+            const total = state.months.reduce((s, m) => s + (Number(acc.values[m])||0), 0);
+            const isRent = n.includes('rentabilidad');
+            const isMain = ['ingreso neto', 'utilidad bruta', 'utilidad global', 'costos totales'].some(x => n.includes(x));
+            let displayValue = currF.format(total);
+            if(isRent) {
+                const totalFb = state.months.reduce((s, m) => s + (Number(accFb?.values[m]) || 0), 0);
+                const totalUg = state.months.reduce((s, m) => s + (Number(accUg?.values[m]) || 0), 0);
+                displayValue = percF.format(totalFb !== 0 ? totalUg / totalFb : 0);
+            }
+            return `<tr class="${isMain ? 'bg-slate-50 font-black text-slate-900 border-y' : ''}">
+                <td class="font-bold uppercase">${acc.name}</td>
+                <td class="text-right px-6 font-black ${isRent ? 'text-brand-600' : ''}">${displayValue}</td>
+            </tr>`;
+        }).join('');
+    }
+
+    window.renderSimTable = function() {
+        const lastM = state.months[state.months.length - 1];
+        document.getElementById('sim-mes-base').innerText = `BASE: ${lastM}`;
+        
+        // Obtenemos solo los gastos del whitelist pero que existen en la carga
+        const costs = state.accounts.filter(a => COST_WHITELIST.some(w => norm(a.name).includes(norm(w))));
+        
+        document.getElementById('sim-table-body').innerHTML = costs.map(acc => {
+            const real = Math.abs(acc.values[lastM] || 0);
+            if(state.simCosts[acc.name] === undefined) state.simCosts[acc.name] = real;
+            return `<tr>
+                <td class="px-6 py-4 uppercase text-[10px] font-black text-slate-500">${acc.name}</td>
+                <td class="px-6 py-4 text-right text-slate-400 font-bold">${currF.format(real)}</td>
+                <td class="px-6 py-4 text-right">
+                    <input type="number" value="${state.simCosts[acc.name]}" 
+                        class="w-32 text-right border-b-2 border-brand-100 font-black text-brand-700 outline-none focus:border-brand-500 bg-transparent"
+                        oninput="window.updateSimCost('${acc.name}', this.value)">
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+    window.updateSimCost = (name, val) => {
+        state.simCosts[name] = parseFloat(val) || 0;
+        window.calcSim();
+    }
+
+    window.calcSim = function() {
+        const meta = parseFloat(document.getElementById('sim-meta').value) || 0;
+        const mbPct = (parseFloat(document.getElementById('sim-mb-pct').value) || 25) / 100;
+        const fin = parseFloat(document.getElementById('sim-financial').value) || 0;
+        
+        // Sumamos todos los costos simulados que el usuario está viendo en la tabla
+        const totalSimCosts = Object.values(state.simCosts).reduce((s, v) => s + v, 0);
+        document.getElementById('sim-total-costs').innerText = currF.format(totalSimCosts);
+
+        // Venta Neta Requerida = (Meta + Gastos Simulados - Ganancia Financiera) / Margen Bruto %
+        // Nota: El margen bruto debe cubrir los costos operativos.
+        const reqFb = mbPct > 0 ? (meta + totalSimCosts - fin) / mbPct : 0;
+        const reqMgo = reqFb * mbPct;
+        document.getElementById('res-fb').innerText = currF.format(reqFb);
+
+        // Tabla comparativa de resultados
+        const lastM = state.months[state.months.length - 1];
+        const rFb = findAccount('fb')?.values[lastM] || 0;
+        const rMgo = findAccount('mgo')?.values[lastM] || 0;
+        const rCop = Math.abs(findAccount('cop')?.values[lastM] || 0);
+        const rFin = findAccount('fin')?.values[lastM] || 0;
+        const rUg = findAccount('ug')?.values[lastM] || 0;
+
+        const summaryRows = [
+            { l: 'Ingreso Neto (Venta)', r: rFb, p: reqFb },
+            { l: 'Margen Bruto Operativo', r: rMgo, p: reqMgo },
+            { l: 'Costos Operativos Totales', r: -rCop, p: -totalSimCosts },
+            { l: 'Ganancia Financiera', r: rFin, p: fin },
+            { l: 'Utilidad Global Final', r: rUg, p: meta }
+        ];
+
+        document.getElementById('sim-pnl-summary').innerHTML = summaryRows.map(row => {
+            const varPct = row.r !== 0 ? (row.p / row.r - 1) : 0;
+            const isFinal = row.l.includes('Final');
+            return `<tr class="${isFinal ? 'bg-emerald-50/50' : ''}">
+                <td class="py-4 uppercase text-[10px] font-black">${row.l}</td>
+                <td class="py-4 text-right text-slate-400 font-medium">${currF.format(row.r)}</td>
+                <td class="py-4 text-right text-brand-600 font-black">${currF.format(row.p)}</td>
+                <td class="py-4 text-right ${varPct >= 0 ? 'text-emerald-500' : 'text-rose-500'} font-bold">
+                    ${varPct > 0 ? '+' : ''}${percF.format(varPct)}
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+    window.exportSimPDF = function() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p', 'pt', 'a4');
+        const element = document.getElementById('sim-export-area');
+        const btn = event.target.closest('button');
+        btn.disabled = true;
+        
+        html2canvas(element, { scale: 2, useCORS: true }).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            const pdfWidth = doc.internal.pageSize.getWidth();
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+            doc.addImage(imgData, 'PNG', 0, 40, pdfWidth, pdfHeight);
+            doc.save(`Proyeccion_Frias_SRL_${new Date().toLocaleDateString()}.pdf`);
+            btn.disabled = false;
+        });
+    }
+
     function renderCharts(fb, mb, ug, cop, validS) {
       if(charts.w) charts.w.destroy();
       charts.w = new Chart(document.getElementById('chart-waterfall').getContext('2d'), {
           type: 'bar',
           data: { 
-              labels: ['ING. NETO', 'UTIL. BRUTA', 'COSTOS', 'UTIL. GLOBAL'], 
+              labels: ['ING. NETO', 'MARGEN B.', 'COSTOS', 'RESULTADO'], 
               datasets: [{ 
                   data: [[0, fb], [0, mb], [mb-cop, mb], [0, ug]], 
                   backgroundColor: ['#0055a5', '#10b981', '#f43f5e', '#0055a5'], 
@@ -383,11 +662,8 @@
           options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {display:false} } }
       });
 
-      const list = state.accounts.filter(a => {
-        const n = norm(a.name);
-        return COST_WHITELIST.some(w => norm(w) === n || n.includes(norm(w)));
-      }).map(a => ({ n: a.name, v: validS.reduce((s,m)=>s+(a.values[m]||0),0) })).sort((a,b)=>b.v-a.v);
-      
+      const list = state.accounts.filter(a => COST_WHITELIST.some(w => norm(a.name).includes(norm(w))))
+          .map(a => ({ n: a.name, v: validS.reduce((s,m)=>s+(a.values[m]||0),0) })).sort((a,b)=>b.v-a.v);
       const totC = list.reduce((s,x)=>s+Math.abs(x.v), 0);
       document.getElementById('egresos-legend').innerHTML = list.map((c, i) => `
         <div class="flex justify-between p-3 border rounded-xl bg-slate-50">
@@ -395,44 +671,19 @@
                 <span class="w-3 h-3 rounded-full mt-0.5 shrink-0" style="background-color: ${dotColors[i % 10]}"></span>
                 <span class="text-[9px] font-black uppercase text-slate-800 truncate">${c.n}</span>
             </div>
-            <div class="text-right shrink-0">
+            <div class="text-right ml-2 shrink-0">
                 <p class="text-[10px] font-black text-[#003A70]">${currF.format(c.v)}</p>
                 <p class="text-[8px] text-slate-400 font-bold">${totC ? (Math.abs(c.v)/totC*100).toFixed(1) : 0}%</p>
             </div>
         </div>`).join('');
     }
 
-    function renderTrendChart() {
-      if(charts.t) charts.t.destroy();
-      const accUg = findAccount('ug');
-      charts.t = new Chart(document.getElementById('chart-anual').getContext('2d'), {
-        type: 'line',
-        data: {
-          labels: state.months,
-          datasets: [{
-            label: 'Utilidad Global Mensual',
-            data: state.months.map(m => accUg?.values[m] || 0),
-            borderColor: '#10b981',
-            backgroundColor: 'rgba(16, 185, 129, 0.1)',
-            borderWidth: 4,
-            tension: 0.4,
-            fill: true,
-            pointRadius: 6,
-            pointBackgroundColor: '#fff',
-            pointBorderWidth: 3
-          }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: false } } }
-      });
-    }
-
     function renderMicro(fb, mb, ug, lab) {
         const indicators = [
-            { l: 'RENTABILIDAD FINAL %', v: fb ? ug/fb : 0, i: 'award', c: 'emerald', d: 'Utilidad Global sobre Ingreso Neto.', f: '(Utilidad Global / Ingreso Neto)' },
-            { l: 'MARGEN BRUTO %', v: fb ? mb/fb : 0, i: 'pie-chart', c: 'indigo', d: 'Utilidad Bruta sobre Ingreso Neto.', f: '(Utilidad Bruta / Ingreso Neto)' },
-            { l: 'COSTO LABORAL %', v: fb ? lab/fb : 0, i: 'users', c: 'blue', d: 'Salarios sobre Ingreso Neto.', f: '(Salarios / Ingreso Neto)' }
+            { l: 'RENTABILIDAD FINAL %', v: fb ? ug/fb : 0, i: 'award', c: 'emerald', d: 'Resultado Final sobre Ingreso Neto.', f: '(Utilidad Global / Ingreso Neto)' },
+            { l: 'MARGEN BRUTO %', v: fb ? mb/fb : 0, i: 'pie-chart', c: 'indigo', d: 'Utilidad Operativa sobre Ingreso Neto.', f: '(Utilidad Bruta / Ingreso Neto)' },
+            { l: 'COSTO LABORAL %', v: fb ? lab/fb : 0, i: 'users', c: 'blue', d: 'Impacto salarial sobre la facturación.', f: '(Salarios / Ingreso Neto)' }
         ];
-
         document.getElementById('micro-kpis').innerHTML = indicators.map(ind => `
             <div class="modern-card p-5 border-l-4 border-l-${ind.c}-500 flex flex-col justify-between">
                 <div>
@@ -443,92 +694,69 @@
                     <h4 class="text-2xl font-black text-slate-900">${percF.format(ind.v)}</h4>
                 </div>
                 <div class="mt-4 pt-3 border-t border-slate-100">
-                    <p class="text-[8px] text-slate-400 font-bold uppercase mb-1 line-clamp-1">${ind.d}</p>
+                    <p class="text-[8px] text-slate-400 font-bold uppercase mb-1 line-clamp-1 text-balance">${ind.d}</p>
                     <p class="text-[8px] text-brand-500 font-black tracking-wider uppercase leading-none">${ind.f}</p>
                 </div>
             </div>
         `).join('');
     }
 
-    function renderTable(validS) {
-        const h = document.getElementById('table-head'); const b = document.getElementById('table-body');
-        if(!validS.length) return;
-
+    function renderTable(validS, headId, bodyId) {
+        const h = document.getElementById(headId); const b = document.getElementById(bodyId);
+        if(!validS.length || !h || !b) return;
         const accFb = findAccount('fb');
         const accUg = findAccount('ug');
-
-        h.innerHTML = `<th>CONCEPTO</th>` + validS.map(m=>`<th class="text-right uppercase">${m}</th>`).join('') + `<th class="text-right bg-blue-50">TOTAL</th>`;
-        
+        h.innerHTML = `<th class="px-6 py-4 text-[10px]">CONCEPTO</th>` + validS.map(m=>`<th class="text-right px-6 py-4 text-[10px]">${m}</th>`).join('') + `<th class="text-right px-6 py-4 text-[10px] bg-brand-50/50">Total</th>`;
         b.innerHTML = state.accounts.map(acc => {
             const n = norm(acc.name);
-            const isRentRow = n.includes('rentabilidad');
-            const isMainRow = ['ingreso neto', 'utilidad bruta', 'utilidad global', 'costos totales'].some(x => n.includes(x));
-            
-            let rowHtml = `<td class="font-bold uppercase">${acc.name}</td>`;
-            
-            if (isRentRow) {
-                // RECALCULAR RENTABILIDAD PARA CADA MES
+            const isRent = n.includes('rentabilidad');
+            const isMain = ['ingreso neto', 'utilidad bruta', 'utilidad global', 'costos totales', 'margen bruto'].some(x => n.includes(x));
+            let rowHtml = `<td class="px-6 py-4 font-bold uppercase ${isRent ? 'text-brand-600' : ''}">${acc.name}</td>`;
+            if (isRent) {
                 validS.forEach(m => {
-                    const monthFb = Number(accFb?.values[m]) || 0;
-                    const monthUg = Number(accUg?.values[m]) || 0;
-                    const rent = monthFb !== 0 ? (monthUg / monthFb) : 0;
-                    rowHtml += `<td class="text-right font-bold text-brand-600">${percF.format(rent)}</td>`;
+                    const mFb = Number(accFb?.values[m]) || 0;
+                    const mUg = Number(accUg?.values[m]) || 0;
+                    rowHtml += `<td class="text-right px-6 py-4 font-bold text-brand-600 bg-brand-50/20">${percF.format(mFb !== 0 ? mUg / mFb : 0)}</td>`;
                 });
-                // CALCULAR RENTABILIDAD PARA EL TOTAL
-                const totalFb = validS.reduce((s, m) => s + (Number(accFb?.values[m]) || 0), 0);
-                const totalUg = validS.reduce((s, m) => s + (Number(accUg?.values[m]) || 0), 0);
-                const totalRent = totalFb !== 0 ? (totalUg / totalFb) : 0;
-                rowHtml += `<td class="text-right font-black bg-blue-50/20 text-brand-600">${percF.format(totalRent)}</td>`;
-                
-                return `<tr class="bg-blue-50/10 font-bold">${rowHtml}</tr>`;
+                const tFb = validS.reduce((s, m) => s + (Number(accFb?.values[m]) || 0), 0);
+                const tUg = validS.reduce((s, m) => s + (Number(accUg?.values[m]) || 0), 0);
+                rowHtml += `<td class="text-right px-6 py-4 font-black bg-brand-100 text-brand-700">${percF.format(tFb !== 0 ? tUg / tFb : 0)}</td>`;
+                return `<tr class="bg-brand-50/50">${rowHtml}</tr>`;
             } else {
                 const totalVal = validS.reduce((s, m) => s + (Number(acc.values[m])||0), 0);
-                rowHtml += validS.map(m => `<td class="text-right">${currF.format(acc.values[m])}</td>`).join('');
-                rowHtml += `<td class="text-right font-black bg-blue-50/20">${currF.format(totalVal)}</td>`;
-                
-                return `<tr class="${isMainRow ? 'bg-slate-50 font-black text-slate-900' : ''}">${rowHtml}</tr>`;
+                rowHtml += validS.map(m => `<td class="text-right px-6 py-4">${currF.format(acc.values[m])}</td>`).join('');
+                rowHtml += `<td class="text-right px-6 py-4 font-black bg-blue-50/20">${currF.format(totalVal)}</td>`;
+                return `<tr class="${isMain ? 'bg-slate-50 font-black text-slate-900 border-y' : ''}">${rowHtml}</tr>`;
             }
         }).join('');
     }
 
-    window.calcSim = function() {
-        const meta = parseFloat(document.getElementById('sim-meta').value) || 0;
-        const mbPct = (parseFloat(document.getElementById('sim-mb-pct').value) || 0) / 100;
-        const accCop = findAccount('cop');
-        const validS = state.selected;
-        const copMedio = validS.length ? (validS.reduce((s, m) => s + Math.abs(accCop?.values[m] || 0), 0) / validS.length) : 0;
-        
-        const req = mbPct > 0 ? (meta + copMedio) / mbPct : 0;
-        document.getElementById('res-fb').innerText = currF.format(req);
-    }
-
     function renderGlosario() {
-      document.getElementById('glosario-grid').innerHTML = [
-        { t: 'Rentabilidad Final', d: 'Margen neto obtenido tras descontar todos los costos operativos.' }, 
-        { t: 'Utilidad Bruta', d: 'Monto que queda tras restar el CMV del Ingreso Neto.' }, 
-        { t: 'Ingreso Neto', d: 'Total facturado incluyendo Facturación Neta y Trade Spend.' }
-      ].map(i => `<div class="modern-card p-6 border-t-4 border-t-[#003A70]"><h4 class="font-black text-[#003A70] text-[10px] uppercase mb-2">${i.t}</h4><p class="text-[11px] text-slate-600 leading-relaxed font-medium">${i.d}</p></div>`).join('');
+      const grid = document.getElementById('glosario-grid');
+      if(grid) grid.innerHTML = [
+        { t: 'Rentabilidad Final', d: 'Muestra qué porcentaje del ingreso neto quedó como utilidad real tras todos los costos y ganancias financieras.' }, 
+        { t: 'Absorción de Gastos', d: 'Qué porcentaje del Margen Bruto se utiliza para pagar la estructura de costos operativos.' }, 
+        { t: 'Venta Objetivo', d: 'Es el monto total que se debe facturar para cubrir los costos proyectados y alcanzar la utilidad deseada.' }
+      ].map(i => `<div class="modern-card p-6 border-t-4 border-t-[#003A70] shadow-md"><h4 class="font-black text-[#003A70] text-[10px] uppercase mb-2">${i.t}</h4><p class="text-[11px] text-slate-600 leading-relaxed font-medium text-balance">${i.d}</p></div>`).join('');
     }
 
-    window.toggleM = function(m) { 
-      state.selected = state.selected.includes(m) ? state.selected.filter(x => x!==m) : [...state.selected, m]; 
-      window.render(); 
-    }
+    window.toggleM = function(m) { state.selected = state.selected.includes(m) ? state.selected.filter(x => x!==m) : [...state.selected, m]; window.render(); }
     window.selectAllMonths = function() { state.selected = [...state.months]; window.render(); }
     window.deselectAllMonths = function() { state.selected = []; window.render(); }
-    
-    async function saveData() { 
-      const d = { accounts: state.accounts, months: state.months };
-      localStorage.setItem('frias_db_data_full_final', JSON.stringify(d)); 
-      try { await supabase.from('dashboard').upsert({ id: 'main', content: d }); } catch(e) {}
-    }
-
-    window.clearData = () => { localStorage.removeItem('frias_db_data_full_final'); location.reload(); }
+    function saveToLocal() { localStorage.setItem('frias_db_full_v11', JSON.stringify({ accounts: state.accounts, months: state.months })); }
+    window.clearData = () => { localStorage.removeItem('frias_db_full_v11'); location.reload(); }
 
     window.onload = () => {
-      const saved = JSON.parse(localStorage.getItem('frias_db_data_full_final'));
-      if(saved) { state.accounts = saved.accounts; state.months = saved.months; state.selected = [...state.months]; state.loaded = true; window.render(); }
-      document.getElementById('btn-month-dropdown')?.addEventListener('click', () => document.getElementById('month-dropdown-menu').classList.toggle('hidden'));
+      const saved = JSON.parse(localStorage.getItem('frias_db_full_v11'));
+      if(saved) { 
+        state.accounts = saved.accounts; state.months = saved.months; state.selected = [...state.months]; state.loaded = true; 
+        const accList = state.accounts.map(a => `<option value="${a.name}">${a.name.toUpperCase()}</option>`).join('');
+        const t1 = document.getElementById('trend-v1'); const t2 = document.getElementById('trend-v2');
+        if(t1 && t2) { t1.innerHTML = accList; t2.innerHTML = accList; t1.value = findAccount('fb')?.name; t2.value = findAccount('ug')?.name; }
+        window.render(); 
+      }
+      document.getElementById('btn-month-dropdown')?.addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('month-dropdown-menu').classList.toggle('hidden'); });
+      document.addEventListener('click', () => { document.getElementById('month-dropdown-menu')?.classList.add('hidden'); });
     };
   </script>
 </body>
