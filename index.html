@@ -127,13 +127,14 @@
       </div>
 
       <section id="content-periodo" class="tab-content active space-y-6">
+        <!-- KPIs Principales -->
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
           <div class="modern-card p-6 border-b-4 border-b-brand-400"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Ingreso Neto (Fact+TS)</p><h3 id="kpi-fb" class="text-2xl sm:text-3xl font-[900] tracking-tighter text-slate-900">$0</h3></div>
           <div class="modern-card p-6 border-b-4 border-b-emerald-400"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Utilidad Bruta</p><h3 id="kpi-mb" class="text-2xl sm:text-3xl font-[900] tracking-tighter text-slate-900">$0</h3></div>
           <div class="modern-card p-6 border-b-4 border-b-rose-400"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Costos Totales</p><h3 id="kpi-cop" class="text-2xl sm:text-3xl font-[900] tracking-tighter text-slate-900">$0</h3></div>
           <div class="modern-card p-6 bg-[#002855] text-white shadow-xl">
             <div class="flex items-center justify-between mb-1">
-                <p class="text-[10px] font-bold text-blue-300 uppercase tracking-widest">Rentabilidad Operativa</p>
+                <p class="text-[10px] font-bold text-blue-300 uppercase tracking-widest">Utilidad Global</p>
                 <span id="kpi-margen-pct" class="text-[10px] font-black px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">0.0%</span>
             </div>
             <h3 id="kpi-ug" class="text-2xl sm:text-3xl font-[900] tracking-tighter text-white">$0</h3>
@@ -145,13 +146,14 @@
             <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6">Cascada de Rentabilidad</h3>
             <div class="h-[300px] sm:h-[400px] w-full"><canvas id="chart-waterfall"></canvas></div>
           </div>
+          <!-- Desglose de Costos con Whitelist Estricta -->
           <div class="modern-card p-6 w-full shadow-lg">
-            <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6">Desglose de Costos Operativos</h3>
+            <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6">Composición de Costos Operativos</h3>
             <div id="egresos-legend" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
           </div>
         </div>
 
-        <!-- Micro KPIs Simplificados (3 Indicadores) -->
+        <!-- Micro KPIs (Solo los 3 solicitados) -->
         <div id="micro-kpis" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
       </section>
 
@@ -161,6 +163,7 @@
         </div>
       </section>
 
+      <!-- Simulador, Ayuda y Tabla se mantienen iguales -->
       <section id="content-simulador" class="tab-content space-y-6">
         <div class="modern-card p-8 bg-[#002855] text-white flex flex-col md:flex-row justify-between items-center gap-6 shadow-xl border-white/10">
           <h2 class="text-2xl font-black uppercase">Simulador de Metas</h2>
@@ -216,17 +219,7 @@
 
     function norm(t) { return String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim(); }
     
-    // Mapeo Estricto para Grupo Frías
-    const ALIASES = {
-        fb: ['ingreso neto (fact neta + ts total)'], 
-        ug: ['utilidad global'], 
-        mb: ['utilidad bruta'], 
-        cop: ['costos totales'], 
-        lab: ['salarios'], 
-        tsd: ['ts dis']
-    };
-
-    // WHITELIST DE COSTOS: Solo estos aparecerán en el desglose de egresos
+    // Whitelist Estricta de Costos (Basada en tus capturas)
     const COST_WHITELIST = [
         'salarios', 'gastos de personal', 'movilidad y viaticos', 
         'juicios e indemnizaciones', 'honorarios', 'servicios tercerizados', 
@@ -234,6 +227,14 @@
         'tasas e impuestos', 'mantenimiento', 'impuesto debitos y creditos', 
         'comision financiera', 'intereses'
     ];
+
+    const ALIASES = {
+        fb: ['ingreso neto (fact neta + ts total)'], 
+        ug: ['utilidad global'], 
+        mb: ['utilidad bruta'], 
+        cop: ['costos totales'], 
+        lab: ['salarios']
+    };
 
     function findAccount(key) {
         const terms = ALIASES[key] || [key];
@@ -277,14 +278,12 @@
         if(det.length >= 2) { hr = i; ms = (data[i]||[]).map(c => detectM(c)); break; }
       }
       if(hr === -1) return alert("No se detectó la fila de meses.");
-      
       const newAccs = [];
       for(let i = hr+1; i < data.length; i++) {
         const n = String(data[i][0] || '').trim(); if(!n || n === 'CONCEPTOS') continue;
         const vs = {}; ms.forEach((m, idx) => { if(!m) return; vs[m] = cleanNumber(data[i][idx]); });
         newAccs.push({ name: n, values: vs });
       }
-      
       state.months = ms.filter(Boolean); 
       state.accounts = newAccs; 
       state.loaded = true;
@@ -304,13 +303,41 @@
       if (!state.months.length) { document.getElementById('dashboard-content').classList.add('hidden'); document.getElementById('empty-state').classList.remove('hidden'); return; }
       document.getElementById('dashboard-content').classList.remove('hidden'); document.getElementById('empty-state').classList.add('hidden');
       
-      const years = [...new Set(state.months.map(m => String(m).match(/\d{4}/)?.[0] || "2026"))].sort();
-      if(!state.selectedYear) state.selectedYear = years[years.length-1];
-      document.getElementById('year-select').innerHTML = years.map(y => `<option value="${y}" ${y === state.selectedYear ? 'selected' : ''}>AÑO ${y}</option>`).join('');
-      
       const mInY = state.months.filter(m => String(m).includes(state.selectedYear));
       const validS = state.selected.filter(m => mInY.includes(m));
       
+      const accFb = findAccount('fb');
+      const accUg = findAccount('ug');
+      const accCop = findAccount('cop');
+      const accMb = findAccount('mb');
+
+      // SUMA MATEMÁTICA AGREGADA
+      let fbTotal = 0;
+      let ugTotal = 0;
+      let copTotal = 0;
+      let mbTotal = 0;
+
+      validS.forEach(m => {
+        fbTotal += (Number(accFb?.values[m]) || 0);
+        ugTotal += (Number(accUg?.values[m]) || 0);
+        copTotal += (Number(accCop?.values[m]) || 0);
+        mbTotal += (Number(accMb?.values[m]) || 0);
+      });
+      
+      document.getElementById('kpi-fb').innerText = currF.format(fbTotal);
+      document.getElementById('kpi-mb').innerText = currF.format(mbTotal);
+      document.getElementById('kpi-cop').innerText = currF.format(copTotal);
+      document.getElementById('kpi-ug').innerText = currF.format(ugTotal);
+      
+      // CALCULO RENTABILIDAD (Utilidad / Ingreso Neto)
+      const rentabilidad = fbTotal !== 0 ? (ugTotal / fbTotal) : 0;
+      document.getElementById('kpi-margen-pct').innerText = percF.format(rentabilidad);
+      
+      renderCharts(fbTotal, mbTotal, ugTotal, copTotal, mInY, validS);
+      renderTable(mInY, validS);
+      renderMicro(fbTotal, mbTotal, ugTotal, validS);
+      
+      // Actualizar opciones del dropdown de meses
       document.getElementById('month-options').innerHTML = mInY.map(m => `
         <label class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 cursor-pointer">
             <input type="checkbox" value="${m}" ${validS.includes(m)?'checked':''} onchange="window.toggleM('${m}')">
@@ -318,36 +345,6 @@
         </label>`).join('');
       document.getElementById('month-dropdown-text').innerText = validS.length === 0 ? "SELECCIONAR" : `${validS.length} MESES SELECC.`;
       
-      const accFb = findAccount('fb');
-      const accUg = findAccount('ug');
-      const accCop = findAccount('cop');
-      const accMb = findAccount('mb');
-
-      // Forzar suma matemática limpia
-      let fbValue = 0;
-      let ugValue = 0;
-      let copValue = 0;
-      let mbValue = 0;
-
-      validS.forEach(m => {
-        fbValue += parseFloat(accFb?.values[m] || 0);
-        ugValue += parseFloat(accUg?.values[m] || 0);
-        copValue += parseFloat(accCop?.values[m] || 0);
-        mbValue += parseFloat(accMb?.values[m] || 0);
-      });
-      
-      document.getElementById('kpi-fb').innerText = currF.format(fbValue);
-      document.getElementById('kpi-mb').innerText = currF.format(mbValue);
-      document.getElementById('kpi-cop').innerText = currF.format(copValue);
-      document.getElementById('kpi-ug').innerText = currF.format(ugValue);
-      
-      // CALCULO RENTABILIDAD FINAL
-      const rentabilidad = fbValue !== 0 ? (ugValue / fbValue) : 0;
-      document.getElementById('kpi-margen-pct').innerText = percF.format(rentabilidad);
-      
-      renderCharts(fbValue, mbValue, ugValue, copValue, mInY, validS);
-      renderTable(mInY, validS);
-      renderMicro(fbValue, mbValue, ugValue, validS);
       lucide.createIcons();
     }
 
@@ -366,20 +363,11 @@
           options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {display:false} } }
       });
       
-      if(charts.a) charts.a.destroy();
-      charts.a = new Chart(document.getElementById('chart-anual').getContext('2d'), {
-          type: 'line',
-          data: {
-              labels: mInY.map(x=>x.replace(' 2026','')),
-              datasets: [{ label: 'UTILIDAD GLOBAL', data: mInY.map(m => findAccount('ug')?.values[m] || 0), borderColor: '#10b981', borderWidth: 3, tension: 0.4 }]
-          },
-          options: { responsive: true, maintainAspectRatio: false }
-      });
-
+      // DESGLOSE DE COSTOS (WHITELIST ESTRICTA)
       const list = state.accounts.filter(a => {
         const n = norm(a.name);
         return COST_WHITELIST.some(w => norm(w) === n || n.includes(norm(w)));
-      }).map(a => ({ n: a.name, v: validS.reduce((s,m)=>s+(parseFloat(a.values[m])||0),0) })).sort((a,b)=>b.v-a.v);
+      }).map(a => ({ n: a.name, v: validS.reduce((s,m)=>s+(Number(a.values[m])||0),0) })).sort((a,b)=>b.v-a.v);
       
       const totC = list.reduce((s,x)=>s+Math.abs(x.v), 0);
       document.getElementById('egresos-legend').innerHTML = list.map((c, i) => `
@@ -396,12 +384,13 @@
     }
 
     function renderMicro(fb, mb, ug, validS) {
-        const lab = validS.reduce((s,m) => s + (parseFloat(findAccount('lab')?.values[m]) || 0), 0);
+        const labRow = findAccount('lab');
+        const labValue = validS.reduce((s, m) => s + (Number(labRow?.values[m]) || 0), 0);
 
         const indicators = [
             { l: 'RENTABILIDAD FINAL %', v: fb ? ug/fb : 0, i: 'award', c: 'emerald', d: 'Margen neto final obtenido por cada peso vendido.', f: '(Utilidad Global / Ingreso Neto)' },
             { l: 'MARGEN BRUTO %', v: fb ? mb/fb : 0, i: 'pie-chart', c: 'indigo', d: 'Peso de la Utilidad Bruta sobre los Ingresos Netos.', f: '(Utilidad Bruta / Ingreso Neto)' },
-            { l: 'COSTO LABORAL %', v: fb ? lab/fb : 0, i: 'users', c: 'blue', d: 'Impacto de salarios en la facturación total.', f: '(Salarios / Ingreso Neto)' }
+            { l: 'COSTO LABORAL %', v: fb ? labValue/fb : 0, i: 'users', c: 'blue', d: 'Impacto de salarios en la facturación total.', f: '(Salarios / Ingreso Neto)' }
         ];
 
         document.getElementById('micro-kpis').innerHTML = indicators.map(ind => `
@@ -429,7 +418,7 @@
         if(!cols.length) return;
         h.innerHTML = `<th>CONCEPTO</th>` + cols.map(m=>`<th class="text-right uppercase">${m.replace(' 2026','')}</th>`).join('') + `<th class="text-right bg-blue-50">TOTAL</th>`;
         b.innerHTML = state.accounts.map(acc => {
-            const total = cols.reduce((s, m) => s + (parseFloat(acc.values[m])||0), 0);
+            const total = cols.reduce((s, m) => s + (Number(acc.values[m])||0), 0);
             return `<tr><td class="font-bold uppercase">${acc.name}</td>` + cols.map(m => `<td class="text-right">${currF.format(acc.values[m])}</td>`).join('') + `<td class="text-right font-black bg-blue-50/20">${currF.format(total)}</td></tr>`;
         }).join('');
     }
@@ -459,14 +448,6 @@
        document.addEventListener('click', (e) => { const b = document.getElementById('btn-month-dropdown'); const m = document.getElementById('month-dropdown-menu'); if (b && m) { if (b.contains(e.target)) m.classList.toggle('hidden'); else if (!m.contains(e.target)) m.classList.add('hidden'); } });
     }
     
-    function renderGlosario() {
-      document.getElementById('glosario-grid').innerHTML = [
-        { t: 'Ingreso Neto', d: 'Monto total facturado incluyendo los conceptos de Trade Spend.' }, 
-        { t: 'Utilidad Bruta', d: 'Resultado directo del negocio antes de descontar los gastos operativos.' }, 
-        { t: 'Rentabilidad Final', d: 'Margen neto obtenido tras descontar todos los costos y gastos.' }
-      ].map(i => `<div class="modern-card p-6 border-t-4 border-t-[#003A70]"><h4 class="font-black text-[#003A70] text-[10px] uppercase mb-2">${i.t}</h4><p class="text-[11px] text-slate-600 leading-relaxed font-medium">${i.d}</p></div>`).join('');
-    }
-
     window.clearData = async function() { localStorage.removeItem('rf_dashboard_data'); location.reload(); }
     window.onload = init;
   </script>
