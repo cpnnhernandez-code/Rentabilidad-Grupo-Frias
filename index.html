@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DASHBOARD DE RENTABILIDAD - GRUPO FRIAS</title>
+  <!-- Versión: 2.0.1 - Actualización de Gastos y PDF -->
 
   <!-- Fuentes e Iconos -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -126,7 +127,7 @@
           </div>
       </div>
 
-      <!-- RESUMEN -->
+      <!-- SECCIÓN RESUMEN -->
       <section id="content-periodo" class="tab-content active space-y-6">
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
           <div class="modern-card p-6 border-b-4 border-b-brand-400"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Ingreso Neto (Fact+TS)</p><h3 id="kpi-fb" class="text-2xl sm:text-3xl font-[900] tracking-tighter text-slate-900">$0</h3></div>
@@ -167,7 +168,7 @@
         </div>
       </section>
 
-      <!-- TENDENCIA -->
+      <!-- SECCIÓN TENDENCIA -->
       <section id="content-tendencia" class="tab-content space-y-6">
         <div class="modern-card p-8 shadow-xl">
           <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
@@ -199,9 +200,9 @@
         </div>
       </section>
 
-      <!-- SIMULADOR -->
+      <!-- SECCIÓN SIMULADOR -->
       <section id="content-simulador" class="tab-content space-y-8">
-        <div id="sim-export-area">
+        <div id="sim-export-area" class="p-1">
           <div class="modern-card p-10 bg-[#002855] text-white shadow-2xl relative overflow-hidden mb-8">
             <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
               <div>
@@ -258,7 +259,7 @@
             <div class="lg:col-span-3">
               <div class="modern-card shadow-xl overflow-hidden h-full flex flex-col">
                 <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                  <h3 class="text-[11px] font-black text-slate-900 uppercase tracking-widest">Ajuste de Egresos Operativos</h3>
+                  <h3 class="text-[11px] font-black text-slate-900 uppercase tracking-widest">Ajuste de Egresos Operativos (17 ítems)</h3>
                   <span id="sim-mes-base" class="text-[9px] font-black bg-brand-100 text-brand-700 px-3 py-1 rounded-full uppercase tracking-tighter">BASE: ---</span>
                 </div>
                 <div class="overflow-x-auto custom-scrollbar flex-grow max-h-[600px]">
@@ -365,7 +366,11 @@
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.id === `tab-${id}-btn`));
         document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === `content-${id}`));
         if(id === 'glosario') renderGlosario();
-        if(id === 'simulador' && !Object.keys(state.simCosts).length) initSimData();
+        if(id === 'simulador') {
+            if(!Object.keys(state.simCosts).length) initSimData();
+            window.renderSimTable();
+            window.calcSim();
+        }
         window.render();
     }
 
@@ -440,7 +445,7 @@
       
       const accList = state.accounts.map(a => `<option value="${a.name}">${a.name.toUpperCase()}</option>`).join('');
       const t1 = document.getElementById('trend-v1'); const t2 = document.getElementById('trend-v2');
-      if(t1 && t2) { t1.innerHTML = accList; t2.innerHTML = accList; t1.value = findAccount('fb')?.name; t2.value = findAccount('ug')?.name; }
+      if(t1 && t2) { t1.innerHTML = accList; t2.innerHTML = accList; t1.value = findAccount('fb')?.name || state.accounts[0]?.name; t2.value = findAccount('ug')?.name || state.accounts[1]?.name; }
       
       state.simCosts = {};
       saveToLocal();
@@ -560,9 +565,9 @@
 
     window.renderSimTable = function() {
         const lastM = state.months[state.months.length - 1];
+        if(!lastM) return;
         document.getElementById('sim-mes-base').innerText = `BASE: ${lastM}`;
         
-        // Obtenemos solo los gastos del whitelist pero que existen en la carga
         const costs = state.accounts.filter(a => COST_WHITELIST.some(w => norm(a.name).includes(norm(w))));
         
         document.getElementById('sim-table-body').innerHTML = costs.map(acc => {
@@ -590,18 +595,15 @@
         const mbPct = (parseFloat(document.getElementById('sim-mb-pct').value) || 25) / 100;
         const fin = parseFloat(document.getElementById('sim-financial').value) || 0;
         
-        // Sumamos todos los costos simulados que el usuario está viendo en la tabla
         const totalSimCosts = Object.values(state.simCosts).reduce((s, v) => s + v, 0);
         document.getElementById('sim-total-costs').innerText = currF.format(totalSimCosts);
 
-        // Venta Neta Requerida = (Meta + Gastos Simulados - Ganancia Financiera) / Margen Bruto %
-        // Nota: El margen bruto debe cubrir los costos operativos.
         const reqFb = mbPct > 0 ? (meta + totalSimCosts - fin) / mbPct : 0;
         const reqMgo = reqFb * mbPct;
         document.getElementById('res-fb').innerText = currF.format(reqFb);
 
-        // Tabla comparativa de resultados
         const lastM = state.months[state.months.length - 1];
+        if(!lastM) return;
         const rFb = findAccount('fb')?.values[lastM] || 0;
         const rMgo = findAccount('mgo')?.values[lastM] || 0;
         const rCop = Math.abs(findAccount('cop')?.values[lastM] || 0);
@@ -752,7 +754,7 @@
         state.accounts = saved.accounts; state.months = saved.months; state.selected = [...state.months]; state.loaded = true; 
         const accList = state.accounts.map(a => `<option value="${a.name}">${a.name.toUpperCase()}</option>`).join('');
         const t1 = document.getElementById('trend-v1'); const t2 = document.getElementById('trend-v2');
-        if(t1 && t2) { t1.innerHTML = accList; t2.innerHTML = accList; t1.value = findAccount('fb')?.name; t2.value = findAccount('ug')?.name; }
+        if(t1 && t2) { t1.innerHTML = accList; t2.innerHTML = accList; t1.value = findAccount('fb')?.name || state.accounts[0]?.name; t2.value = findAccount('ug')?.name || state.accounts[1]?.name; }
         window.render(); 
       }
       document.getElementById('btn-month-dropdown')?.addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('month-dropdown-menu').classList.toggle('hidden'); });
