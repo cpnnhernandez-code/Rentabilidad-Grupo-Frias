@@ -139,12 +139,12 @@
             <div class="h-[300px] w-full"><canvas id="chart-waterfall"></canvas></div>
           </div>
           <div class="modern-card p-6 shadow-lg overflow-hidden">
-            <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6">Desglose de Costos Operativos</h3>
+            <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6">Composición de Costos Operativos</h3>
             <div id="egresos-legend" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[300px] overflow-y-auto custom-scrollbar pr-2"></div>
           </div>
         </div>
 
-        <!-- Micro KPIs (Solo los 3 Solicitados) -->
+        <!-- Micro KPIs (Rentabilidad Final, Margen Bruto, Costo Laboral) -->
         <div id="micro-kpis" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
       </section>
 
@@ -164,7 +164,7 @@
 
     function norm(t) { return String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim(); }
     
-    // Whitelist exacta de Costos
+    // Whitelist exacta de Costos (basado en tus capturas)
     const COST_WHITELIST = [
         'salarios', 'gastos de personal', 'movilidad y viaticos', 
         'juicios e indemnizaciones', 'honorarios', 'servicios tercerizados', 
@@ -183,24 +183,14 @@
 
     function findAccount(key) {
         const terms = ALIASES[key] || [key];
-        // Búsqueda inteligente: coincide exacto o si contiene las palabras clave críticas
-        let bestMatch = state.accounts.find(a => {
+        // Buscador robusto: busca coincidencias parciales y totales de las palabras clave
+        return state.accounts.find(a => {
             const n = norm(a.name);
             return terms.some(t => {
-                const parts = norm(t).split(' ');
-                return n === norm(t) || parts.every(p => n.includes(p));
+                const parts = norm(t).split(' ').filter(p => p.length > 2);
+                return n === norm(t) || (parts.length > 0 && parts.every(p => n.includes(p)));
             });
         });
-        
-        // Refuerzo específico para Utilidad Global si falla el anterior
-        if (!bestMatch && key === 'ug') {
-            bestMatch = state.accounts.find(a => {
-                const n = norm(a.name);
-                return n.includes('utilidad') && n.includes('global');
-            });
-        }
-        
-        return bestMatch;
     }
 
     function cleanNumber(val) {
@@ -239,7 +229,7 @@
         if(monthIndices.length >= 2) { hr = i; ms = row.map(c => detectM(c)); break; }
       }
       
-      if(hr === -1) return alert("No se detectaron meses.");
+      if(hr === -1) return alert("No se detectó la fila de meses.");
       
       const newAccs = [];
       for(let i = hr+1; i < data.length; i++) {
@@ -277,17 +267,21 @@
       
       const validS = state.selected;
       
+      // Localización agresiva de cuentas
       const accFb = findAccount('fb');
       const accUg = findAccount('ug');
       const accCop = findAccount('cop');
       const accMb = findAccount('mb');
+      const accLab = findAccount('lab');
 
-      let fbTotal = 0, ugTotal = 0, copTotal = 0, mbTotal = 0;
+      // Totales
+      let fbTotal = 0, ugTotal = 0, copTotal = 0, mbTotal = 0, labTotal = 0;
       validS.forEach(m => {
-        fbTotal += (Number(accFb?.values[m]) || 0);
-        ugTotal += (Number(accUg?.values[m]) || 0);
-        copTotal += (Number(accCop?.values[m]) || 0);
-        mbTotal += (Number(accMb?.values[m]) || 0);
+        fbTotal += (accFb?.values[m] || 0);
+        ugTotal += (accUg?.values[m] || 0);
+        copTotal += (accCop?.values[m] || 0);
+        mbTotal += (accMb?.values[m] || 0);
+        labTotal += (accLab?.values[m] || 0);
       });
       
       document.getElementById('kpi-fb').innerText = currF.format(fbTotal);
@@ -295,13 +289,14 @@
       document.getElementById('kpi-cop').innerText = currF.format(copTotal);
       document.getElementById('kpi-ug').innerText = currF.format(ugTotal);
       
-      // CALCULO RENTABILIDAD FINAL (Utilidad Global / Ingreso Neto)
+      // RENTABILIDAD REAL (Utilidad Global / Ingreso Neto)
       const rentabilidad = fbTotal !== 0 ? (ugTotal / fbTotal) : 0;
       document.getElementById('kpi-margen-pct').innerText = percF.format(rentabilidad);
       
       renderCharts(fbTotal, mbTotal, ugTotal, copTotal, validS);
-      renderMicro(fbTotal, mbTotal, ugTotal, validS);
+      renderMicro(fbTotal, mbTotal, ugTotal, labTotal);
       
+      // Update meses
       document.getElementById('month-options').innerHTML = state.months.map(m => `
         <label class="flex items-center gap-3 px-3 py-2 hover:bg-slate-50 cursor-pointer rounded-lg">
             <input type="checkbox" value="${m}" ${validS.includes(m)?'checked':''} onchange="window.toggleM('${m}')">
@@ -317,7 +312,7 @@
       charts.w = new Chart(document.getElementById('chart-waterfall').getContext('2d'), {
           type: 'bar',
           data: { 
-              labels: ['ING. NETO', 'UTIL. BRUTA', 'COSTOS', 'RESULTADO'], 
+              labels: ['ING. NETO', 'UTIL. BRUTA', 'COSTOS', 'UTIL. GLOBAL'], 
               datasets: [{ 
                   data: [[0, fb], [0, mb], [mb-cop, mb], [0, ug]], 
                   backgroundColor: ['#0055a5', '#10b981', '#f43f5e', '#0055a5'], 
@@ -327,9 +322,10 @@
           options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {display:false} } }
       });
 
+      // Egresos con Whitelist
       const list = state.accounts.filter(a => {
         const n = norm(a.name);
-        return COST_WHITELIST.some(w => norm(w) === n || n.includes(norm(w)));
+        return COST_WHITELIST.some(w => n === norm(w) || n.includes(norm(w)));
       }).map(a => ({ n: a.name, v: validS.reduce((s,m)=>s+(a.values[m]||0),0) })).sort((a,b)=>b.v-a.v);
       
       const totC = list.reduce((s,x)=>s+Math.abs(x.v), 0);
@@ -346,14 +342,11 @@
         </div>`).join('');
     }
 
-    function renderMicro(fb, mb, ug, validS) {
-        const labRow = findAccount('lab');
-        const labValue = validS.reduce((s, m) => s + (Number(labRow?.values[m]) || 0), 0);
-
+    function renderMicro(fb, mb, ug, lab) {
         const indicators = [
-            { l: 'RENTABILIDAD FINAL %', v: fb ? ug/fb : 0, i: 'award', c: 'emerald', d: 'Resultado neto obtenido por cada peso vendido.', f: '(Utilidad Global / Ingreso Neto)' },
-            { l: 'MARGEN BRUTO %', v: fb ? mb/fb : 0, i: 'pie-chart', c: 'indigo', d: 'Peso de la utilidad bruta sobre los ingresos netos.', f: '(Utilidad Bruta / Ingreso Neto)' },
-            { l: 'COSTO LABORAL %', v: fb ? labValue/fb : 0, i: 'users', c: 'blue', d: 'Impacto de salarios en la facturación total.', f: '(Salarios / Ingreso Neto)' }
+            { l: 'RENTABILIDAD FINAL %', v: fb ? ug/fb : 0, i: 'award', c: 'emerald', d: 'Utilidad Global sobre Ingreso Neto.', f: '(Utilidad Global / Ingreso Neto)' },
+            { l: 'MARGEN BRUTO %', v: fb ? mb/fb : 0, i: 'pie-chart', c: 'indigo', d: 'Utilidad Bruta sobre Ingreso Neto.', f: '(Utilidad Bruta / Ingreso Neto)' },
+            { l: 'COSTO LABORAL %', v: fb ? lab/fb : 0, i: 'users', c: 'blue', d: 'Salarios sobre Ingreso Neto.', f: '(Salarios / Ingreso Neto)' }
         ];
 
         document.getElementById('micro-kpis').innerHTML = indicators.map(ind => `
@@ -375,9 +368,9 @@
 
     function renderGlosario() {
       document.getElementById('glosario-grid').innerHTML = [
-        { t: 'Ingreso Neto', d: 'Total facturado (Facturación Neta + Ts Total).' }, 
-        { t: 'Utilidad Bruta', d: 'Resultado operativo antes de gastos fijos.' }, 
-        { t: 'Rentabilidad Final', d: 'Utilidad Global dividida por el Ingreso Neto.' }
+        { t: 'Rentabilidad Final', d: 'Utilidad Global / Ingreso Neto (Fact+TS).' }, 
+        { t: 'Margen Bruto', d: 'Utilidad Bruta / Ingreso Neto (Fact+TS).' }, 
+        { t: 'Costo Laboral', d: 'Salarios / Ingreso Neto (Fact+TS).' }
       ].map(i => `<div class="modern-card p-6 border-t-4 border-t-[#003A70]"><h4 class="font-black text-[#003A70] text-[10px] uppercase mb-2">${i.t}</h4><p class="text-[11px] text-slate-600 leading-relaxed font-medium">${i.d}</p></div>`).join('');
     }
 
@@ -387,11 +380,11 @@
     }
     window.selectAllMonths = function() { state.selected = [...state.months]; window.render(); }
     window.deselectAllMonths = function() { state.selected = []; window.render(); }
-    function saveToLocal() { localStorage.setItem('frias_db_data', JSON.stringify({ accounts: state.accounts, months: state.months })); }
-    window.clearData = () => { localStorage.removeItem('frias_db_data'); location.reload(); }
+    function saveToLocal() { localStorage.setItem('frias_db_data_v2', JSON.stringify({ accounts: state.accounts, months: state.months })); }
+    window.clearData = () => { localStorage.removeItem('frias_db_data_v2'); location.reload(); }
 
     window.onload = () => {
-      const saved = JSON.parse(localStorage.getItem('frias_db_data'));
+      const saved = JSON.parse(localStorage.getItem('frias_db_data_v2'));
       if(saved) { state.accounts = saved.accounts; state.months = saved.months; state.selected = [...state.months]; state.loaded = true; window.render(); }
       document.getElementById('btn-month-dropdown')?.addEventListener('click', () => document.getElementById('month-dropdown-menu').classList.toggle('hidden'));
     };
