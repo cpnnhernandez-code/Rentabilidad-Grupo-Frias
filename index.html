@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DASHBOARD DE RENTABILIDAD - GRUPO FRIAS</title>
-  <!-- Versión: 2.0.1 - Actualización de Gastos y PDF -->
+  <!-- Versión: 2.1.0 - Corrección Cálculo Margen Bruto % -->
 
   <!-- Fuentes e Iconos -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -94,7 +94,7 @@
             <i data-lucide="bar-chart-2" class="w-10 h-10"></i>
         </div>
         <h2 class="text-2xl font-black text-white mb-3 uppercase">Sin datos cargados</h2>
-        <p class="text-blue-100 max-w-md mx-auto mb-8 text-sm font-medium text-balance">Sube el reporte de rentabilidad de Grupo Frías para activar el tablero y el simulador.</p>
+        <p class="text-blue-100 max-w-md mx-auto mb-8 text-sm font-medium text-balance tracking-wide">Sube el reporte de rentabilidad de Grupo Frías para activar el análisis.</p>
         <label for="file-upload-empty" class="cursor-pointer px-8 py-4 rounded-xl bg-white text-[#003A70] font-black hover:bg-blue-50 transition shadow-xl flex items-center gap-3 text-lg uppercase">
             <i data-lucide="upload-cloud" class="w-6 h-6"></i> Seleccionar archivo
             <input type="file" id="file-upload-empty" accept=".xlsx,.xls,.csv" class="hidden" onchange="window.handleFile(event)" />
@@ -129,10 +129,11 @@
 
       <!-- SECCIÓN RESUMEN -->
       <section id="content-periodo" class="tab-content active space-y-6">
+        <!-- KPIs Principales -->
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
           <div class="modern-card p-6 border-b-4 border-b-brand-400"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Ingreso Neto (Fact+TS)</p><h3 id="kpi-fb" class="text-2xl sm:text-3xl font-[900] tracking-tighter text-slate-900">$0</h3></div>
-          <div class="modern-card p-6 border-b-4 border-b-emerald-400"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Utilidad Bruta</p><h3 id="kpi-mb" class="text-2xl sm:text-3xl font-[900] tracking-tighter text-slate-900">$0</h3></div>
-          <div class="modern-card p-6 border-b-4 border-b-rose-400"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Costos Totales</p><h3 id="kpi-cop" class="text-2xl sm:text-3xl font-[900] tracking-tighter text-slate-900">$0</h3></div>
+          <div class="modern-card p-6 border-b-4 border-b-emerald-400"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Utilidad Bruta (Op.)</p><h3 id="kpi-mb" class="text-2xl sm:text-3xl font-[900] tracking-tighter text-slate-900">$0</h3></div>
+          <div class="modern-card p-6 border-b-4 border-b-rose-400"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Costos Operativos</p><h3 id="kpi-cop" class="text-2xl sm:text-3xl font-[900] tracking-tighter text-slate-900">$0</h3></div>
           <div class="modern-card p-6 bg-[#002855] text-white shadow-xl">
             <div class="flex items-center justify-between mb-1">
                 <p class="text-[10px] font-bold text-blue-300 uppercase tracking-widest">Utilidad Global</p>
@@ -148,16 +149,17 @@
             <div class="h-[300px] w-full"><canvas id="chart-waterfall"></canvas></div>
           </div>
           <div class="modern-card p-6 shadow-lg overflow-hidden">
-            <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6 text-brand-600">Composición de Costos Operativos</h3>
+            <h3 class="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6 text-brand-600">Composición de Gastos Estructurales</h3>
             <div id="egresos-legend" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[300px] overflow-y-auto custom-scrollbar pr-2"></div>
           </div>
         </div>
 
+        <!-- Indicadores de Gestión Detallados -->
         <div id="micro-kpis" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
 
         <div class="modern-card overflow-hidden shadow-lg border-t-4 border-t-[#003A70] mt-8">
           <div class="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
-            <h3 class="text-[11px] font-black text-slate-900 uppercase tracking-widest">Estado de Resultados (P&L) Detallado</h3>
+            <h3 class="text-[11px] font-black text-slate-900 uppercase tracking-widest">Estado de Resultados (P&L)</h3>
           </div>
           <div class="overflow-x-auto custom-scrollbar">
             <table class="table-pnl">
@@ -172,7 +174,7 @@
       <section id="content-tendencia" class="tab-content space-y-6">
         <div class="modern-card p-8 shadow-xl">
           <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
-            <h3 class="text-[11px] font-black text-[#003A70] uppercase tracking-widest">Análisis de Tendencia Histórica</h3>
+            <h3 class="text-[11px] font-black text-[#003A70] uppercase tracking-widest">Histórico de Cuentas</h3>
             <div class="flex flex-wrap gap-4">
               <div class="space-y-1">
                 <label class="text-[9px] font-black text-slate-400 uppercase">Variable A</label>
@@ -207,25 +209,25 @@
             <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
               <div>
                   <h2 class="text-3xl font-black uppercase tracking-tighter mb-2">Simulador Gerencial</h2>
-                  <p class="text-blue-200 text-sm font-medium uppercase tracking-widest italic">Define objetivos y ajusta costos para proyectar la rentabilidad.</p>
+                  <p class="text-blue-200 text-sm font-medium uppercase tracking-widest italic">Ajuste costos y defina metas para proyectar la facturación necesaria.</p>
               </div>
               <div class="flex flex-col items-center gap-4">
                   <div class="bg-white/10 p-6 rounded-2xl border border-white/20 text-center min-w-[240px] backdrop-blur-sm">
-                      <p class="text-[10px] font-black uppercase text-blue-200 mb-2 tracking-widest">Venta Neta Requerida</p>
+                      <p class="text-[10px] font-black uppercase text-blue-200 mb-2 tracking-widest">Venta Neta Objetivo</p>
                       <h2 id="res-fb" class="text-3xl font-[900] text-white tracking-tighter">$0</h2>
                   </div>
                   <button onclick="window.exportSimPDF()" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-black rounded-xl transition shadow-lg text-xs uppercase border-none cursor-pointer">
-                    <i data-lucide="file-text" class="w-4 h-4"></i> Exportar Proyectado (PDF)
+                    <i data-lucide="file-text" class="w-4 h-4"></i> Descargar Reporte (PDF)
                   </button>
               </div>
             </div>
           </div>
 
           <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            <!-- Parámetros Meta -->
+            <!-- Variables Meta -->
             <div class="lg:col-span-1 space-y-6">
               <div class="modern-card p-8 border-t-4 border-t-emerald-500 shadow-lg h-full">
-                <h3 class="text-[11px] font-black uppercase text-slate-500 mb-8 tracking-widest">Variables de Meta</h3>
+                <h3 class="text-[11px] font-black uppercase text-slate-500 mb-8 tracking-widest">Metas de Resultado</h3>
                 <div class="space-y-6">
                   <div>
                     <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Meta Utilidad Global ($)</label>
@@ -255,20 +257,20 @@
               </div>
             </div>
 
-            <!-- Tabla de Gastos Editables -->
+            <!-- Tabla de Costos Editables -->
             <div class="lg:col-span-3">
               <div class="modern-card shadow-xl overflow-hidden h-full flex flex-col">
                 <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                  <h3 class="text-[11px] font-black text-slate-900 uppercase tracking-widest">Ajuste de Egresos Operativos (17 ítems)</h3>
+                  <h3 class="text-[11px] font-black text-slate-900 uppercase tracking-widest">Ajuste Manual de Costos (17 Ítems)</h3>
                   <span id="sim-mes-base" class="text-[9px] font-black bg-brand-100 text-brand-700 px-3 py-1 rounded-full uppercase tracking-tighter">BASE: ---</span>
                 </div>
                 <div class="overflow-x-auto custom-scrollbar flex-grow max-h-[600px]">
                   <table class="w-full text-left">
                     <thead>
                       <tr class="text-[10px] text-slate-400 font-black uppercase border-b bg-white sticky top-0 z-10">
-                        <th class="px-6 py-4">Concepto del P&L</th>
+                        <th class="px-6 py-4">Concepto Estructural</th>
                         <th class="px-6 py-4 text-right">Real (Mes Anterior)</th>
-                        <th class="px-6 py-4 text-right text-brand-600">Simulado (Editable)</th>
+                        <th class="px-6 py-4 text-right text-brand-600">Proyectado</th>
                       </tr>
                     </thead>
                     <tbody id="sim-table-body" class="divide-y font-bold text-slate-700"></tbody>
@@ -282,16 +284,16 @@
             </div>
           </div>
 
-          <!-- P&L Proyectado Comparativo -->
+          <!-- P&L Proyectado -->
           <div class="modern-card overflow-hidden shadow-xl mt-8 border-t-4 border-t-brand-500">
             <div class="p-6 border-b border-slate-100 bg-slate-50">
-              <h3 class="text-[11px] font-black text-slate-900 uppercase tracking-widest">Estado de Resultados Proyectado vs Mes Anterior</h3>
+              <h3 class="text-[11px] font-black text-slate-900 uppercase tracking-widest">Estado de Resultados Proyectado</h3>
             </div>
             <div class="overflow-x-auto">
               <table class="w-full text-left table-pnl">
                 <thead>
                   <tr class="text-[10px] text-slate-400 font-black uppercase border-b-2">
-                    <th class="py-4">LINEA DE RESULTADOS</th>
+                    <th class="py-4">CUENTA</th>
                     <th class="py-4 text-right">REAL (MES BASE)</th>
                     <th class="py-4 text-right text-brand-600">PROYECTADO</th>
                     <th class="py-4 text-right">VARIACIÓN %</th>
@@ -331,7 +333,6 @@
         fin: ['ganancia financiera', 'resultado financiero', 'intereses']
     };
 
-    // Listado COMPLETO de 17 conceptos basado en la captura del usuario
     const COST_WHITELIST = [
         'salarios', 'gastos de personal', 'movilidad y viaticos', 
         'juicios e indemnizaciones', 'honorarios', 'servicios tercerizados', 
@@ -366,26 +367,19 @@
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.id === `tab-${id}-btn`));
         document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === `content-${id}`));
         if(id === 'glosario') renderGlosario();
-        if(id === 'simulador') {
-            if(!Object.keys(state.simCosts).length) initSimData();
-            window.renderSimTable();
-            window.calcSim();
-        }
+        if(id === 'simulador' && !Object.keys(state.simCosts).length) initSimData();
         window.render();
     }
 
     function initSimData() {
         const lastM = state.months[state.months.length - 1];
         if(!lastM) return;
-
         state.simCosts = {};
         state.accounts.forEach(acc => {
-            const n = norm(acc.name);
-            if (COST_WHITELIST.some(w => n.includes(norm(w)))) {
+            if (COST_WHITELIST.some(w => norm(acc.name).includes(norm(w)))) {
                 state.simCosts[acc.name] = Math.abs(acc.values[lastM] || 0);
             }
         });
-        
         const currentUg = findAccount('ug')?.values[lastM] || 0;
         document.getElementById('sim-meta').value = Math.round(currentUg);
         window.replicateMB();
@@ -396,9 +390,9 @@
         const lastM = state.months[state.months.length - 1];
         const accFb = findAccount('fb');
         const accMgo = findAccount('mgo');
-        const valFb = accFb?.values[lastM] || 0;
-        const valMgo = accMgo?.values[lastM] || 0;
-        const mbPct = valFb !== 0 ? Math.round((valMgo / valFb) * 1000) / 10 : 25;
+        const currentFb = accFb?.values[lastM] || 0;
+        const currentMgo = accMgo?.values[lastM] || 0;
+        const mbPct = currentFb !== 0 ? Math.round((currentMgo / currentFb) * 1000) / 10 : 25;
         document.getElementById('sim-mb-pct').value = mbPct;
         window.calcSim();
     }
@@ -474,15 +468,17 @@
       const accUg = findAccount('ug');
       const accCop = findAccount('cop');
       const accMb = findAccount('mb');
+      const accMgo = findAccount('mgo'); // Margen Bruto Directo
       const accLab = findAccount('lab');
 
-      let fbTotal = 0, ugTotal = 0, copTotal = 0, mbTotal = 0, labTotal = 0;
+      let fbTotal = 0, ugTotal = 0, copTotal = 0, mbTotal = 0, labTotal = 0, mgoTotal = 0;
       validS.forEach(m => {
         fbTotal += (Number(accFb?.values[m]) || 0);
         ugTotal += (Number(accUg?.values[m]) || 0);
         copTotal += (Number(accCop?.values[m]) || 0);
         mbTotal += (Number(accMb?.values[m]) || 0);
         labTotal += (Number(accLab?.values[m]) || 0);
+        mgoTotal += (Number(accMgo?.values[m]) || 0);
       });
       
       document.getElementById('kpi-fb').innerText = currF.format(fbTotal);
@@ -494,8 +490,8 @@
       document.getElementById('kpi-margen-pct').innerText = percF.format(rentabilidad);
       
       if(state.tab === 'periodo') {
-        renderCharts(fbTotal, mbTotal, ugTotal, copTotal, validS);
-        renderMicro(fbTotal, mbTotal, ugTotal, labTotal);
+        renderCharts(fbTotal, mgoTotal, ugTotal, copTotal, validS);
+        renderMicro(fbTotal, mgoTotal, ugTotal, labTotal);
         renderTable(validS, 'table-head', 'table-body');
       } else if (state.tab === 'tendencia') {
         window.renderTrendChart();
@@ -517,14 +513,13 @@
 
     window.renderTrendChart = function() {
       const canvas = document.getElementById('chart-trend-comp');
-      if(!canvas) return;
-      if(charts.t) charts.t.destroy();
+      if(!canvas || charts.t) if(charts.t) charts.t.destroy();
       const v1Name = document.getElementById('trend-v1').value;
       const v2Name = document.getElementById('trend-v2').value;
       const v1 = state.accounts.find(a => a.name === v1Name);
       const v2 = state.accounts.find(a => a.name === v2Name);
       
-      charts.t = new Chart(canvas.getContext('2d'), {
+      charts.t = new Chart(document.getElementById('chart-trend-comp').getContext('2d'), {
         type: 'line',
         data: {
           labels: state.months,
@@ -549,7 +544,7 @@
             const n = norm(acc.name);
             const total = state.months.reduce((s, m) => s + (Number(acc.values[m])||0), 0);
             const isRent = n.includes('rentabilidad');
-            const isMain = ['ingreso neto', 'utilidad bruta', 'utilidad global', 'costos totales'].some(x => n.includes(x));
+            const isMain = ['ingreso neto', 'utilidad bruta', 'utilidad global', 'costos totales', 'margen bruto'].some(x => n.includes(x));
             let displayValue = currF.format(total);
             if(isRent) {
                 const totalFb = state.months.reduce((s, m) => s + (Number(accFb?.values[m]) || 0), 0);
@@ -567,9 +562,7 @@
         const lastM = state.months[state.months.length - 1];
         if(!lastM) return;
         document.getElementById('sim-mes-base').innerText = `BASE: ${lastM}`;
-        
         const costs = state.accounts.filter(a => COST_WHITELIST.some(w => norm(a.name).includes(norm(w))));
-        
         document.getElementById('sim-table-body').innerHTML = costs.map(acc => {
             const real = Math.abs(acc.values[lastM] || 0);
             if(state.simCosts[acc.name] === undefined) state.simCosts[acc.name] = real;
@@ -594,7 +587,6 @@
         const meta = parseFloat(document.getElementById('sim-meta').value) || 0;
         const mbPct = (parseFloat(document.getElementById('sim-mb-pct').value) || 25) / 100;
         const fin = parseFloat(document.getElementById('sim-financial').value) || 0;
-        
         const totalSimCosts = Object.values(state.simCosts).reduce((s, v) => s + v, 0);
         document.getElementById('sim-total-costs').innerText = currF.format(totalSimCosts);
 
@@ -638,7 +630,6 @@
         const element = document.getElementById('sim-export-area');
         const btn = event.target.closest('button');
         btn.disabled = true;
-        
         html2canvas(element, { scale: 2, useCORS: true }).then(canvas => {
             const imgData = canvas.toDataURL('image/png');
             const pdfWidth = doc.internal.pageSize.getWidth();
@@ -649,14 +640,14 @@
         });
     }
 
-    function renderCharts(fb, mb, ug, cop, validS) {
+    function renderCharts(fb, mgo, ug, cop, validS) {
       if(charts.w) charts.w.destroy();
       charts.w = new Chart(document.getElementById('chart-waterfall').getContext('2d'), {
           type: 'bar',
           data: { 
               labels: ['ING. NETO', 'MARGEN B.', 'COSTOS', 'RESULTADO'], 
               datasets: [{ 
-                  data: [[0, fb], [0, mb], [mb-cop, mb], [0, ug]], 
+                  data: [[0, fb], [0, mgo], [mgo-cop, mgo], [0, ug]], 
                   backgroundColor: ['#0055a5', '#10b981', '#f43f5e', '#0055a5'], 
                   borderRadius: 8 
               }] 
@@ -680,10 +671,11 @@
         </div>`).join('');
     }
 
-    function renderMicro(fb, mb, ug, lab) {
+    function renderMicro(fb, mgo, ug, lab) {
+        // mgo = Margen Bruto (Ingreso - Costo directo)
         const indicators = [
+            { l: 'MARGEN BRUTO %', v: fb ? mgo/fb : 0, i: 'pie-chart', c: 'indigo', d: 'Rentabilidad directa del negocio.', f: '(Margen Bruto / Ingreso Neto)' },
             { l: 'RENTABILIDAD FINAL %', v: fb ? ug/fb : 0, i: 'award', c: 'emerald', d: 'Resultado Final sobre Ingreso Neto.', f: '(Utilidad Global / Ingreso Neto)' },
-            { l: 'MARGEN BRUTO %', v: fb ? mb/fb : 0, i: 'pie-chart', c: 'indigo', d: 'Utilidad Operativa sobre Ingreso Neto.', f: '(Utilidad Bruta / Ingreso Neto)' },
             { l: 'COSTO LABORAL %', v: fb ? lab/fb : 0, i: 'users', c: 'blue', d: 'Impacto salarial sobre la facturación.', f: '(Salarios / Ingreso Neto)' }
         ];
         document.getElementById('micro-kpis').innerHTML = indicators.map(ind => `
@@ -736,25 +728,25 @@
     function renderGlosario() {
       const grid = document.getElementById('glosario-grid');
       if(grid) grid.innerHTML = [
-        { t: 'Rentabilidad Final', d: 'Muestra qué porcentaje del ingreso neto quedó como utilidad real tras todos los costos y ganancias financieras.' }, 
-        { t: 'Absorción de Gastos', d: 'Qué porcentaje del Margen Bruto se utiliza para pagar la estructura de costos operativos.' }, 
-        { t: 'Venta Objetivo', d: 'Es el monto total que se debe facturar para cubrir los costos proyectados y alcanzar la utilidad deseada.' }
-      ].map(i => `<div class="modern-card p-6 border-t-4 border-t-[#003A70] shadow-md"><h4 class="font-black text-[#003A70] text-[10px] uppercase mb-2">${i.t}</h4><p class="text-[11px] text-slate-600 leading-relaxed font-medium text-balance">${i.d}</p></div>`).join('');
+        { t: 'Margen Bruto %', d: 'Indica el porcentaje de utilidad directa de las ventas después de pagar costos directos. Es el motor principal del negocio.' }, 
+        { t: 'Rentabilidad Final %', d: 'Qué porcentaje del ingreso neto quedó como utilidad real tras todos los costos fijos y financieros.' }, 
+        { t: 'Absorción de Gastos', d: 'Muestra qué porcentaje del Margen Bruto se consume en pagar la estructura de 17 ítems de costos operativos.' }
+      ].map(i => `<div class="modern-card p-6 border-t-4 border-t-[#003A70] shadow-md"><h4 class="font-black text-[#003A70] text-[10px] uppercase mb-2">${i.t}</h4><p class="text-[11px] text-slate-600 leading-relaxed font-medium text-balance tracking-tight">${i.d}</p></div>`).join('');
     }
 
     window.toggleM = function(m) { state.selected = state.selected.includes(m) ? state.selected.filter(x => x!==m) : [...state.selected, m]; window.render(); }
     window.selectAllMonths = function() { state.selected = [...state.months]; window.render(); }
     window.deselectAllMonths = function() { state.selected = []; window.render(); }
-    function saveToLocal() { localStorage.setItem('frias_db_full_v11', JSON.stringify({ accounts: state.accounts, months: state.months })); }
-    window.clearData = () => { localStorage.removeItem('frias_db_full_v11'); location.reload(); }
+    function saveToLocal() { localStorage.setItem('frias_db_full_v12', JSON.stringify({ accounts: state.accounts, months: state.months })); }
+    window.clearData = () => { localStorage.removeItem('frias_db_full_v12'); location.reload(); }
 
     window.onload = () => {
-      const saved = JSON.parse(localStorage.getItem('frias_db_full_v11'));
+      const saved = JSON.parse(localStorage.getItem('frias_db_full_v12'));
       if(saved) { 
         state.accounts = saved.accounts; state.months = saved.months; state.selected = [...state.months]; state.loaded = true; 
         const accList = state.accounts.map(a => `<option value="${a.name}">${a.name.toUpperCase()}</option>`).join('');
         const t1 = document.getElementById('trend-v1'); const t2 = document.getElementById('trend-v2');
-        if(t1 && t2) { t1.innerHTML = accList; t2.innerHTML = accList; t1.value = findAccount('fb')?.name || state.accounts[0]?.name; t2.value = findAccount('ug')?.name || state.accounts[1]?.name; }
+        if(t1 && t2) { t1.innerHTML = accList; t2.innerHTML = accList; t1.value = findAccount('fb')?.name || state.accounts[0]?.name; t2.value = findAccount('mgo')?.name || state.accounts[1]?.name; }
         window.render(); 
       }
       document.getElementById('btn-month-dropdown')?.addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('month-dropdown-menu').classList.toggle('hidden'); });
